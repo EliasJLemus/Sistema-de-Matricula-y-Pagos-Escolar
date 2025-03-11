@@ -13,6 +13,44 @@ CREATE TABLE "Estudiantes"."InformacionGeneral" (
 	edad INT,
 	direccion VARCHAR(200)
 )
+ALTER TABLE "Estudiantes"."InformacionGeneral" ADD COLUMN tipo_persona VARCHAR(20) CHECK (tipo_persona IN ('Estudiante', 'Encargado'));
+CREATE UNIQUE INDEX idx_tipo_persona ON "Estudiantes"."InformacionGeneral" (id) WHERE tipo_persona = 'Estudiante';
+CREATE UNIQUE INDEX idx_tipo_persona_encargado ON "Estudiantes"."InformacionGeneral" (id) WHERE tipo_persona = 'Encargado';
+
+ALTER TABLE "Estudiantes"."InformacionGeneral"
+ALTER COLUMN tipo_persona SET NOT NULL;
+
+
+CREATE OR REPLACE FUNCTION "Estudiantes".validar_tipo_persona()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Si se inserta en Estudiantes, validar que tipo_persona sea 'Estudiante'
+    IF TG_TABLE_NAME = 'Estudiantes' THEN
+        IF (SELECT tipo_persona FROM "Estudiantes"."InformacionGeneral" WHERE id = NEW.id_info_general) <> 'Estudiante' THEN
+            RAISE EXCEPTION 'El ID no corresponde a un estudiante';
+        END IF;
+    END IF;
+
+    -- Si se inserta en Encargados, validar que tipo_persona sea 'Encargado'
+    IF TG_TABLE_NAME = 'Encargados' THEN
+        IF (SELECT tipo_persona FROM "Estudiantes"."InformacionGeneral" WHERE id = NEW.id_info_general) <> 'Encargado' THEN
+            RAISE EXCEPTION 'El ID no corresponde a un encargado';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_estudiante
+BEFORE INSERT ON "Estudiantes"."Estudiantes"
+FOR EACH ROW EXECUTE FUNCTION "Estudiantes".validar_tipo_persona();
+
+CREATE TRIGGER trg_validar_encargado
+BEFORE INSERT ON "Estudiantes"."Encargados"
+FOR EACH ROW EXECUTE FUNCTION "Estudiantes".validar_tipo_persona();
+
+
 --tabla: Encargados
 CREATE TABLE "Estudiantes"."Encargados" (
 	id SERIAL PRIMARY KEY,
