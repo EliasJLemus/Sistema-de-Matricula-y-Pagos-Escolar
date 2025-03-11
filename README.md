@@ -1,16 +1,29 @@
-# Sistema de Matricula y Pagos Escolares
-## Carpeta app
--- La carpeta app se encuentra tanto el frontend como el backend. Quienes trabajen con react utilizaran la caroeta frontend y los que trabajen con node la carpeta Backend.
+# Sistema de Matrícula y Pagos Escolares
 
-## Descargas necesarias
-Aseguren de instalar los siguientes componentes-> node.js, vite, npm y pnpm
+## Estructura del Proyecto
+- **Carpeta app**: Contiene tanto el frontend como el backend
+  - Los desarrolladores de React trabajarán con la carpeta frontend
+  - Los desarrolladores de Node trabajarán con la carpeta backend
 
-## Instalacion
-comando a ejecutar:
-- pnpm install o npm intall -> esto ejecutenlo en la raiz del proyecto al igual en las sub carpetas del frontend y backend para instalar las dependencias
+## Descargas Necesarias
+Asegúrese de instalar los siguientes componentes:
+- Node.js
+- Vite
+- npm
+- pnpm
 
-## Comandos de Ejecucion
-### En la raiz del proyecto ejecutar estos comandos:
-- para correr solo el frontend: **pnpm --filter frontend run dev**
-- para correr el backend: **pnpm --filter backend run start**
-- para correr ambos simultaneamente: **pnpm run dev**
+## Instalación
+Ejecute el siguiente comando en la raíz del proyecto y también en las subcarpetas de frontend y backend para instalar las dependencias:
+```
+pnpm install
+```
+o
+```
+npm install
+```
+
+## Comandos de Ejecución
+Desde la raíz del proyecto, ejecute estos comandos:
+- Para ejecutar solo el frontend: **pnpm --filter frontend run dev**
+- Para ejecutar el backend: **pnpm --filter backend run start**
+- Para ejecutar ambos simultáneamente: **pnpm run dev**
