@@ -1,33 +1,36 @@
 --Reporte estudiante
 SELECT 
-    e.numero_estudiante AS "No. Estudiante",
-    ig.primer_nombre || ' ' || COALESCE(ig.segundo_nombre, '') || ' ' || 
-    ig.primer_apellido || ' ' || COALESCE(ig.segundo_apellido, '') AS "Nombre Completo",
-    ig.fecha_nacimiento AS "Fecha Nacimiento",
-    ig.edad AS "Edad",
-    ig.genero AS "Genero",
-    ig.identidad AS "Identidad",
+    e.numero_estudiante AS "Código Estudiante",
+    CONCAT(ig.primer_nombre, ' ', ig.segundo_nombre) AS "Nombres",
+    CONCAT(ig.primer_apellido, ' ', ig.segundo_apellido) AS "Apellidos",
+    ig.identidad AS "Número de Identidad",
     ig.nacionalidad AS "Nacionalidad",
-    ig.direccion AS "Direccion",
-    g.nombre_grado || ' ' || g.seccion AS "Grado",
-    e.fecha_admision AS "Fecha Admision",
-    e.es_zurdo AS "Es Zurdo?",
-    e.dif_educacion_fisica AS "Deficit Fisico?",
-    e.reaccion_alergica AS "Reaccion Alergica",
-    e.descripcion_alergica AS "Descripcion Alergica",
-    STRING_AGG(DISTINCT 
-        ee.parentesco || ': ' || 
-        igenc.primer_nombre || ' ' || COALESCE(igenc.segundo_nombre, '') || ' ' || 
-        igenc.primer_apellido || ' ' || COALESCE(igenc.segundo_apellido, ''), 
-        '; '
-    ) AS "Encargados",
-    STRING_AGG(DISTINCT enc.telefono, '; ') AS "Telefonos de Encargados",
-    STRING_AGG(DISTINCT enc.correo_electronico, '; ') AS "Correos de Encargados"
+    ig.genero AS "Género",
+    ig.fecha_nacimiento AS "Fecha de Nacimiento",
+    ig.edad AS "Edad",
+    ig.direccion AS "Dirección",
+    g.nombre_grado AS "Grado",
+    g.seccion AS "Sección",
+    CASE WHEN e.es_zurdo THEN 'Sí' ELSE 'No' END AS "Es Zurdo",
+    CASE WHEN e.dif_educacion_fisica THEN 'Sí' ELSE 'No' END AS "Dificultad en Educación Física",
+    CASE WHEN e.reaccion_alergica THEN 'Sí' ELSE 'No' END AS "Tiene Alergias",
+    e.descripcion_alergica AS "Descripción de Alergias",
+    e.fecha_admision AS "Fecha de Admisión",
+    ARRAY_TO_STRING(
+        ARRAY(
+            SELECT CONCAT(
+                enc.numero_encargado, ' - ',
+                ig_enc.primer_nombre, ' ', ig_enc.segundo_nombre, ' ',
+                ig_enc.primer_apellido, ' ', ig_enc.segundo_apellido, ' | ',
+                ee.parentesco, ' | Tel: ', enc.telefono, ' | Email: ', enc.correo_electronico
+            )
+            FROM "Estudiantes"."EstudianteEncargado" ee
+            JOIN "Estudiantes"."Encargados" enc ON ee.id_encargado = enc.id
+            JOIN "Estudiantes"."InformacionGeneral" ig_enc ON enc.id_info_general = ig_enc.id
+            WHERE ee.id_estudiante = e.id
+        ), 
+        E'\n'
+    ) AS "Información de Encargados"
 FROM "Estudiantes"."Estudiantes" e
 JOIN "Estudiantes"."InformacionGeneral" ig ON e.id_info_general = ig.id
-JOIN "Administracion"."Grados" g ON e.id_grado = g.id
-LEFT JOIN "Estudiantes"."EstudianteEncargado" ee ON e.id = ee.id_estudiante
-LEFT JOIN "Estudiantes"."Encargados" enc ON ee.id_encargado = enc.id
-LEFT JOIN "Estudiantes"."InformacionGeneral" igenc ON enc.id_info_general = igenc.id
-GROUP BY e.id, e.numero_estudiante, ig.id, g.nombre_grado, g.seccion
-ORDER BY g.nombre_grado, g.seccion, ig.primer_apellido, ig.primer_nombre;
+LEFT JOIN "Administracion"."Grados" g ON e.id_grado = g.id;
