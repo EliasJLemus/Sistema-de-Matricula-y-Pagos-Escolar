@@ -1,4 +1,33 @@
-body {
+html, body, #root, .app, .content {
+  height: 100%;
   width: 100%;
-  height: "100vh";
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 0px;
+  overflow-y: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px; /* Hacemos los bordes del scrollbar más suaves */
+}
+
+/* Cambiar color cuando el cursor pasa sobre el thumb */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }

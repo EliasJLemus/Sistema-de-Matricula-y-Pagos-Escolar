@@ -84,34 +84,34 @@ export const themeSettings = (mode: "light" | "dark") => {
       },
     },
     typography: {
+      fontFamily: "Roboto, sans-serif",
+      fontSize: 12,
+      h1: {
         fontFamily: "Roboto, sans-serif",
-        fontSize: 12,
-        h1:{
-            fontFamily: "Roboto, sans-serif",
-            fontSize: 40,
-        }
-    }
+        fontSize: 40,
+      },
+    },
   });
 };
 
-//context
+// Contexto para el modo de color
 export const ColorModeContext = createContext({
-    toggleColorMode: () => {}
-})
+  toggleColorMode: () => {},
+});
 
+// Hook para manejar el tema
 export const useMode = () => {
-    const [mode, setMode] = useState<"light" | "dark">("light");
+  const [mode, setMode] = useState<"light" | "dark">("light");
 
-    const colorMode = useMemo(
-        ()=> ({
-            toggleColorMode: () =>
-                setMode((prev) => (prev === "light" ? "dark" : "light"))
-        }),
-        []
-    )
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () =>
+        setMode((prev) => (prev === "light" ? "dark" : "light")),
+    }),
+    [setMode]
+  );
 
-    const theme = useMemo(( ) => createTheme(themeSettings(mode)), [mode]);
+  const theme = useMemo(() => themeSettings(mode), [mode]);
 
-    return [theme, colorMode]
-}
-
+  return [theme, colorMode] as const;
+};
