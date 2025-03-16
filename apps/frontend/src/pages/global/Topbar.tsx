@@ -1,47 +1,38 @@
-import { Box, IconButton, useTheme } from "@mui/material";
-import { useContext } from "react";
-import { ColorModeContext, tokens } from "../../theme";
-import {
-  LightModeOutlined,
-  NotificationsOutlined,
-  SettingsOutlined,
-  PersonOutlined,
-  DarkModeOutlined,
-} from "@mui/icons-material";
-import SearchComponent from "../../components/Search"
+import { Box, IconButton, Typography } from "@mui/material";
+import MenuOutlined from "@mui/icons-material/MenuOutlined";
 
-const Topbar = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const colorMode = useContext(ColorModeContext);
+interface TopbarProps {
+  onMenuClick: () => void;
+}
 
+const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   return (
     <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      p={2}
       sx={{
-        backgroundColor: theme.palette.mode === "dark" ? colors.primary[800] : colors.primary[200],
-        borderBottom: `1px solid ${colors.grey[400]}`,
+        width: "100%",
+        height: "70px",
+        backgroundColor: "#F5F1E3", 
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 16px",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+        borderBottom: "1px solid #ccc",
       }}
     >
-        <SearchComponent></SearchComponent>
-      {/* Icons */}
-      <Box display="flex" alignItems="center">
-        <IconButton onClick={colorMode.toggleColorMode}>
-          {theme.palette.mode === "dark" ? <DarkModeOutlined /> : <LightModeOutlined />}
-        </IconButton>
-        <IconButton>
-          <NotificationsOutlined />
-        </IconButton>
-        <IconButton>
-          <SettingsOutlined />
-        </IconButton>
-        <IconButton>
-          <PersonOutlined />
-        </IconButton>
-      </Box>
+      {/* Botón menú */}
+      <IconButton onClick={onMenuClick}>
+        <MenuOutlined />
+      </IconButton>
+
+      <Typography variant="h5" sx={{ fontWeight: "bold", color: "#333", flexGrow: 1, textAlign: "center" }}>
+        Sunny Path Bilingual School
+      </Typography>
+
+      {/* Espacio vacío para balancear el IconButton */}
+      <Box width="40px" />
     </Box>
   );
 };
