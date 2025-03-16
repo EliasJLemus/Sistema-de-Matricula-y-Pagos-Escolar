@@ -4,13 +4,31 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { BrowserRouter } from "react-router-dom";
 import {AppRouter} from "./Router"
+import axios from "axios";
+import { Button } from '@mui/material';
 
 function App() {
   const [count, setCount] = useState(0);
 
+  const handleDownloadReport = async() => {
+    try{
+      const response = await axios.get("http://localhost:3000/report/sdownload")
+      const blob = response.data;
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const a = document.createElement("a");
+      a.href = url
+      a.download = "reporte_pagos.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.appendChild(a);
+    }catch(error){
+      console.error(error);
+    }
+  }
+
   return (
     <>
-    <BrowserRouter>
+    {/* <BrowserRouter>
       <AppRouter/>
     </BrowserRouter>
       <div>
@@ -32,7 +50,8 @@ function App() {
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
-      </p>
+      </p> */}
+      <Button onClick={handleDownloadReport}>Descargar reporte</Button>
     </>
   )
 }
