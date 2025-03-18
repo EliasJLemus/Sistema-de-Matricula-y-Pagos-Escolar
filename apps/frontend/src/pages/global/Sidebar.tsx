@@ -1,4 +1,5 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar } from "@mui/material";
+import { Link } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
@@ -47,15 +48,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
 
             {/* Lista */}
             <List>
-              {[
-                { icon: <HomeIcon to="/home"/>, text: "Home" },
-                { icon: <SchoolIcon />, text: "Estudiantes" },
-                { icon: <PeopleIcon />, text: "Apoderados" },
-                { icon: <AssignmentIcon />, text: "Matrículas" },
-                { icon: <DescriptionIcon />, text: "Reportes" },
-                { icon: <PaymentIcon />, text: "Pagos" },
+              {[ 
+                { icon: <HomeIcon />, text: "Home", path: "/home" },
+                { icon: <SchoolIcon />, text: "Estudiantes", path: "/estudiantes" },
+                { icon: <PeopleIcon />, text: "Apoderados", path: "/apoderados" },
+                { icon: <AssignmentIcon />, text: "Matrículas", path: "/matriculas" },
+                { icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" },
+                { icon: <PaymentIcon />, text: "Pagos", path: "/pagos" },
               ].map((item, index) => (
-                <ListItemButton key={index} sx={{ py: 2 }}>
+                <ListItemButton
+                  key={index}
+                  component={Link}
+                  to={item.path}
+                  sx={{ py: 2 }}
+                >
                   <ListItemIcon sx={{ minWidth: "40px" }}>{item.icon}</ListItemIcon>
                   <ListItemText
                     primary={item.text}
