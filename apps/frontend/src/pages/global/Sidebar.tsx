@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
             {/* Lista */}
             <List>
               {[
-                { icon: <HomeIcon />, text: "Home" },
+                { icon: <HomeIcon to="/home"/>, text: "Home" },
                 { icon: <SchoolIcon />, text: "Estudiantes" },
                 { icon: <PeopleIcon />, text: "Apoderados" },
                 { icon: <AssignmentIcon />, text: "Matrículas" },
