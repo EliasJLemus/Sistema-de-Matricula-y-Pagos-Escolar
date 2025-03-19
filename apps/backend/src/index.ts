@@ -11,9 +11,9 @@ app.use(cors({
     origin: "*"
 }))
 
-app.use("/", (req, res) => {
-    res.json({message: "Probando una ruta random en el backend"})
-})
+// app.use("/", (req, res) => {
+//     res.json({message: "Probando una ruta random en el backend"})
+// })
 
 app.use("/reports", reportsRoute);
 

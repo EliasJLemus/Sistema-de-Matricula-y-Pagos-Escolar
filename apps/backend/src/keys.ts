@@ -17,5 +17,12 @@ function getEnvVar(name: string, fallback?: string): string
 }
 
 export const Keys = {
-    Port: getEnvVar("PORT")
+    Port: getEnvVar("PORT"),
+    Database: {
+        Host: getEnvVar("DB_HOST"),
+        Port: getEnvVar("DB_PORT"),
+        Username: getEnvVar("DB_USER"),
+        Password: getEnvVar("DB_PASSWORD"),
+        Database: getEnvVar("DB_NAME"),
+    }
 }
