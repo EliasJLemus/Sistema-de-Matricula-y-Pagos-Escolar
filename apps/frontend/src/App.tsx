@@ -3,6 +3,7 @@ import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, ThemeProvider, Box } from "@mui/material";
 import Topbar from "./pages/global/Topbar";
 import Dashboard from "./pages/dashboard/Index";
+import DashboardPage from "../src/pages/dashboard/dashboard"
 import Sidebar from "./pages/global/Sidebar";
 import Home from "./pages/home/home"
 import { Route, Routes } from "react-router-dom";
@@ -28,7 +29,7 @@ function App() {
             <Topbar onMenuClick={() => setIsSidebarVisible(!isSidebarVisible)} />
             <Routes>
               <Route path="/home" element={<Home/>}/>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/reportes" element={<DashboardPage />} />
             </Routes>
           </Box>
         </Box>
