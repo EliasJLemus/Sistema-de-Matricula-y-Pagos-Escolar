@@ -25,7 +25,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
@@ -34,8 +33,14 @@ import { Input } from "../../components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+//Query
+import {useGetReportsMatricula} from "../../lib/queries"
 
 export default function Dashboard() {
+ 
+  const {data, isLoading, isError} = useGetReportsMatricula();
+
+
   const [activeReport, setActiveReport] = useState<string | null>(null)
 
   const handleBackToDashboard = () => {
@@ -472,12 +477,12 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 p-6">
-        {activeReport === "tuition" && (
+        {activeReport === "tuition" && data && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight">Reporte de Matrícula 2025</h2>
-                <p className="text-muted-foreground">No. Reporte 01011 | Fecha de emisión: 03/09/2025</p>
+                <p className="text-muted-foreground">No. Reporte 01011 | Fecha de emisión</p>
               </div>
               <Button>
                 <Download className="mr-2 h-4 w-4" />
@@ -495,9 +500,9 @@ export default function Dashboard() {
                     <SelectValue placeholder="Grado" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="kinder">Kinder</SelectItem>
-                    <SelectItem value="primero">Primero</SelectItem>
-                    <SelectItem value="segundo">Segundo</SelectItem>
+                    
+                    <SelectItem value="Kinder">Kinder</SelectItem>
+                    
                   </SelectContent>
                 </Select>
               </div>
@@ -531,78 +536,33 @@ export default function Dashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">Abigail Lopez</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>A</TableCell>
-                      <TableCell>5000</TableCell>
-                      <TableCell>Ninguno</TableCell>
-                      <TableCell>Cero</TableCell>
-                      <TableCell>5000.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Pagado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>01/05/2025</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Anna Mejia</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>5000</TableCell>
-                      <TableCell>Beca</TableCell>
-                      <TableCell>100%</TableCell>
-                      <TableCell>0.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Pagado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>01/05/2025</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Berenice Corrales</TableCell>
-                      <TableCell>Primero</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>5000</TableCell>
-                      <TableCell>Descuento hermanos</TableCell>
-                      <TableCell>25%</TableCell>
-                      <TableCell>3750.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          Pendiente
-                        </Badge>
-                      </TableCell>
-                      <TableCell>01/07/2025</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Carlos Lopez</TableCell>
-                      <TableCell>Primero</TableCell>
-                      <TableCell>A</TableCell>
-                      <TableCell>5000</TableCell>
-                      <TableCell>Descuento hermanos</TableCell>
-                      <TableCell>25%</TableCell>
-                      <TableCell>3750.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          Pendiente
-                        </Badge>
-                      </TableCell>
-                      <TableCell>01/07/2025</TableCell>
-                    </TableRow>
+                    {data.map((item) => {
+                      console.log(data)
+                      return (
+                        <TableRow>
+                          <TableCell className="font-medium">{item.nombreEstudiante}</TableCell>
+                          <TableCell>{item.grado}</TableCell>
+                          <TableCell>{item.seccion}</TableCell>
+                          <TableCell>L. {item.tarifaMatricula}</TableCell>
+                          <TableCell>{item.beneficioAplicado}</TableCell>
+                          <TableCell>{item.descuento}</TableCell>
+                          <TableCell>L. {item.totalPagar}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                item.estado === "Pagado"
+                                ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
+                                : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
+                              }
+                            >
+                              {item.estado}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{item.fechaMatricula}</TableCell>
+                        </TableRow>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>
