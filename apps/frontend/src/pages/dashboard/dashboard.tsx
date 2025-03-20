@@ -64,7 +64,7 @@ export default function Dashboard() {
   if (!activeReport) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
+        {/* <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">Sunny Path Bilingual School</h1>
@@ -85,12 +85,11 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
-        </header>
+        </header> */}
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground">Fecha de emisión: 03/09/2025</p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline">
@@ -481,7 +480,7 @@ export default function Dashboard() {
               </div>
               <Button>
                 <Download className="mr-2 h-4 w-4" />
-                Descargar
+                Descarga
               </Button>
             </div>
 

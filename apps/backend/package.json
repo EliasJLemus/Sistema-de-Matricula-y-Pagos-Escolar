@@ -12,8 +12,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.5.2",
   "dependencies": {
-    "BackEnd": "file:",
     "backend": "file:",
+    "BackEnd": "file:",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
