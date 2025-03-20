@@ -15,7 +15,7 @@ app.use(cors({
 //     res.json({message: "Probando una ruta random en el backend"})
 // })
 
-app.use("/reports", reportsRoute);
+app.use("/reportes", reportsRoute);
 
 app.listen(Keys.Port, ()=> {
     console.log(`Server running on port ${Keys.Port}`);
