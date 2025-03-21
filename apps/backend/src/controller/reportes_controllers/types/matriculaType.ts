@@ -34,4 +34,19 @@ export type ReporteMatriculaDBType = {
     recargo: number,
     estado: string
   }
+
+  export type ReporteEstudianteDBType = {
+    estudiante: string,
+    identidad: string,
+    genero: string,
+    alergias: string | null,
+    zurdo: "Sí" | "No",
+    grado: string,
+    estado: string,
+    plan_pago: string,
+    encargado: string | null,
+    parentesco: string | null,
+    telefono: string | null
+  }
+  
   

@@ -1,5 +1,5 @@
 import {Database} from "../service"
-import {ReporteMatriculaDBType, ReporteMensualidadDBType} from "../../controller/reportes_controllers/types/matriculaType";
+import {ReporteMatriculaDBType, ReporteMensualidadDBType, ReporteEstudianteDBType} from "../../controller/reportes_controllers/types/matriculaType";
 import { QueryResult } from "pg";
 
 
@@ -49,5 +49,23 @@ export class ReporteDetalladoDB {
         }catch(error){
             throw error;
         }
+    }
+
+    public async getReporteEstudiante(): Promise<ReporteEstudianteDBType[] | Error>{
+        try{
+            const client = await this.db.getClient();
+
+            const query = `SELECT 
+                estudiante, identidad,
+                genero, alergias, zurdo, grado, estado, plan_pago, 
+                encargado, parentesco, telefono
+	            FROM sistema.reporte_estudiantes;`
+
+            const result = await client.query(query);
+
+            return result.rows as ReporteEstudianteDBType[];
+        }catch(error){
+            throw error;
+        }   
     }
 }

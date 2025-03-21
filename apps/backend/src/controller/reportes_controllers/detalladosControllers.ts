@@ -75,6 +75,15 @@ export const getReporteEstudiante = async (
 ): Promise<void> => {
     try{
 
+        const result = await reporteDetalladoDB.getReporteEstudiante();
+        
+        if (Array.isArray(result) && result.length > 0) {
+            res.status(200).json(result);
+            return
+        }
+        res.status(404).json({message: "No se encontraron datos"});
+        return
+
     }catch(error){
         res.status(500).json({message: "Error en el servidor"});
         return
