@@ -1,46 +1,7 @@
 import { ReactNode, createContext, useContext } from "react";
 import { QueryClient, QueryClientProvider, useQuery, UseQueryResult } from "@tanstack/react-query";
 import { client } from "./client";
-
-// Definimos el tipo de los datos del reporte de matrícula
-type ReporteMatricula = {
-    nombreEstudiante: string;
-    grado: string;
-    seccion: string;
-    tarifaMatricula: number;
-    beneficioAplicado: string;
-    descuento: string;
-    totalPagar: number;
-    estado: string;
-    fechaMatricula: string; // Formato 'DD/MM/YYYY'
-  };
-
-  type ReporteMensualidad = {
-    estudiante: string,
-    grado: string,
-    descuento: string,
-    fecha_inicio: string |  Date,         
-    fecha_vencimiento: string | Date,   
-    saldo_total: number,
-    saldo_pagado: number,
-    saldo_pendiente: number,
-    recargo: number,
-    estado: string
-  }
-
-  type ReporteEstudiante = {
-    estudiante: string,
-    identidad: string,
-    genero: string,
-    alergias: string | null,
-    zurdo: "Sí" | "No",
-    grado: string,
-    estado: string,
-    plan_pago: string,
-    encargado: string | null,
-    parentesco: string | null,
-    telefono: string | null
-  }
+import {ReporteMatricula, ReporteMensualidad, ReporteEstudiante, StructureAndData} from "@shared/reportsType";
 
 
 // Definimos los props del provider
@@ -52,10 +13,10 @@ interface QueryProviderProps {
 const queryClient = new QueryClient();
 
 // Hook personalizado para obtener los reportes de matrícula
-export const useGetReportsMatricula = (): UseQueryResult<ReporteMatricula[], Error> => {
+export const useGetReportsMatricula = (): UseQueryResult<StructureAndData<ReporteMatricula>, Error> => {
   return useQuery({
     queryKey: ["getReportsMatricula"],
-    queryFn: async (): Promise<ReporteMatricula[]> => {
+    queryFn: async (): Promise<StructureAndData<ReporteMatricula>> => {
       try {
         const response = await client.get("/reportes/matricula");
         if (!response.data) throw new Error("No se encontraron datos en el reporte de matrícula");
@@ -67,10 +28,10 @@ export const useGetReportsMatricula = (): UseQueryResult<ReporteMatricula[], Err
   });
 };
 
-export const useGetReporteMensualidad = (): UseQueryResult<ReporteMensualidad[], Error> => {
+export const useGetReporteMensualidad = (): UseQueryResult<StructureAndData<ReporteMensualidad>, Error> => {
   return useQuery({
     queryKey: ["getReporteMensualidad"],
-    queryFn: async (): Promise<ReporteMensualidad[]> => {
+    queryFn: async (): Promise<StructureAndData<ReporteMensualidad>> => {
       try {
         const response = await client.get("/reportes/mensualidad");
         if (!response.data) throw new Error("No se encontraron datos en el reporte de mensualidad");
@@ -82,10 +43,10 @@ export const useGetReporteMensualidad = (): UseQueryResult<ReporteMensualidad[],
   });
 }
 
-export const useGetReporteEstudiante = (): UseQueryResult<ReporteEstudiante[], Error> => {
+export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<ReporteEstudiante>, Error> => {
   return useQuery({
     queryKey: ["getReporteEstdiante"],
-    queryFn: async (): Promise<ReporteEstudiante[]> => {
+    queryFn: async (): Promise<StructureAndData<ReporteEstudiante>> => {
       try{
         const response = await client.get("/reportes/estudiante");
         if(!response.data) throw new Error("No se encontraron datos en el reporte de estudiantes");
@@ -102,11 +63,13 @@ export const useGetReporteEstudiante = (): UseQueryResult<ReporteEstudiante[], E
 type QueryContextType = {
   useGetReportsMatricula: typeof useGetReportsMatricula,
   useGetReporteMensualidad: typeof useGetReporteMensualidad;
+  useGetReporteEstudiante: typeof useGetReporteEstudiante;
 };
 
 const QueryContext = createContext<QueryContextType>({
   useGetReportsMatricula,
-  useGetReporteMensualidad
+  useGetReporteMensualidad,
+  useGetReporteEstudiante
 });
 
 //  Hook para usar el contexto
@@ -117,8 +80,8 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
   // Valor que se proveerá en el contexto
   const contextValue = {
     useGetReportsMatricula,
-    useGetReporteMensualidad
-    
+    useGetReporteMensualidad,
+    useGetReporteEstudiante,
   };
 
   return (

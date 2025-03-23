@@ -35,10 +35,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 //Query
 import {useGetReportsMatricula, useGetReporteEstudiante, useGetReporteMensualidad} from "../../lib/queries"
+import {MatriculaTable, } from "@/Tables/matriculas"
+import {MensualidadTable} from "@/Tables/mensualidad"
+import {EstudianteTable} from "@/Tables/estudiantes"
 
 export default function Dashboard() {
- 
-  const {data, isLoading, isError} = useGetReportsMatricula();
 
 
   const [activeReport, setActiveReport] = useState<string | null>(null)
@@ -69,28 +70,7 @@ export default function Dashboard() {
   if (!activeReport) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-        {/* <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Sunny Path Bilingual School</h1>
-          </div>
-          <div className="ml-auto flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar reportes..." className="w-64 pl-8" />
-            </div>
-            <Select defaultValue="2025">
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Año" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2025">2025</SelectItem>
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </header> */}
+       
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -275,6 +255,10 @@ export default function Dashboard() {
                     <CardDescription>Acceso rápido a todos los reportes</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-2">
+                  <Button variant="outline" className="justify-start" onClick={() => setActiveReport("student")}>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Reporte de Estudiante
+                    </Button>
                     <Button variant="outline" className="justify-start" onClick={() => setActiveReport("tuition")}>
                       <BookOpen className="mr-2 h-4 w-4" />
                       Reporte de Matrícula
@@ -476,268 +460,17 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 p-6">
-        {activeReport === "tuition" && data && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Matrícula 2025</h2>
-                <p className="text-muted-foreground">No. Reporte 01011 | Fecha de emisión</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descarga
-              </Button>
-            </div>
 
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Input placeholder="Nombre" className="w-64" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Grado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    
-                    <SelectItem value="Kinder">Kinder</SelectItem>
-                    
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pagado">Pagado</SelectItem>
-                    <SelectItem value="pendiente">Pendiente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+        {activeReport === "student"  && (
+          <EstudianteTable/>
+        )}
 
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre de estudiante</TableHead>
-                      <TableHead>Grado</TableHead>
-                      <TableHead>Sección</TableHead>
-                      <TableHead>Tarifa de matrícula</TableHead>
-                      <TableHead>Beneficio aplicado</TableHead>
-                      <TableHead>Descuento</TableHead>
-                      <TableHead>Total a Pagar</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Fecha de matrícula</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.map((item) => {
-                      console.log(data)
-                      return (
-                        <TableRow>
-                          <TableCell className="font-medium">{item.nombreEstudiante}</TableCell>
-                          <TableCell>{item.grado}</TableCell>
-                          <TableCell>{item.seccion}</TableCell>
-                          <TableCell>L. {item.tarifaMatricula}</TableCell>
-                          <TableCell>{item.beneficioAplicado}</TableCell>
-                          <TableCell>{item.descuento}</TableCell>
-                          <TableCell>L. {item.totalPagar}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                item.estado === "Pagado"
-                                ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                                : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                              }
-                            >
-                              {item.estado}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{item.fechaMatricula}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between border-t p-4">
-                <div className="text-sm text-muted-foreground">Mostrando 1-4 de 68 estudiantes</div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    1
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    2
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    3
-                  </Button>
-                  <span>...</span>
-                  <Button variant="outline" size="sm">
-                    68
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Siguiente
-                    <ChevronLeft className="h-4 w-4 rotate-180" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </div>
+        {activeReport === "tuition" &&  (
+            <MatriculaTable/>
         )}
 
         {activeReport === "monthly" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Mensualidades</h2>
-                <p className="text-muted-foreground">No. Reporte 010107 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Input placeholder="Estudiante" className="w-64" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Grado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kinder">Kinder</SelectItem>
-                    <SelectItem value="primero">Primero</SelectItem>
-                    <SelectItem value="segundo">Segundo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input type="date" className="w-40" />
-              </div>
-            </div>
-
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Estudiante</TableHead>
-                      <TableHead>Grado</TableHead>
-                      <TableHead>Descuento</TableHead>
-                      <TableHead>Fecha de inicio</TableHead>
-                      <TableHead>Fecha de vencimiento</TableHead>
-                      <TableHead>Saldo Total</TableHead>
-                      <TableHead>Saldo Pagado</TableHead>
-                      <TableHead>Saldo Pendiente</TableHead>
-                      <TableHead>Recargo</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      /** */
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Abigail Fajardo</TableCell>
-                      <TableCell>Sexto</TableCell>
-                      <TableCell>Ninguno</TableCell>
-                      <TableCell>02/01/2025</TableCell>
-                      <TableCell>03/01/2025</TableCell>
-                      <TableCell>L.5000</TableCell>
-                      <TableCell>L.2500</TableCell>
-                      <TableCell>L.2500</TableCell>
-                      <TableCell>L.100</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          Pendiente
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Allan Fernandez</TableCell>
-                      <TableCell>Primero</TableCell>
-                      <TableCell>Descuento %25</TableCell>
-                      <TableCell>02/01/2025</TableCell>
-                      <TableCell>03/01/2025</TableCell>
-                      <TableCell>L.3750</TableCell>
-                      <TableCell>L.3750</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Pagado
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Angel Velasquez</TableCell>
-                      <TableCell>Noveno</TableCell>
-                      <TableCell>Beca</TableCell>
-                      <TableCell>02/01/2025</TableCell>
-                      <TableCell>03/01/2025</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>L.0.00</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Pagado
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between border-t p-4">
-                <div className="text-sm text-muted-foreground">Mostrando 1-3 de 68 estudiantes</div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    1
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    2
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    3
-                  </Button>
-                  <span>...</span>
-                  <Button variant="outline" size="sm">
-                    68
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Siguiente
-                    <ChevronLeft className="h-4 w-4 rotate-180" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </div>
+          <MensualidadTable/>
         )}
 
         {activeReport === "discounts" && (

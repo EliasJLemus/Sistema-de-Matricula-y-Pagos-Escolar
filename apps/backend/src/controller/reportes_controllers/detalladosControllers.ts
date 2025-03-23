@@ -3,12 +3,13 @@ import {
     Response
 } from "express";
 import {ReporteDetalladoDB} from "../../db/reportes/detalladosDB";
-import {ReporteMatricula, ReporteMatriculaDBType} from "../reportes_controllers/types/matriculaType";
+import {ReporteMatricula, ReporteMatriculaDBType} from "@shared/reportsType";
 import {
     matriculaStructure,
     mensualidadStructure,
-    estudianteStructure
-} from "./structure"
+    estudianteStructure,
+    becaStructure
+} from "@/controller/reportes_controllers/structure/structure_detalle"
 
 const reporteDetalladoDB = new ReporteDetalladoDB();
 
@@ -89,6 +90,27 @@ export const getReporteEstudiante = async (
         if (Array.isArray(result) && result.length > 0) {
             estudianteStructure.data = result
             res.status(200).json(estudianteStructure);
+            return
+        }
+        res.status(404).json({message: "No se encontraron datos"});
+        return
+
+    }catch(error){
+        res.status(500).json({message: "Error en el servidor"});
+        return
+    }
+}
+
+export const getReporteBeca = async (req: Request, res: Response, ): Promise<void> => {
+    try{
+
+        const result = await reporteDetalladoDB.getReporteBeca();
+        
+        if (Array.isArray(result) && result.length > 0) {
+
+            becaStructure.data = result;
+
+            res.status(200).json(becaStructure);
             return
         }
         res.status(404).json({message: "No se encontraron datos"});

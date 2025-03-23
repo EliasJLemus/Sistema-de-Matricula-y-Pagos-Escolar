@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "CommonJS",
+      "strict": true,
+      "esModuleInterop": true,
+      "baseUrl": ".",
+      "paths": {
+        "@shared/*": ["shared/*.ts"]
+      }
+    }
+  }
+  

@@ -1,4 +1,4 @@
-import { StructureAndData, StructureColumn, ReporteMatricula } from "../types/matriculaType";
+import { StructureAndData, StructureColumn, ReporteMatricula } from "@shared/reportsType"
 
 const columnsMatricula: StructureColumn<ReporteMatricula>[] = [
   { name: "nombreEstudiante", 
