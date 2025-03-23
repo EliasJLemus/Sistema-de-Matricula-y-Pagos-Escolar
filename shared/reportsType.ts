@@ -67,6 +67,12 @@ export type ReporteMatriculaDBType = {
     deuda_total_del_grado: number;
   };
   
+  export type ReporteFinancieroAnualType = {
+    tipo_pago: string;
+    ingresos: number;
+    deudas_por_cobrar: number;
+  };
+  
 
   export type StructureColumn<T> = {
     name: keyof T;      

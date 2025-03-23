@@ -1,6 +1,7 @@
 import {Database} from "../service"
 import {
-    ReportePagosPendientesType
+    ReportePagosPendientesType,
+    ReporteFinancieroAnualType
 } from "@shared/reportsType";
 
 class ReporteSintetizadoDB {
@@ -28,6 +29,26 @@ class ReporteSintetizadoDB {
             return result.rows as ReportePagosPendientesType[];
         } catch (error) {
             throw error;    
+        }
+    }
+
+    public async getReporteFinancieroAnual (): Promise<ReporteFinancieroAnualType[] | Error> {
+        try{
+            const client = await this.db.getClient();
+
+            const query = `SELECT tipo_pago, ingresos, deudas_por_cobrar
+	        FROM sistema.reporte_financiero_anual;`
+
+            const result = await client.query(query)
+
+            if(result.rows.length === 0){
+                throw new Error("No se encontraron datos");
+            }
+
+            return result.rows as ReporteFinancieroAnualType[];
+
+        }catch(error){
+            throw error
         }
     }
 }

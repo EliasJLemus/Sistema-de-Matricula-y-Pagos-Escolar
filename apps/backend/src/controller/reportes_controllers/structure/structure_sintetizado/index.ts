@@ -1,3 +1,4 @@
 import {pagosPendientesStructure} from "./structurePagosPendientes";
+import {financieroAnualStructure} from "./structureFinancieroAnual"
 
-export {pagosPendientesStructure}
+export {pagosPendientesStructure, financieroAnualStructure}
