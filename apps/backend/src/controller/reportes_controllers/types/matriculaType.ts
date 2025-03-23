@@ -19,15 +19,15 @@ export type ReporteMatriculaDBType = {
     descuento: string;
     totalPagar: number;
     estado: string;
-    fechaMatricula: string; // Formato 'DD/MM/YYYY'
+    fechaMatricula: string | Date; // Formato 'DD/MM/YYYY'
   };
   
   export type ReporteMensualidadDBType = {
     estudiante: string,
     grado: string,
     descuento: string,
-    fecha_inicio: string,         // Format: "DD/MM/YYYY"
-    fecha_vencimiento: string,    // Format: "DD/MM/YYYY"
+    fecha_inicio: string | Date,         
+    fecha_vencimiento: string | Date,    
     saldo_total: number,
     saldo_pagado: number,
     saldo_pendiente: number,
@@ -48,5 +48,18 @@ export type ReporteMatriculaDBType = {
     parentesco: string | null,
     telefono: string | null
   }
+
+  export type StructureColumn<T> = {
+    name: keyof T;      
+    label: string;   
+    type?: string;     
+  };
+  
+  export type StructureAndData<T> = {
+    title: string;               
+    columns: StructureColumn<T>[];
+    data: T[];                     
+  };
+  
   
   

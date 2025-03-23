@@ -34,7 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 //Query
-import {useGetReportsMatricula} from "../../lib/queries"
+import {useGetReportsMatricula, useGetReporteEstudiante, useGetReporteMensualidad} from "../../lib/queries"
 
 export default function Dashboard() {
  
@@ -647,6 +647,9 @@ export default function Dashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    <TableRow>
+                      /** */
+                    </TableRow>
                     <TableRow>
                       <TableCell className="font-medium">Abigail Fajardo</TableCell>
                       <TableCell>Sexto</TableCell>
