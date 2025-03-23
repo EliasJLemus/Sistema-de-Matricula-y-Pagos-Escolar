@@ -19,7 +19,7 @@ export type ReporteMatriculaDBType = {
     descuento: string;
     totalPagar: number;
     estado: string;
-    fechaMatricula: string | Date; // Formato 'DD/MM/YYYY'
+    fechaMatricula: string | Date;
   };
   
   export type ReporteMensualidad = {
@@ -50,17 +50,17 @@ export type ReporteMatriculaDBType = {
   }
 
   export type ReporteBeca = {
-    idEstudiante: number;
-    nombreEstudiante: string;
+    id_estudiante: string;
+    nombre_estudiante: string;
     grado: string;
     seccion: string;
-    fechaAdmision: string; 
-    tipoBeneficio: "Beca" | "Descuento" | string;
-    porcentajeBeneficio: string; 
-    estado: "Activa" | string;
+    fecha_admision: string; 
+    tipo_beneficio: string;
+    porcentaje_beneficio: string; 
+    estado: string;
   };
   
-
+  
   export type StructureColumn<T> = {
     name: keyof T;      
     label: string;   

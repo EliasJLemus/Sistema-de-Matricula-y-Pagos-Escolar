@@ -2,12 +2,11 @@ import { StructureAndData, StructureColumn, ReporteBeca } from "@shared/reportsT
 
 const columnsBeca: StructureColumn<ReporteBeca>[] = [
   { 
-    name : "idEstudiante", 
+    name : "id_estudiante", 
     label: "ID Estudiante",
-    type : "number"
   },
   { 
-    name : "nombreEstudiante", 
+    name : "nombre_estudiante", 
     label: "Nombre del Estudiante"
   },
   { 
@@ -19,16 +18,16 @@ const columnsBeca: StructureColumn<ReporteBeca>[] = [
     label: "Sección"
   },
   { 
-    name : "fechaAdmision", 
+    name : "fecha_admision", 
     label: "Fecha de Admisión",
     type : "date"
   },
   { 
-    name : "tipoBeneficio", 
+    name : "tipo_beneficio", 
     label: "Tipo de Beneficio"
   },
   { 
-    name : "porcentajeBeneficio", 
+    name : "porcentaje_beneficio", 
     label: "Porcentaje de Beneficio"
   },
   { 

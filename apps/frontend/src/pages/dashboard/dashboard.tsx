@@ -33,11 +33,10 @@ import { Input } from "../../components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-//Query
-import {useGetReportsMatricula, useGetReporteEstudiante, useGetReporteMensualidad} from "../../lib/queries"
 import {MatriculaTable, } from "@/Tables/matriculas"
 import {MensualidadTable} from "@/Tables/mensualidad"
 import {EstudianteTable} from "@/Tables/estudiantes"
+import {BecaTable} from "@/Tables/becas"
 
 export default function Dashboard() {
 
@@ -474,148 +473,7 @@ export default function Dashboard() {
         )}
 
         {activeReport === "discounts" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Descuentos y Becas 2025</h2>
-                <p className="text-muted-foreground">No. Reporte 01018 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Input placeholder="Nombre" className="w-64" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Input placeholder="ID_estudiante" className="w-40" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Grado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kinder">Kinder</SelectItem>
-                    <SelectItem value="primero">Primero</SelectItem>
-                    <SelectItem value="segundo">Segundo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Tipo de beneficio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beca">Beca</SelectItem>
-                    <SelectItem value="descuento">Descuento</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead></TableHead>
-                      <TableHead>Nombre del estudiante</TableHead>
-                      <TableHead>Grado</TableHead>
-                      <TableHead>Sección</TableHead>
-                      <TableHead>Fecha de admisión</TableHead>
-                      <TableHead>Tipo de beneficio</TableHead>
-                      <TableHead>Porcentaje de beneficio</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>1</TableCell>
-                      <TableCell className="font-medium">Abigail Medrano</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>A</TableCell>
-                      <TableCell>01/06/2025</TableCell>
-                      <TableCell>Beca</TableCell>
-                      <TableCell>100%</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Activa
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>2</TableCell>
-                      <TableCell className="font-medium">Alicia Keys</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>01/25/2025</TableCell>
-                      <TableCell>Descuento</TableCell>
-                      <TableCell>75%</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Activa
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>3</TableCell>
-                      <TableCell className="font-medium">Alicia Machado</TableCell>
-                      <TableCell>Primero</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>01/22/2025</TableCell>
-                      <TableCell>Descuento</TableCell>
-                      <TableCell>25%</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                        >
-                          Activa
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between border-t p-4">
-                <div className="text-sm text-muted-foreground">Mostrando 1-3 de 68 estudiantes</div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    1
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    2
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    3
-                  </Button>
-                  <span>...</span>
-                  <Button variant="outline" size="sm">
-                    68
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Siguiente
-                    <ChevronLeft className="h-4 w-4 rotate-180" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </div>
+          <BecaTable/>
         )}
 
         {activeReport === "outstanding" && (

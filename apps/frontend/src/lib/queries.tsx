@@ -1,7 +1,11 @@
 import { ReactNode, createContext, useContext } from "react";
 import { QueryClient, QueryClientProvider, useQuery, UseQueryResult } from "@tanstack/react-query";
 import { client } from "./client";
-import {ReporteMatricula, ReporteMensualidad, ReporteEstudiante, StructureAndData} from "@shared/reportsType";
+import {ReporteMatricula, 
+  ReporteMensualidad, 
+  ReporteEstudiante,
+  ReporteBeca,
+  StructureAndData} from "@shared/reportsType";
 
 
 // Definimos los props del provider
@@ -59,17 +63,35 @@ export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<Repor
   })
 }
 
+export const useGetReporteBeca = (): UseQueryResult<StructureAndData<ReporteBeca>, Error> => {
+  return useQuery({
+    queryKey: ["getReporteBeca"],
+    queryFn: async (): Promise<StructureAndData<ReporteBeca>> => {
+      try{
+        const response = await client.get("/reportes/beca");
+        if(!response.data) throw new Error("No se encontraron datos en el reporte de becas");
+
+        return response.data;
+      }catch(error){
+        throw error
+      }
+    } 
+  })
+} 
+
 // Creamos el contexto con un valor por defecto apropiado
 type QueryContextType = {
   useGetReportsMatricula: typeof useGetReportsMatricula,
   useGetReporteMensualidad: typeof useGetReporteMensualidad;
   useGetReporteEstudiante: typeof useGetReporteEstudiante;
+  useGetReporteBeca: typeof useGetReporteBeca;
 };
 
 const QueryContext = createContext<QueryContextType>({
   useGetReportsMatricula,
   useGetReporteMensualidad,
-  useGetReporteEstudiante
+  useGetReporteEstudiante,
+  useGetReporteBeca,
 });
 
 //  Hook para usar el contexto
@@ -82,6 +104,7 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
     useGetReportsMatricula,
     useGetReporteMensualidad,
     useGetReporteEstudiante,
+    useGetReporteBeca,
   };
 
   return (
