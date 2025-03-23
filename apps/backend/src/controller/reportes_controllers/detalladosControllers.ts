@@ -65,7 +65,8 @@ export const getReporteMensualidad = async (
         const result = await reporteDetalladoDB.getReporteMensualidad();
         
         if (Array.isArray(result) && result.length > 0) {
-            res.status(200).json(result);
+            mensualidadStructure.data = result;
+            res.status(200).json(mensualidadStructure);
             return
         }
         res.status(404).json({message: "No se encontraron datos"});
@@ -86,7 +87,8 @@ export const getReporteEstudiante = async (
         const result = await reporteDetalladoDB.getReporteEstudiante();
         
         if (Array.isArray(result) && result.length > 0) {
-            res.status(200).json(result);
+            estudianteStructure.data = result
+            res.status(200).json(estudianteStructure);
             return
         }
         res.status(404).json({message: "No se encontraron datos"});
