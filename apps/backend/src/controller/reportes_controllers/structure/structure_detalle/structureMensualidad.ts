@@ -1,6 +1,6 @@
-import { StructureAndData, StructureColumn, ReporteMensualidad } from "@shared/reportsType";
+import { StructureAndData, StructureColumn, ReporteMensualidadType } from "@shared/reportsType";
 
-const columnsMensualidad: StructureColumn<ReporteMensualidad>[] = [
+const columnsMensualidad: StructureColumn<ReporteMensualidadType>[] = [
   { 
     name : "estudiante", 
     label: "Estudiante" 
@@ -49,8 +49,8 @@ const columnsMensualidad: StructureColumn<ReporteMensualidad>[] = [
   }
 ];
 
-export const mensualidadStructure: StructureAndData<ReporteMensualidad> = {
+export const mensualidadStructure: StructureAndData<ReporteMensualidadType> = {
   title  : "Reporte de Mensualidad",
   columns: columnsMensualidad,
-  data   : [] as ReporteMensualidad[]
+  data   : [] as ReporteMensualidadType[]
 };

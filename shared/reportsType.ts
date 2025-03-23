@@ -10,7 +10,7 @@ export type ReporteMatriculaDBType = {
     fecha_matricula: string; 
   };
 
-  export type ReporteMatricula = {
+  export type ReporteMatriculaType = {
     nombreEstudiante: string;
     grado: string;
     seccion: string;
@@ -22,7 +22,7 @@ export type ReporteMatriculaDBType = {
     fechaMatricula: string | Date;
   };
   
-  export type ReporteMensualidad = {
+  export type ReporteMensualidadType = {
     estudiante: string,
     grado: string,
     descuento: string,
@@ -35,7 +35,7 @@ export type ReporteMatriculaDBType = {
     estado: string
   }
 
-  export type ReporteEstudiante = {
+  export type ReporteEstudianteType = {
     estudiante: string,
     identidad: string,
     genero: string,
@@ -49,7 +49,7 @@ export type ReporteMatriculaDBType = {
     telefono: string | null
   }
 
-  export type ReporteBeca = {
+  export type ReporteBecaType = {
     id_estudiante: string;
     nombre_estudiante: string;
     grado: string;
@@ -60,7 +60,14 @@ export type ReporteMatriculaDBType = {
     estado: string;
   };
   
+  export type ReportePagosPendientesType = {
+    grado: string;
+    total_deudas: number;
+    promedio_deuda_por_estudiante: number;
+    deuda_total_del_grado: number;
+  };
   
+
   export type StructureColumn<T> = {
     name: keyof T;      
     label: string;   

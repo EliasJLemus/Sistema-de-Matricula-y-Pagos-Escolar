@@ -1,6 +1,6 @@
-import { StructureAndData, StructureColumn, ReporteBeca } from "@shared/reportsType";
+import { StructureAndData, StructureColumn, ReporteBecaType } from "@shared/reportsType";
 
-const columnsBeca: StructureColumn<ReporteBeca>[] = [
+const columnsBeca: StructureColumn<ReporteBecaType>[] = [
   { 
     name : "id_estudiante", 
     label: "ID Estudiante",
@@ -36,8 +36,8 @@ const columnsBeca: StructureColumn<ReporteBeca>[] = [
   }
 ];
 
-export const becaStructure: StructureAndData<ReporteBeca> = {
+export const becaStructure: StructureAndData<ReporteBecaType> = {
   title  : "Reporte de Becas y Descuentos",
   columns: columnsBeca,
-  data   : [] as ReporteBeca[]
+  data   : [] as ReporteBecaType[]
 };

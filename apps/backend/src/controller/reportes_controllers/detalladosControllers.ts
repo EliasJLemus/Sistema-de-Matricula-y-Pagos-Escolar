@@ -3,7 +3,7 @@ import {
     Response
 } from "express";
 import {ReporteDetalladoDB} from "../../db/reportes/detalladosDB";
-import {ReporteMatricula, ReporteMatriculaDBType} from "@shared/reportsType";
+import {ReporteMatriculaType, ReporteMatriculaDBType} from "@shared/reportsType";
 import {
     matriculaStructure,
     mensualidadStructure,
@@ -23,7 +23,7 @@ export const getReporteMatricula = async(
         
         
         if (Array.isArray(result)) {
-            const report: ReporteMatricula[] = result.map((row: ReporteMatriculaDBType) => {
+            const report: ReporteMatriculaType[] = result.map((row: ReporteMatriculaDBType) => {
                 return {
                     nombreEstudiante: row.nombre_estudiante,
                     grado: row.grado,
@@ -35,7 +35,7 @@ export const getReporteMatricula = async(
                     estado: row.estado,
                     fechaMatricula: row.fecha_matricula
                 }
-            }) as ReporteMatricula[];
+            }) as ReporteMatriculaType[];
 
             if (report.length > 0) {
 

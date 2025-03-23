@@ -1,10 +1,10 @@
 import { ReactNode, createContext, useContext } from "react";
 import { QueryClient, QueryClientProvider, useQuery, UseQueryResult } from "@tanstack/react-query";
 import { client } from "./client";
-import {ReporteMatricula, 
-  ReporteMensualidad, 
-  ReporteEstudiante,
-  ReporteBeca,
+import {ReporteMatriculaType, 
+  ReporteMensualidadType, 
+  ReporteEstudianteType,
+  ReporteBecaType,
   StructureAndData} from "@shared/reportsType";
 
 
@@ -17,10 +17,10 @@ interface QueryProviderProps {
 const queryClient = new QueryClient();
 
 // Hook personalizado para obtener los reportes de matrícula
-export const useGetReportsMatricula = (): UseQueryResult<StructureAndData<ReporteMatricula>, Error> => {
+export const useGetReportsMatricula = (): UseQueryResult<StructureAndData<ReporteMatriculaType>, Error> => {
   return useQuery({
     queryKey: ["getReportsMatricula"],
-    queryFn: async (): Promise<StructureAndData<ReporteMatricula>> => {
+    queryFn: async (): Promise<StructureAndData<ReporteMatriculaType>> => {
       try {
         const response = await client.get("/reportes/matricula");
         if (!response.data) throw new Error("No se encontraron datos en el reporte de matrícula");
@@ -32,10 +32,10 @@ export const useGetReportsMatricula = (): UseQueryResult<StructureAndData<Report
   });
 };
 
-export const useGetReporteMensualidad = (): UseQueryResult<StructureAndData<ReporteMensualidad>, Error> => {
+export const useGetReporteMensualidad = (): UseQueryResult<StructureAndData<ReporteMensualidadType>, Error> => {
   return useQuery({
-    queryKey: ["getReporteMensualidad"],
-    queryFn: async (): Promise<StructureAndData<ReporteMensualidad>> => {
+    queryKey: ["getReporteMensualidadType"],
+    queryFn: async (): Promise<StructureAndData<ReporteMensualidadType>> => {
       try {
         const response = await client.get("/reportes/mensualidad");
         if (!response.data) throw new Error("No se encontraron datos en el reporte de mensualidad");
@@ -47,10 +47,10 @@ export const useGetReporteMensualidad = (): UseQueryResult<StructureAndData<Repo
   });
 }
 
-export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<ReporteEstudiante>, Error> => {
+export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<ReporteEstudianteType>, Error> => {
   return useQuery({
     queryKey: ["getReporteEstdiante"],
-    queryFn: async (): Promise<StructureAndData<ReporteEstudiante>> => {
+    queryFn: async (): Promise<StructureAndData<ReporteEstudianteType>> => {
       try{
         const response = await client.get("/reportes/estudiante");
         if(!response.data) throw new Error("No se encontraron datos en el reporte de estudiantes");
@@ -63,10 +63,10 @@ export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<Repor
   })
 }
 
-export const useGetReporteBeca = (): UseQueryResult<StructureAndData<ReporteBeca>, Error> => {
+export const useGetReporteBeca = (): UseQueryResult<StructureAndData<ReporteBecaType>, Error> => {
   return useQuery({
-    queryKey: ["getReporteBeca"],
-    queryFn: async (): Promise<StructureAndData<ReporteBeca>> => {
+    queryKey: ["getReporteBecaType"],
+    queryFn: async (): Promise<StructureAndData<ReporteBecaType>> => {
       try{
         const response = await client.get("/reportes/beca");
         if(!response.data) throw new Error("No se encontraron datos en el reporte de becas");

@@ -1,6 +1,6 @@
-import { StructureAndData, StructureColumn, ReporteMatricula } from "@shared/reportsType"
+import { StructureAndData, StructureColumn, ReporteMatriculaType } from "@shared/reportsType"
 
-const columnsMatricula: StructureColumn<ReporteMatricula>[] = [
+const columnsMatricula: StructureColumn<ReporteMatriculaType>[] = [
   { name: "nombreEstudiante", 
     label: "Nombre del Estudiante" },
   { name: "grado", 
@@ -23,8 +23,8 @@ const columnsMatricula: StructureColumn<ReporteMatricula>[] = [
     type: "date" }
 ];
 
-export const matriculaStructure: StructureAndData<ReporteMatricula> = {
+export const matriculaStructure: StructureAndData<ReporteMatriculaType> = {
   title: "Reporte de Matrícula",
   columns: columnsMatricula,
-  data: [] as ReporteMatricula[]
+  data: [] as ReporteMatriculaType[]
 };

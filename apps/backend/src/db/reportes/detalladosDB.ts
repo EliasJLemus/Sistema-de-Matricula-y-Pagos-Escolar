@@ -1,9 +1,9 @@
 import {Database} from "../service"
 import {
     ReporteMatriculaDBType, 
-    ReporteEstudiante, 
-    ReporteMensualidad, 
-    ReporteBeca} from "@shared/reportsType";
+    ReporteEstudianteType, 
+    ReporteMensualidadType, 
+    ReporteBecaType} from "@shared/reportsType";
 import { QueryResult } from "pg";
 
 
@@ -37,7 +37,7 @@ export class ReporteDetalladoDB {
         }
     }
 
-    public async getReporteMensualidad(): Promise<ReporteMensualidad[] | Error> {
+    public async getReporteMensualidad(): Promise<ReporteMensualidadType[] | Error> {
         try{
             const client = await this.db.getClient();
 
@@ -49,13 +49,13 @@ export class ReporteDetalladoDB {
 
             const result = await client.query(query);
             
-            return result.rows as ReporteMensualidad[];
+            return result.rows as ReporteMensualidadType[];
         }catch(error){
             throw error;
         }
     }
 
-    public async getReporteEstudiante(): Promise<ReporteEstudiante[] | Error>{
+    public async getReporteEstudiante(): Promise<ReporteEstudianteType[] | Error>{
         try{
             const client = await this.db.getClient();
 
@@ -67,13 +67,13 @@ export class ReporteDetalladoDB {
 
             const result = await client.query(query);
 
-            return result.rows as ReporteEstudiante[];
+            return result.rows as ReporteEstudianteType[];
         }catch(error){
             throw error;
         }   
     }
 
-    public async getReporteBeca(): Promise<ReporteBeca[] | Error> {
+    public async getReporteBeca(): Promise<ReporteBecaType[] | Error> {
         try{
             const client = await this.db.getClient();
 
@@ -89,7 +89,7 @@ export class ReporteDetalladoDB {
                 return new Error("No se encontraron resultados");
             }
 
-            return result.rows  as ReporteBeca[];
+            return result.rows  as ReporteBecaType[];
         }catch(error){
             throw error;
         }
