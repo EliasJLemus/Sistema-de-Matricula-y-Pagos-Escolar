@@ -1,7 +1,8 @@
 import {Database} from "../service"
 import {
     ReportePagosPendientesType,
-    ReporteFinancieroAnualType
+    ReporteFinancieroAnualType,
+    ReporteRetiroEstudiantesType
 } from "@shared/reportsType";
 
 class ReporteSintetizadoDB {
@@ -49,6 +50,25 @@ class ReporteSintetizadoDB {
 
         }catch(error){
             throw error
+        }
+    }
+
+    public async getReporteRetiroEstudiante (): Promise<ReporteRetiroEstudiantesType[] | Error> {
+        try {
+            const client = await this.db.getClient();
+
+            const query = `SELECT grado, estudiantes_activos, estudiantes_retirados, tasa_retiro
+            FROM sistema.reporte_retiro_estudiantes;`;
+
+            const result = await client.query(query);
+
+            if (result.rows.length === 0) {
+                throw new Error("No se encontraron datos");
+            }
+
+            return result.rows as ReporteRetiroEstudiantesType[];
+        } catch (error) {
+            throw error;
         }
     }
 }

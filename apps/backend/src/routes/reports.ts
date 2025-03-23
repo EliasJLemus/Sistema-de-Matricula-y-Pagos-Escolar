@@ -9,7 +9,7 @@ import { Router } from "express"
 
  import {getReportePagosPendientes,
    getReporteFinancieroAnual,
-
+   getReporteRetiroEstudiante
  } from "@/controller/reportes_controllers/sintetizadosControllers"
 
 const reportRoute = Router();
@@ -26,5 +26,7 @@ reportRoute.get("/beca", getReporteBeca)
 reportRoute.get("/pagos-pendientes", getReportePagosPendientes)
 
 reportRoute.get("/financiero-anual", getReporteFinancieroAnual)
+
+reportRoute.get("/retiro-estudiante", getReporteRetiroEstudiante)
 
 export default reportRoute;

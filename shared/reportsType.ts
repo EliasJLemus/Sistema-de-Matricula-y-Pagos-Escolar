@@ -73,6 +73,13 @@ export type ReporteMatriculaDBType = {
     deudas_por_cobrar: number;
   };
   
+  export type ReporteRetiroEstudiantesType = {
+    grado: string;
+    estudiantes_activos: number;
+    estudiantes_retirados: number;
+    tasa_retiro: string; // Viene como porcentaje 'X%'
+  };
+  
 
   export type StructureColumn<T> = {
     name: keyof T;      
