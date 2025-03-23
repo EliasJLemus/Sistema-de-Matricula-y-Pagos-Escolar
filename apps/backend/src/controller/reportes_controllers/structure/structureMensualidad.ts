@@ -49,7 +49,7 @@ const columnsMensualidad: StructureColumn<ReporteMensualidadDBType>[] = [
   }
 ];
 
-export const reporteMensualidad: StructureAndData<ReporteMensualidadDBType> = {
+export const mensualidadStructure: StructureAndData<ReporteMensualidadDBType> = {
   title  : "Reporte de Mensualidad",
   columns: columnsMensualidad,
   data   : [] as ReporteMensualidadDBType[]

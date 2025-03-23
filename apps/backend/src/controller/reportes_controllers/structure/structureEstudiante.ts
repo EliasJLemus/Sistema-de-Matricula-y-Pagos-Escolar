@@ -47,7 +47,7 @@ const columnsEstudiante: StructureColumn<ReporteEstudianteDBType>[] = [
   }
 ];
 
-export const reporteEstudiante: StructureAndData<ReporteEstudianteDBType> = {
+export const estudianteStructure: StructureAndData<ReporteEstudianteDBType> = {
   title  : "Reporte de Estudiantes",
   columns: columnsEstudiante,
   data   : [] as ReporteEstudianteDBType[]

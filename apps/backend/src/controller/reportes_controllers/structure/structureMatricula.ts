@@ -23,7 +23,7 @@ const columnsMatricula: StructureColumn<ReporteMatricula>[] = [
     type: "date" }
 ];
 
-export const reporteMatricula: StructureAndData<ReporteMatricula> = {
+export const matriculaStructure: StructureAndData<ReporteMatricula> = {
   title: "Reporte de Matrícula",
   columns: columnsMatricula,
   data: [] as ReporteMatricula[]

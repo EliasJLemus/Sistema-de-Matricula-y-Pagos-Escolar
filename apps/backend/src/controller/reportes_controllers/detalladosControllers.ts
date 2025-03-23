@@ -4,6 +4,11 @@ import {
 } from "express";
 import {ReporteDetalladoDB} from "../../db/reportes/detalladosDB";
 import {ReporteMatricula, ReporteMatriculaDBType} from "../reportes_controllers/types/matriculaType";
+import {
+    matriculaStructure,
+    mensualidadStructure,
+    estudianteStructure
+} from "./structure"
 
 const reporteDetalladoDB = new ReporteDetalladoDB();
 
@@ -32,7 +37,10 @@ export const getReporteMatricula = async(
             }) as ReporteMatricula[];
 
             if (report.length > 0) {
-                res.status(200).json(report);
+
+                matriculaStructure.data = report; 
+
+                res.status(200).json(matriculaStructure);
                 return;
             }
             res.status(404).json({ message: "No se encontraron datos" });
