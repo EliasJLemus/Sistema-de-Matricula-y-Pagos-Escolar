@@ -27,7 +27,7 @@ export class ReporteDetalladoDB {
     let paramIndex = 3;
   
     if (filters.nombre) {
-      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.nombre}%`);
     }
     if (filters.grado) {
@@ -53,7 +53,10 @@ export class ReporteDetalladoDB {
     return result.rows;
   }
   
-  public async countReporteMatricula(filters: { nombre?: string; grado?: string; estado?: string }): Promise<number> {
+  
+  public async countReporteMatricula(
+    filters: { nombre?: string; grado?: string; estado?: string }
+  ): Promise<number> {
     const client = await this.db.getClient();
   
     const where: string[] = [];
@@ -61,7 +64,7 @@ export class ReporteDetalladoDB {
     let paramIndex = 1;
   
     if (filters.nombre) {
-      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.nombre}%`);
     }
     if (filters.grado) {
@@ -79,6 +82,7 @@ export class ReporteDetalladoDB {
     const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
+  
   
   // ======= BECA =======
   public async getReporteBeca(

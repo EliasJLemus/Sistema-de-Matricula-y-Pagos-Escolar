@@ -13,25 +13,28 @@ import {
 import axios from "axios";
 
 // Hook para matrícula con filtros
+type FiltrosMatricula = {
+  nombre?: string;
+  grado?: string;
+  estado?: string;
+};
+
 export const useGetReportsMatricula = (
   page: number = 1,
   limit: number = 10,
-  filters: { nombre?: string; grado?: string; estado?: string } = {}
+  filters: FiltrosMatricula = {}
 ): UseQueryResult<StructureAndData<ReporteMatriculaType>, Error> => {
-  return useQuery<StructureAndData<ReporteMatriculaType>, Error>({
+  return useQuery({
     queryKey: ["getReportsMatricula", page, limit, filters],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-      });
-      // Solo agregamos filtros que tengan valor
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== "") {
-          params.append(key, value);
-        }
-      });
-      const response = await client.get(`/reportes/matricula?${params.toString()}`);
+      const baseUrl = `http://localhost:3000/reportes/matricula`;
+      let url = `${baseUrl}?page=${page}&limit=${limit}`;
+
+      if (filters.nombre) url += `&nombre=${encodeURIComponent(filters.nombre)}`;
+      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
+      if (filters.estado) url += `&estado=${encodeURIComponent(filters.estado)}`;
+
+      const response = await axios.get<StructureAndData<ReporteMatriculaType>>(url);
       return response.data;
     },
     staleTime: 1000,

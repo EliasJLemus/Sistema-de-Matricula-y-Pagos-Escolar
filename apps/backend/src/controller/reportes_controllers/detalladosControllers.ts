@@ -27,19 +27,16 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
     const { limit, offset } = getPaginationParams(req);
     const { nombre, grado, estado } = req.query;
 
-    const result = await reporteDetalladoDB.getReporteMatricula(limit, offset, {
+    const filters = {
       nombre: nombre as string,
       grado: grado as string,
       estado: estado as string
-    });
+    };
 
-    const total = await reporteDetalladoDB.countReporteMatricula({
-      nombre: nombre as string,
-      grado: grado as string,
-      estado: estado as string
-    });
+    const result = await reporteDetalladoDB.getReporteMatricula(limit, offset, filters);
+    const total = await reporteDetalladoDB.countReporteMatricula(filters);
 
-    if (Array.isArray(result)) {
+    if (Array.isArray(result) && result.length > 0) {
       const report = result.map(row => ({
         nombreEstudiante: row.nombre_estudiante,
         grado: row.grado,
@@ -55,7 +52,7 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
       res.status(200).json({
         ...matriculaStructure,
         data: report,
-        pagination: { limit, offset, count: report.length, total }
+        pagination: { limit, offset, count: result.length, total }
       });
     } else {
       res.status(404).json({ message: "No se encontraron datos" });
@@ -64,6 +61,7 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 
 

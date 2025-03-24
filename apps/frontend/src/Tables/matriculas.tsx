@@ -29,38 +29,35 @@ export const MatriculaTable: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  // Usamos la clave "nombreEstudiante" para que coincida con la columna y la API
+  // ✅ Usamos la clave `nombre` para que coincida con la API
   const [filters, setFilters] = useState({
-    nombreEstudiante: "",
+    nombre: "",
     grado: "",
     estado: ""
   });
 
-  // Se aplica debounce para evitar refetch en cada pulsación de tecla
   const debouncedFilters = useDebounce(filters, 400);
 
-  // Debug: imprimir en consola los filtros con debounce
   useEffect(() => {
-    console.log("Debounced Filters:", debouncedFilters);
+    console.log("Debounced Matricula Filters:", debouncedFilters);
   }, [debouncedFilters]);
 
-  // Actualiza los filtros y reinicia la página
   const handleInputChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value === "todos" ? "" : value
+    }));
     setPage(1);
   };
 
-  // Limpia los filtros y reinicia la página
   const clearFilters = () => {
-    setFilters({ nombreEstudiante: "", grado: "", estado: "" });
+    setFilters({ nombre: "", grado: "", estado: "" });
     setPage(1);
   };
 
-  // Usa los filtros debounced para la consulta
   const { data, isFetching, isLoading, error } = useGetReportsMatricula(page, limit, debouncedFilters);
 
-  // Si no hay data, define un arreglo vacío para la tabla
-  const tableData = data ? data.data : [];
+  const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
@@ -79,32 +76,34 @@ export const MatriculaTable: React.FC = () => {
         filters={
           <div className="flex flex-wrap gap-4 items-end">
             <Input
-              placeholder="Nombre"
+              placeholder="Nombre del estudiante"
               className="w-64"
-              value={filters.nombreEstudiante}
-              onChange={(e) => handleInputChange("nombreEstudiante", e.target.value)}
+              value={filters.nombre}
+              onChange={(e) => handleInputChange("nombre", e.target.value)}
             />
             <Select
-              value={filters.grado}
+              value={filters.grado || "todos"}
               onValueChange={(value) => handleInputChange("grado", value)}
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Grado" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="Kinder">Kinder</SelectItem>
                 <SelectItem value="Primero">Primero</SelectItem>
                 <SelectItem value="Segundo">Segundo</SelectItem>
               </SelectContent>
             </Select>
             <Select
-              value={filters.estado}
+              value={filters.estado || "todos"}
               onValueChange={(value) => handleInputChange("estado", value)}
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="Pagado">Pagado</SelectItem>
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
               </SelectContent>
