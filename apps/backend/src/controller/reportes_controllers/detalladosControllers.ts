@@ -103,9 +103,8 @@ export const getReporteEstudiante = async (req: Request, res: Response): Promise
       estudiante: estudiante as string,
       grado: grado as string,
       fecha: fecha as string,
-      estado: estado as string // ✅ AGREGADO
+      estado: estado as string 
     };
-console.log("LLEGANDO")
     const result = await reporteDetalladoDB.getReporteEstudiante(limit, offset, filters);
     const total = await reporteDetalladoDB.countReporteEstudiante(filters);
 

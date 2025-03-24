@@ -154,13 +154,15 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-  
+  console.log("filters", filters)
     if (filters.estudiante) {
-      where.push(`LOWER(estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
     }
+    
   
     if (filters.grado) {
+      console.log("grado", filters.grado)
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }

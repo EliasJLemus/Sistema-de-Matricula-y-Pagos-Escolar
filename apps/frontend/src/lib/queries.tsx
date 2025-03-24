@@ -56,7 +56,7 @@ export const useGetReporteMensualidad = (
           params.append(key, value);
         }
       });
-      const response = await client.get(`/reportes/mensualidad?${params.toString()}`);
+      const response = await client.get(`http://localhost:3000/reportes/mensualidad?${params.toString()}`);
       return response.data;
     },
     staleTime: 1000,
@@ -88,7 +88,7 @@ export const useGetReporteEstudiante = (
       if (filters.estado) params.append("estado", filters.estado);
       console.log(params)
       const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
-        `http://localhost:3000/reportes/estudiante?page:${page}&limit:${limit}`
+        `http://localhost:3000/reportes/estudiante?page:${page}&limit:${limit}${filters.estudiante ? `&estudiante=${filters.estudiante}` : ``}${filters.grado ? `&grado=${filters.grado}` : ``}${filters.estado ? `&estado=${filters.estado}` : ``}`
       );
       console.log(response.data)
       return response.data;
