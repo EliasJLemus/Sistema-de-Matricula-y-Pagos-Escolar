@@ -1,4 +1,4 @@
-import { StructureAndData, StructureColumn, ReporteBecaType } from "@shared/reportsType";
+import { StructureAndData, StructureColumn, ReporteBecaType, PaginationType } from "@shared/reportsType";
 
 const columnsBeca: StructureColumn<ReporteBecaType>[] = [
   { 
@@ -39,5 +39,6 @@ const columnsBeca: StructureColumn<ReporteBecaType>[] = [
 export const becaStructure: StructureAndData<ReporteBecaType> = {
   title  : "Reporte de Becas y Descuentos",
   columns: columnsBeca,
-  data   : [] as ReporteBecaType[]
+  data   : [] as ReporteBecaType[],
+  pagination: { limit: 0, offset: 0, count: 0, total: 0 } // <-- Aquí inicializado
 };

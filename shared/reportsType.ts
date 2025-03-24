@@ -82,16 +82,25 @@ export type ReporteMatriculaDBType = {
   
 
   export type StructureColumn<T> = {
-    name: keyof T;      
-    label: string;   
-    type?: string;     
+    name: keyof T;
+    label: string;
+    type?: string;
+  };
+  
+  export type PaginationType = {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
   };
   
   export type StructureAndData<T> = {
-    title: string;               
+    title: string;
     columns: StructureColumn<T>[];
-    data: T[];                     
+    data: T[];
+    pagination?: PaginationType; // ✅ añadido aquí
   };
+  
   
   
   
