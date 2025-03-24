@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetReportsMatricula } from "@/lib/queries";
 import { ReportTable } from "@/components/Tables/Table";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
 
@@ -28,26 +29,37 @@ export const MatriculaTable: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  // Estado para los filtros que se mantienen visibles
+  // Usamos la clave "nombreEstudiante" para que coincida con la columna y la API
   const [filters, setFilters] = useState({
-    nombre: "",
+    nombreEstudiante: "",
     grado: "",
     estado: ""
   });
 
-  // Se aplica debounce para evitar refetch en cada tecla
+  // Se aplica debounce para evitar refetch en cada pulsación de tecla
   const debouncedFilters = useDebounce(filters, 400);
 
-  // Actualiza filtros y reinicia la página
+  // Debug: imprimir en consola los filtros con debounce
+  useEffect(() => {
+    console.log("Debounced Filters:", debouncedFilters);
+  }, [debouncedFilters]);
+
+  // Actualiza los filtros y reinicia la página
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
   };
 
-  // Consulta la data usando los filtros
+  // Limpia los filtros y reinicia la página
+  const clearFilters = () => {
+    setFilters({ nombreEstudiante: "", grado: "", estado: "" });
+    setPage(1);
+  };
+
+  // Usa los filtros debounced para la consulta
   const { data, isFetching, isLoading, error } = useGetReportsMatricula(page, limit, debouncedFilters);
 
-  // Si no hay data, se define un arreglo vacío para la tabla
+  // Si no hay data, define un arreglo vacío para la tabla
   const tableData = data ? data.data : [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
@@ -69,8 +81,8 @@ export const MatriculaTable: React.FC = () => {
             <Input
               placeholder="Nombre"
               className="w-64"
-              value={filters.nombre}
-              onChange={(e) => handleInputChange("nombre", e.target.value)}
+              value={filters.nombreEstudiante}
+              onChange={(e) => handleInputChange("nombreEstudiante", e.target.value)}
             />
             <Select
               value={filters.grado}
@@ -97,6 +109,9 @@ export const MatriculaTable: React.FC = () => {
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={clearFilters}>
+              Quitar filtros
+            </Button>
           </div>
         }
         pagination={{
