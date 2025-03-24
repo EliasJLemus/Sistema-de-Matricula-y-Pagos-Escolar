@@ -28,33 +28,27 @@ import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../components/ui/chart"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import {MatriculaTable, } from "@/Tables/matriculas"
-import {MensualidadTable} from "@/Tables/mensualidad"
-import {EstudianteTable} from "@/Tables/estudiantes"
-import {BecaTable} from "@/Tables/becas"
+import { MatriculaTable } from "@/Tables/matriculas"
+import { MensualidadTable } from "@/Tables/mensualidad"
+import { EstudianteTable } from "@/Tables/estudiantes"
+import { BecaTable } from "@/Tables/becas"
+import { FinancieroAnualTable } from "@/Tables/financieroAnual"
+import { PagosPendientesTable } from "@/Tables/pagosPendientes"
+import { useChartData } from "@/hooks/useChartData"
 
 export default function Dashboard() {
-
-
   const [activeReport, setActiveReport] = useState<string | null>(null)
+  const { chartData, isLoading } = useChartData()
 
   const handleBackToDashboard = () => {
     setActiveReport(null)
   }
 
-  // Sample data for charts
   const outstandingPaymentsData = [
     { grade: "Primero", averageDebt: 2006.67, totalDebt: 6020 },
     { grade: "Segundo", averageDebt: 1725, totalDebt: 5175 },
-  ]
-
-  const financialReportData = [
-    { type: "Matrículas", income: 27800, debt: 5865 },
-    { type: "Mensualidades", income: 29500, debt: 22500 },
-    { type: "Nivelados", income: 11195, debt: 202500 },
   ]
 
   const studentAttritionData = [
@@ -63,11 +57,9 @@ export default function Dashboard() {
     { level: "Secundaria", active: 220, retired: 12.7, rate: "5.8%" },
   ]
 
-  // Dashboard content
   if (!activeReport) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-       
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -138,23 +130,27 @@ export default function Dashboard() {
                     <CardDescription>Ingresos vs Deudas por Cobrar</CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <ResponsiveContainer width="100%" height={350}>
-                      <RechartsLineChart data={financialReportData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="type" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="income"
-                          name="Ingresos (L)"
-                          stroke="hsl(var(--chart-1))"
-                          activeDot={{ r: 8 }}
-                        />
-                        <Line type="monotone" dataKey="debt" name="Deudas (L)" stroke="hsl(var(--chart-2))" />
-                      </RechartsLineChart>
-                    </ResponsiveContainer>
+                    {isLoading ? (
+                      <div className="h-[350px] flex items-center justify-center">Cargando...</div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={350}>
+                        <RechartsLineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="type" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="income"
+                            name="Ingresos (L)"
+                            stroke="hsl(var(--chart-1))"
+                            activeDot={{ r: 8 }}
+                          />
+                          <Line type="monotone" dataKey="debt" name="Deudas (L)" stroke="hsl(var(--chart-2))" />
+                        </RechartsLineChart>
+                      </ResponsiveContainer>
+                    )}
                   </CardContent>
                   <CardFooter>
                     <Button variant="outline" className="w-full" onClick={() => setActiveReport("financial")}>
@@ -162,6 +158,7 @@ export default function Dashboard() {
                     </Button>
                   </CardFooter>
                 </Card>
+
                 <Card className="col-span-3">
                   <CardHeader>
                     <CardTitle>Retiro de Estudiantes</CardTitle>
@@ -246,13 +243,14 @@ export default function Dashboard() {
                     </Table>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Reportes Disponibles</CardTitle>
                     <CardDescription>Acceso rápido a todos los reportes</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-2">
-                  <Button variant="outline" className="justify-start" onClick={() => setActiveReport("student")}>
+                    <Button variant="outline" className="justify-start" onClick={() => setActiveReport("student")}>
                       <BookOpen className="mr-2 h-4 w-4" />
                       Reporte de Estudiante
                     </Button>
@@ -276,174 +274,12 @@ export default function Dashboard() {
                 </Card>
               </div>
             </TabsContent>
-
-            <TabsContent value="financial" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ingresos por Matrículas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">L. 27,800</div>
-                    <p className="text-sm text-muted-foreground">Deudas por cobrar: L. 5,865</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("tuition")}>
-                      Ver Reporte de Matrícula
-                    </Button>
-                  </CardFooter>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ingresos por Mensualidades</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">L. 29,500</div>
-                    <p className="text-sm text-muted-foreground">Deudas por cobrar: L. 22,500</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("monthly")}>
-                      Ver Reporte de Mensualidades
-                    </Button>
-                  </CardFooter>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ingresos por Nivelados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">L. 11,195</div>
-                    <p className="text-sm text-muted-foreground">Deudas por cobrar: L. 202,500</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("financial")}>
-                      Ver Reporte Financiero
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reporte Financiero Anual</CardTitle>
-                  <CardDescription>Ingresos vs Deudas por Cobrar</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <ResponsiveContainer width="100%" height={400}>
-                    <RechartsLineChart data={financialReportData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="type" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="income"
-                        name="Ingresos (L)"
-                        stroke="hsl(var(--chart-1))"
-                        activeDot={{ r: 8 }}
-                      />
-                      <Line type="monotone" dataKey="debt" name="Deudas (L)" stroke="hsl(var(--chart-2))" />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => setActiveReport("financial")}>
-                    Ver Reporte Completo
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="students" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Estudiantes Matriculados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">620</div>
-                    <p className="text-sm text-muted-foreground">+5% desde el año pasado</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("tuition")}>
-                      Ver Reporte de Matrícula
-                    </Button>
-                  </CardFooter>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Estudiantes con Becas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">42</div>
-                    <p className="text-sm text-muted-foreground">6.8% del total de estudiantes</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("discounts")}>
-                      Ver Reporte de Becas
-                    </Button>
-                  </CardFooter>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Estudiantes Retirados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">29</div>
-                    <p className="text-sm text-muted-foreground">4.6% tasa de retiro</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveReport("attrition")}>
-                      Ver Reporte de Retiro
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Retiro de Estudiantes</CardTitle>
-                  <CardDescription>Estudiantes activos vs retirados por nivel</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      active: {
-                        label: "Estudiantes Activos",
-                        color: "hsl(var(--chart-1))",
-                      },
-                      retired: {
-                        label: "Estudiantes Retirados",
-                        color: "hsl(var(--chart-2))",
-                      },
-                    }}
-                    className="h-[400px]"
-                  >
-                    <RechartsBarChart data={studentAttritionData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="level" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="active" fill="var(--color-active)" name="Activos" />
-                      <Bar dataKey="retired" fill="var(--color-retired)" name="Retirados" />
-                    </RechartsBarChart>
-                  </ChartContainer>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => setActiveReport("attrition")}>
-                    Ver Reporte Completo
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
           </Tabs>
         </main>
       </div>
     )
   }
 
-  // Individual report views
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -457,361 +293,17 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 p-6">
-
-        {activeReport === "student"  && (
-          <EstudianteTable/>
-        )}
-
-        {activeReport === "tuition" &&  (
-            <MatriculaTable/>
-        )}
-
-        {activeReport === "monthly" && (
-          <MensualidadTable/>
-        )}
-
-        {activeReport === "discounts" && (
-          <BecaTable/>
-        )}
-
-        {activeReport === "outstanding" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Promedios de Pagos Pendientes</h2>
-                <p className="text-muted-foreground">No. Reporte 010107 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="mb-6">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grado</TableHead>
-                        <TableHead>Promedio de Deuda por Estudiante</TableHead>
-                        <TableHead>Total de deudas</TableHead>
-                        <TableHead>Deuda Total del Grado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Primero</TableCell>
-                        <TableCell>L. 2,006.67</TableCell>
-                        <TableCell>3</TableCell>
-                        <TableCell>L. 6,020</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Segundo</TableCell>
-                        <TableCell>L. 1,725</TableCell>
-                        <TableCell>3</TableCell>
-                        <TableCell>L. 5,175</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4">Promedio y Total de Deuda por Grado</h3>
-                  <ChartContainer
-                    config={{
-                      average: {
-                        label: "Promedio de Deuda por Estudiante",
-                        color: "hsl(var(--chart-1))",
-                      },
-                      total: {
-                        label: "Deuda Total del Grado",
-                        color: "hsl(var(--chart-2))",
-                      },
-                    }}
-                    className="h-[400px]"
-                  >
-                    <RechartsBarChart
-                      data={outstandingPaymentsData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="grade" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="averageDebt" fill="var(--color-average)" name="Promedio" />
-                      <Bar dataKey="totalDebt" fill="var(--color-total)" name="Total" />
-                    </RechartsBarChart>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
+        {activeReport === "student" && <EstudianteTable />}
+        {activeReport === "tuition" && <MatriculaTable />}
+        {activeReport === "monthly" && <MensualidadTable />}
+        {activeReport === "discounts" && <BecaTable />}
+        {activeReport === "outstanding" && <PagosPendientesTable />}
         {activeReport === "financial" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">
-                  Reporte Financiero Anual de Ingreso vs Deudas por Cobrar
-                </h2>
-                <p className="text-muted-foreground">No. Reporte 010107 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="mb-6">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Tipo de pago</TableHead>
-                        <TableHead>Ingresos</TableHead>
-                        <TableHead>Deudas por cobrar</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Matrículas</TableCell>
-                        <TableCell>$ 27,800</TableCell>
-                        <TableCell>$ 5,865</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Mensualidades</TableCell>
-                        <TableCell>$ 29,500</TableCell>
-                        <TableCell>$ 22,500</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Nivelados</TableCell>
-                        <TableCell>$ 11,195</TableCell>
-                        <TableCell>$ 202,500</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4">
-                    Reporte Financiero Anual de Ingreso VS Deudas por cobrar - Gráfica
-                  </h3>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <RechartsLineChart data={financialReportData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="type" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="income"
-                        name="Ingresos ($)"
-                        stroke="hsl(var(--chart-1))"
-                        activeDot={{ r: 8 }}
-                      />
-                      <Line type="monotone" dataKey="debt" name="Deudas ($)" stroke="hsl(var(--chart-2))" />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeReport === "attrition" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Retiro de Estudiantes</h2>
-                <p className="text-muted-foreground">No. Reporte 01011 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="mb-6">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grado</TableHead>
-                        <TableHead>Estudiantes activos</TableHead>
-                        <TableHead>Estudiantes retirados</TableHead>
-                        <TableHead>Tasa retiro</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Pre-básica</TableCell>
-                        <TableCell>120</TableCell>
-                        <TableCell>8</TableCell>
-                        <TableCell>7%</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Básica</TableCell>
-                        <TableCell>280</TableCell>
-                        <TableCell>8.4</TableCell>
-                        <TableCell>2.01%</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Secundaria</TableCell>
-                        <TableCell>220</TableCell>
-                        <TableCell>12.7</TableCell>
-                        <TableCell>5.8%</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4">
-                    Comparación de estudiantes activos vs estudiantes retirados
-                  </h3>
-                  <ChartContainer
-                    config={{
-                      active: {
-                        label: "Estudiantes Activos",
-                        color: "hsl(var(--chart-1))",
-                      },
-                      retired: {
-                        label: "Estudiantes Retirados",
-                        color: "hsl(var(--chart-2))",
-                      },
-                    }}
-                    className="h-[400px]"
-                  >
-                    <RechartsBarChart data={studentAttritionData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="level" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="active" fill="var(--color-active)" name="Activos" />
-                      <Bar dataKey="retired" fill="var(--color-retired)" name="Retirados" />
-                    </RechartsBarChart>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeReport === "seniority" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Reporte de Antigüedad de Estudiantes</h2>
-                <p className="text-muted-foreground">No. Reporte 01017 | Fecha de emisión: 03/09/2025</p>
-              </div>
-              <Button>
-                <Download className="mr-2 h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Select>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Antigüedad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="un-año">Un año</SelectItem>
-                    <SelectItem value="dos-años">Dos años</SelectItem>
-                    <SelectItem value="tres-años">Tres años</SelectItem>
-                    <SelectItem value="cuatro-años">Cuatro años</SelectItem>
-                    <SelectItem value="cinco-años">Cinco años o más</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID Estudiante</TableHead>
-                      <TableHead>Nombre de estudiante</TableHead>
-                      <TableHead>Grado</TableHead>
-                      <TableHead>Sección</TableHead>
-                      <TableHead>Fecha de admisión</TableHead>
-                      <TableHead>Antigüedad</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>01</TableCell>
-                      <TableCell className="font-medium">Aaron Felipe Castr</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>01/24/2024</TableCell>
-                      <TableCell>Un año</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>02</TableCell>
-                      <TableCell className="font-medium">Abigail Lopez Lopez</TableCell>
-                      <TableCell>Kinder</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>01/15/2024</TableCell>
-                      <TableCell>Un año</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>03</TableCell>
-                      <TableCell className="font-medium">Allan Machado</TableCell>
-                      <TableCell>Primero</TableCell>
-                      <TableCell>A</TableCell>
-                      <TableCell>01/06/2022</TableCell>
-                      <TableCell>Tres años</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>04</TableCell>
-                      <TableCell className="font-medium">Berenice Figueroa</TableCell>
-                      <TableCell>Quinto</TableCell>
-                      <TableCell>B</TableCell>
-                      <TableCell>01/19/2018</TableCell>
-                      <TableCell>Siete años</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between border-t p-4">
-                <div className="text-sm text-muted-foreground">Mostrando 1-4 de 68 estudiantes</div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    1
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    2
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    3
-                  </Button>
-                  <span>...</span>
-                  <Button variant="outline" size="sm">
-                    68
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Siguiente
-                    <ChevronLeft className="h-4 w-4 rotate-180" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
+            <FinancieroAnualTable />
           </div>
         )}
       </main>
     </div>
   )
 }
-
