@@ -14,26 +14,72 @@ export class ReporteDetalladoDB {
   }
 
   // ======= MATRICULA =======
-  public async getReporteMatricula(limit: number, offset: number): Promise<ReporteMatriculaDBType[]> {
+  public async getReporteMatricula(
+    limit: number,
+    offset: number,
+    filters: { nombre?: string; grado?: string; estado?: string }
+  ): Promise<ReporteMatriculaDBType[]> {
     const client = await this.db.getClient();
-
+  
+    const where: string[] = [];
+    const values: any[] = [limit, offset];
+    let paramIndex = 3;
+  
+    if (filters.nombre) {
+      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      values.push(`%${filters.nombre}%`);
+    }
+    if (filters.grado) {
+      where.push(`grado = $${paramIndex++}`);
+      values.push(filters.grado);
+    }
+    if (filters.estado) {
+      where.push(`estado = $${paramIndex++}`);
+      values.push(filters.estado);
+    }
+  
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  
     const query = `
       SELECT nombre_estudiante, grado, seccion, tarifa_matricula, beneficio_aplicado, descuento, total_pagar, estado, fecha_matricula
       FROM sistema.reporte_matricula
+      ${whereClause}
       ORDER BY fecha_matricula DESC
       LIMIT $1 OFFSET $2
     `;
-
-    const result = await client.query(query, [limit, offset]);
+  
+    const result = await client.query(query, values);
     return result.rows;
   }
+  
 
-  public async countReporteMatricula(): Promise<number> {
+  public async countReporteMatricula(filters: { nombre?: string; grado?: string; estado?: string }): Promise<number> {
     const client = await this.db.getClient();
-    const query = `SELECT COUNT(*) FROM sistema.reporte_matricula`;
-    const result = await client.query(query);
+  
+    const where: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+  
+    if (filters.nombre) {
+      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      values.push(`%${filters.nombre}%`);
+    }
+    if (filters.grado) {
+      where.push(`grado = $${paramIndex++}`);
+      values.push(filters.grado);
+    }
+    if (filters.estado) {
+      where.push(`estado = $${paramIndex++}`);
+      values.push(filters.estado);
+    }
+  
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  
+    const query = `SELECT COUNT(*) FROM sistema.reporte_matricula ${whereClause}`;
+    const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
+  
 
   // ======= MENSUALIDAD =======
   public async getReporteMensualidad(limit: number, offset: number): Promise<ReporteMensualidadType[]> {

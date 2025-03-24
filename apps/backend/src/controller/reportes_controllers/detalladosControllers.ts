@@ -24,13 +24,23 @@ const getPaginationParams = (req: Request) => {
 
 export const getReporteMatricula = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset, page, getAll } = getPaginationParams(req);
+    const { limit, offset } = getPaginationParams(req);
+    const { nombre, grado, estado } = req.query;
 
-    const result = await reporteDetalladoDB.getReporteMatricula(limit, offset);
-    const total = await reporteDetalladoDB.countReporteMatricula();
+    const result = await reporteDetalladoDB.getReporteMatricula(limit, offset, {
+      nombre: nombre as string,
+      grado: grado as string,
+      estado: estado as string
+    });
+
+    const total = await reporteDetalladoDB.countReporteMatricula({
+      nombre: nombre as string,
+      grado: grado as string,
+      estado: estado as string
+    });
 
     if (Array.isArray(result)) {
-      const report: ReporteMatriculaType[] = result.map((row: ReporteMatriculaDBType) => ({
+      const report = result.map(row => ({
         nombreEstudiante: row.nombre_estudiante,
         grado: row.grado,
         seccion: row.seccion,
@@ -42,22 +52,19 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
         fechaMatricula: row.fecha_matricula
       }));
 
-      if (report.length > 0) {
-        matriculaStructure.data = report;
-        matriculaStructure.pagination = { limit, offset, count: report.length, total };
-        res.status(200).json(matriculaStructure);
-        return;
-      }
-      res.status(404).json({ message: "No se encontraron datos" });
-      return;
+      res.status(200).json({
+        ...matriculaStructure,
+        data: report,
+        pagination: { limit, offset, count: report.length, total }
+      });
     } else {
-      res.status(500).json({ message: "Error en el servidor" });
-      return;
+      res.status(404).json({ message: "No se encontraron datos" });
     }
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 
 export const getReporteMensualidad = async (req: Request, res: Response): Promise<void> => {
