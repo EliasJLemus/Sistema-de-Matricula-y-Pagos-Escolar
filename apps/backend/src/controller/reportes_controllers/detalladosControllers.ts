@@ -69,11 +69,17 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
 
 export const getReporteMensualidad = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset, page, getAll } = getPaginationParams(req);
-
-    const result = await reporteDetalladoDB.getReporteMensualidad(limit, offset);
-    const total = await reporteDetalladoDB.countReporteMensualidad();
-
+    const { limit, offset } = getPaginationParams(req);
+    const { estudiante, grado, fecha } = req.query;
+    const filters = {
+      estudiante: estudiante as string,
+      grado: grado as string,
+      fecha: fecha as string,
+    };
+  
+    const result = await reporteDetalladoDB.getReporteMensualidad(limit, offset, filters);
+    const total = await reporteDetalladoDB.countReporteMensualidad(filters);
+  
     if (Array.isArray(result) && result.length > 0) {
       mensualidadStructure.data = result;
       mensualidadStructure.pagination = { limit, offset, count: result.length, total };
@@ -81,20 +87,27 @@ export const getReporteMensualidad = async (req: Request, res: Response): Promis
       return;
     }
     res.status(404).json({ message: "No se encontraron datos" });
-    return;
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
-    return;
   }
 };
 
 
+
 export const getReporteEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset, page, getAll } = getPaginationParams(req);
+    const { limit, offset } = getPaginationParams(req);
+    const { estudiante, grado, fecha, estado } = req.query;
 
-    const result = await reporteDetalladoDB.getReporteEstudiante(limit, offset);
-    const total = await reporteDetalladoDB.countReporteEstudiante();
+    const filters = {
+      estudiante: estudiante as string,
+      grado: grado as string,
+      fecha: fecha as string,
+      estado: estado as string // ✅ AGREGADO
+    };
+console.log("LLEGANDO")
+    const result = await reporteDetalladoDB.getReporteEstudiante(limit, offset, filters);
+    const total = await reporteDetalladoDB.countReporteEstudiante(filters);
 
     if (Array.isArray(result) && result.length > 0) {
       estudianteStructure.data = result;
@@ -102,21 +115,27 @@ export const getReporteEstudiante = async (req: Request, res: Response): Promise
       res.status(200).json(estudianteStructure);
       return;
     }
+
     res.status(404).json({ message: "No se encontraron datos" });
-    return;
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
-    return;
   }
 };
 
+
 export const getReporteBeca = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset, page, getAll } = getPaginationParams(req);
-
-    const result = await reporteDetalladoDB.getReporteBeca(limit, offset);
-    const total = await reporteDetalladoDB.countReporteBeca();
-
+    const { limit, offset } = getPaginationParams(req);
+    const { nombre_estudiante, grado, tipo_beneficio } = req.query;
+    const filters = {
+      nombre_estudiante: nombre_estudiante as string,
+      grado: grado as string,
+      tipo_beneficio: tipo_beneficio as string,
+    };
+  
+    const result = await reporteDetalladoDB.getReporteBeca(limit, offset, filters);
+    const total = await reporteDetalladoDB.countReporteBeca(filters);
+  
     if (Array.isArray(result) && result.length > 0) {
       becaStructure.data = result;
       becaStructure.pagination = { limit, offset, count: result.length, total };
@@ -124,10 +143,9 @@ export const getReporteBeca = async (req: Request, res: Response): Promise<void>
       return;
     }
     res.status(404).json({ message: "No se encontraron datos" });
-    return;
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
-    return;
   }
 };
+
 

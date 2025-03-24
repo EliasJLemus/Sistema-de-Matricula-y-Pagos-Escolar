@@ -10,6 +10,7 @@ import {
   ReporteRetiroEstudiantesType,
   StructureAndData 
 } from "@shared/reportsType";
+import axios from "axios";
 
 // Hook para matrícula con filtros
 export const useGetReportsMatricula = (
@@ -40,12 +41,22 @@ export const useGetReportsMatricula = (
 // Hook para mensualidad
 export const useGetReporteMensualidad = (
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  filters: { estudiante?: string; grado?: string; fecha?: string } = {}
 ): UseQueryResult<StructureAndData<ReporteMensualidadType>, Error> => {
   return useQuery<StructureAndData<ReporteMensualidadType>, Error>({
-    queryKey: ["getReporteMensualidad", page, limit],
+    queryKey: ["getReporteMensualidad", page, limit, filters],
     queryFn: async () => {
-      const response = await client.get(`/reportes/mensualidad?page=${page}&limit=${limit}`);
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          params.append(key, value);
+        }
+      });
+      const response = await client.get(`/reportes/mensualidad?${params.toString()}`);
       return response.data;
     },
     staleTime: 1000,
@@ -53,29 +64,58 @@ export const useGetReporteMensualidad = (
 };
 
 // Hook para estudiantes
+type Filters = {
+  estudiante?: string;
+  grado?: string;
+  estado?: string;
+};
+
 export const useGetReporteEstudiante = (
-  page: number = 1,
-  limit: number = 10
-): UseQueryResult<StructureAndData<ReporteEstudianteType>, Error> => {
-  return useQuery<StructureAndData<ReporteEstudianteType>, Error>({
-    queryKey: ["getReporteEstudiante", page, limit],
+  page: number,
+  limit: number,
+  filters: Filters
+) => {
+  return useQuery({
+  
+    queryKey: ["reporteEstudiante", page, filters],
     queryFn: async () => {
-      const response = await client.get(`/reportes/estudiante?page=${page}&limit=${limit}`);
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      if (filters.estudiante) params.append("estudiante", filters.estudiante);
+      if (filters.grado) params.append("grado", filters.grado);
+      if (filters.estado) params.append("estado", filters.estado);
+      console.log(params)
+      const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
+        `http://localhost:3000/reportes/estudiante?page:${page}&limit:${limit}`
+      );
+      console.log(response.data)
       return response.data;
-    },
-    staleTime: 1000,
+    }
   });
 };
+
 
 // Hook para becas
 export const useGetReporteBeca = (
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string } = {}
 ): UseQueryResult<StructureAndData<ReporteBecaType>, Error> => {
   return useQuery<StructureAndData<ReporteBecaType>, Error>({
-    queryKey: ["getReporteBeca", page, limit],
+    queryKey: ["getReporteBeca", page, limit, filters],
     queryFn: async () => {
-      const response = await client.get(`/reportes/beca?page=${page}&limit=${limit}`);
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          params.append(key, value);
+        }
+      });
+      const response = await client.get(`/reportes/beca?${params.toString()}`);
       return response.data;
     },
     staleTime: 1000,
