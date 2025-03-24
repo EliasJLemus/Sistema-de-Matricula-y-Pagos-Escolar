@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, ThemeProvider, Box } from "@mui/material";
 import Topbar from "./pages/global/Topbar";
-import Dashboard from "./pages/dashboard/Index";
 import DashboardPage from "../src/pages/dashboard/dashboard"
 import Sidebar from "./pages/global/Sidebar";
 import Home from "./pages/home/home"

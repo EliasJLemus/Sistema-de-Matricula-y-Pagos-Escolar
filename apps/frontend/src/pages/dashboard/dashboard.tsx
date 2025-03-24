@@ -37,25 +37,24 @@ import { BecaTable } from "@/Tables/becas"
 import { FinancieroAnualTable } from "@/Tables/financieroAnual"
 import { PagosPendientesTable } from "@/Tables/pagosPendientes"
 import { useChartData } from "@/hooks/useChartData"
+import { useGetReportePagosPendientes } from "@/lib/queries"
 
 export default function Dashboard() {
   const [activeReport, setActiveReport] = useState<string | null>(null)
   const { chartData, isLoading } = useChartData()
+  const { data: pagosPendientesData, isLoading: isLoadingPagos } = useGetReportePagosPendientes()
 
   const handleBackToDashboard = () => {
     setActiveReport(null)
   }
-
-  const outstandingPaymentsData = [
-    { grade: "Primero", averageDebt: 2006.67, totalDebt: 6020 },
-    { grade: "Segundo", averageDebt: 1725, totalDebt: 5175 },
-  ]
 
   const studentAttritionData = [
     { level: "Pre-básica", active: 120, retired: 8, rate: "7%" },
     { level: "Básica", active: 280, retired: 8.4, rate: "2.01%" },
     { level: "Secundaria", active: 220, retired: 12.7, rate: "5.8%" },
   ]
+
+  console.log("Pagos Pendientes Data:", pagosPendientesData)
 
   if (!activeReport) {
     return (
@@ -79,6 +78,7 @@ export default function Dashboard() {
               <TabsTrigger value="financial">Financiero</TabsTrigger>
               <TabsTrigger value="students">Estudiantes</TabsTrigger>
             </TabsList>
+
             <TabsContent value="overview" className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -91,6 +91,7 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">+5% desde el año pasado</p>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
@@ -101,6 +102,7 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">+12% desde el mes pasado</p>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Deudas por Cobrar</CardTitle>
@@ -111,6 +113,7 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">+2% desde el mes pasado</p>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Tasa de Retiro</CardTitle>
@@ -167,14 +170,8 @@ export default function Dashboard() {
                   <CardContent>
                     <ChartContainer
                       config={{
-                        active: {
-                          label: "Estudiantes Activos",
-                          color: "hsl(var(--chart-1))",
-                        },
-                        retired: {
-                          label: "Estudiantes Retirados",
-                          color: "hsl(var(--chart-2))",
-                        },
+                        active: { label: "Estudiantes Activos", color: "hsl(var(--chart-1))" },
+                        retired: { label: "Estudiantes Retirados", color: "hsl(var(--chart-2))" },
                       }}
                       className="aspect-[4/3]"
                     >
@@ -216,32 +213,43 @@ export default function Dashboard() {
                       Ver todo
                     </Button>
                   </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
+                  <CardContent className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Grado</TableHead>
+                        <TableHead>Promedio de Deuda</TableHead>
+                        <TableHead>Deuda Total</TableHead>
+                        <TableHead className="text-right">Estado</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoadingPagos ? (
                         <TableRow>
-                          <TableHead>Grado</TableHead>
-                          <TableHead>Promedio de Deuda</TableHead>
-                          <TableHead>Deuda Total</TableHead>
-                          <TableHead className="text-right">Estado</TableHead>
+                          <TableCell colSpan={4} className="text-center">Cargando...</TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {outstandingPaymentsData.map((item) => (
-                          <TableRow key={item.grade}>
-                            <TableCell className="font-medium">{item.grade}</TableCell>
-                            <TableCell>L. {item.averageDebt.toFixed(2)}</TableCell>
-                            <TableCell>L. {item.totalDebt.toFixed(2)}</TableCell>
+                      ) : pagosPendientesData && pagosPendientesData.data && pagosPendientesData.data.length > 0 ? (
+                        pagosPendientesData.data.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{item.grado}</TableCell>
+                            <TableCell>L. {Number(item.promedio_deuda_por_estudiante).toFixed(2)}</TableCell>
+                            <TableCell>L. {Number(item.deuda_total_del_grado).toFixed(2)}</TableCell>
                             <TableCell className="text-right">
-                              <Badge variant={item.averageDebt > 2000 ? "destructive" : "outline"}>
-                                {item.averageDebt > 2000 ? "Alto" : "Normal"}
+                              <Badge variant={item.promedio_deuda_por_estudiante > 2000 ? "destructive" : "outline"}>
+                                {item.promedio_deuda_por_estudiante > 2000 ? "Alto" : "Normal"}
                               </Badge>
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center">Sin datos</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+
                 </Card>
 
                 <Card>
