@@ -18,65 +18,53 @@ interface QueryProviderProps {
 
 const queryClient = new QueryClient();
 
-export const useGetReportsMatricula = (): UseQueryResult<StructureAndData<ReporteMatriculaType>, Error> => {
+export const useGetReportsMatricula = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["getReportsMatricula"],
+    queryKey: ["getReportsMatricula", page, limit],
     queryFn: async (): Promise<StructureAndData<ReporteMatriculaType>> => {
-      try {
-        const response = await client.get("/reportes/matricula");
-        if (!response.data) throw new Error("No se encontraron datos en el reporte de matrícula");
-        return response.data;
-      } catch (e) {
-        throw e;
-      }
+      const response = await client.get(`/reportes/matricula?page=${page}&limit=${limit}`);
+      if (!response.data) throw new Error("No se encontraron datos");
+      return response.data;
     },
   });
 };
 
-export const useGetReporteMensualidad = (): UseQueryResult<StructureAndData<ReporteMensualidadType>, Error> => {
+
+export const useGetReporteMensualidad = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["getReporteMensualidadType"],
+    queryKey: ["getReporteMensualidad", page, limit],
     queryFn: async (): Promise<StructureAndData<ReporteMensualidadType>> => {
-      try {
-        const response = await client.get("/reportes/mensualidad");
-        if (!response.data) throw new Error("No se encontraron datos en el reporte de mensualidad");
-        return response.data;
-      } catch (e) {
-        throw e;
-      }
+      const response = await client.get(`/reportes/mensualidad?page=${page}&limit=${limit}`);
+      if (!response.data) throw new Error("No se encontraron datos");
+      return response.data;
     },
   });
 };
 
-export const useGetReporteEstudiante = (): UseQueryResult<StructureAndData<ReporteEstudianteType>, Error> => {
+
+export const useGetReporteEstudiante = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["getReporteEstdiante"],
+    queryKey: ["getReporteEstudiante", page, limit],
     queryFn: async (): Promise<StructureAndData<ReporteEstudianteType>> => {
-      try {
-        const response = await client.get("/reportes/estudiante");
-        if (!response.data) throw new Error("No se encontraron datos en el reporte de estudiantes");
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
+      const response = await client.get(`/reportes/estudiante?page=${page}&limit=${limit}`);
+      if (!response.data) throw new Error("No se encontraron datos");
+      return response.data;
     }
   });
 };
 
-export const useGetReporteBeca = (): UseQueryResult<StructureAndData<ReporteBecaType>, Error> => {
+
+export const useGetReporteBeca = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["getReporteBecaType"],
+    queryKey: ["getReporteBeca", page, limit],
     queryFn: async (): Promise<StructureAndData<ReporteBecaType>> => {
-      try {
-        const response = await client.get("/reportes/beca");
-        if (!response.data) throw new Error("No se encontraron datos en el reporte de becas");
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    }
+      const response = await client.get(`/reportes/beca?page=${page}&limit=${limit}`);
+      if (!response.data) throw new Error("No se encontraron datos");
+      return response.data;
+    },
   });
 };
+
 
 export const useGetReporteFinancieroAnual = (): UseQueryResult<StructureAndData<ReporteFinancieroAnualType>, Error> => {
   return useQuery({

@@ -13,14 +13,18 @@ const reporteDetalladoDB = new ReporteDetalladoDB();
 
 // Utils para manejar paginación (default)
 const getPaginationParams = (req: Request) => {
-  const limit = parseInt(req.query.limit as string) || 10;
-  const offset = parseInt(req.query.offset as string) || 0;
-  return { limit, offset };
+  const getAll = req.query.getAll === "true";
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = getAll ? 10000 : parseInt(req.query.limit as string) || 10;
+  const offset = getAll ? 0 : (page - 1) * limit;
+
+  return { limit, offset, getAll, page };
 };
+
 
 export const getReporteMatricula = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset } = getPaginationParams(req);
+    const { limit, offset, page, getAll } = getPaginationParams(req);
 
     const result = await reporteDetalladoDB.getReporteMatricula(limit, offset);
     const total = await reporteDetalladoDB.countReporteMatricula();
@@ -55,9 +59,10 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
   }
 };
 
+
 export const getReporteMensualidad = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset } = getPaginationParams(req);
+    const { limit, offset, page, getAll } = getPaginationParams(req);
 
     const result = await reporteDetalladoDB.getReporteMensualidad(limit, offset);
     const total = await reporteDetalladoDB.countReporteMensualidad();
@@ -76,9 +81,10 @@ export const getReporteMensualidad = async (req: Request, res: Response): Promis
   }
 };
 
+
 export const getReporteEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset } = getPaginationParams(req);
+    const { limit, offset, page, getAll } = getPaginationParams(req);
 
     const result = await reporteDetalladoDB.getReporteEstudiante(limit, offset);
     const total = await reporteDetalladoDB.countReporteEstudiante();
@@ -99,7 +105,7 @@ export const getReporteEstudiante = async (req: Request, res: Response): Promise
 
 export const getReporteBeca = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { limit, offset } = getPaginationParams(req);
+    const { limit, offset, page, getAll } = getPaginationParams(req);
 
     const result = await reporteDetalladoDB.getReporteBeca(limit, offset);
     const total = await reporteDetalladoDB.countReporteBeca();
@@ -117,3 +123,4 @@ export const getReporteBeca = async (req: Request, res: Response): Promise<void>
     return;
   }
 };
+

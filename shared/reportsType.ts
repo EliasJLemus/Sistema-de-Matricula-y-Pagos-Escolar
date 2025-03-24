@@ -98,7 +98,7 @@ export type ReporteMatriculaDBType = {
     title: string;
     columns: StructureColumn<T>[];
     data: T[];
-    pagination?: PaginationType; // ✅ añadido aquí
+    pagination?: PaginationType; // 
   };
   
   

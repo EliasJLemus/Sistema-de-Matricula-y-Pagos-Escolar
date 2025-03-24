@@ -14,14 +14,22 @@ interface ReportTableProps<T> {
   title: string;
   columns: Column<T>[];
   data: T[];
-  filters?: React.ReactNode; 
+  filters?: React.ReactNode;
+  pagination?: {
+    page: number;
+    pageCount: number;
+    onNext: () => void;
+    onPrev: () => void;
+    onPageChange: (page: number) => void;
+  };
 }
 
 export function ReportTable<T>({
   title,
   columns,
   data,
-  filters
+  filters,
+  pagination
 }: ReportTableProps<T>) {
   return (
     <div className="space-y-4">
@@ -80,20 +88,39 @@ export function ReportTable<T>({
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="flex items-center justify-between border-t p-4">
-          <div className="text-sm text-muted-foreground">Mostrando {data.length} registros</div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled>
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-            <Button variant="outline" size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
-            <span>...</span>
-            <Button variant="outline" size="sm">Siguiente<ChevronLeft className="h-4 w-4 rotate-180" /></Button>
-          </div>
-        </CardFooter>
+        {pagination && (
+          <CardFooter className="flex items-center justify-between border-t p-4">
+            <div className="text-sm text-muted-foreground">
+              Mostrando {data.length} registros
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={pagination.onPrev} disabled={pagination.page <= 1}>
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              {Array.from({ length: pagination.pageCount }, (_, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => pagination.onPageChange(i + 1)}
+                  className={pagination.page === i + 1 ? "bg-muted" : ""}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={pagination.onNext}
+                disabled={pagination.page >= pagination.pageCount}
+              >
+                Siguiente
+                <ChevronLeft className="h-4 w-4 rotate-180" />
+              </Button>
+            </div>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

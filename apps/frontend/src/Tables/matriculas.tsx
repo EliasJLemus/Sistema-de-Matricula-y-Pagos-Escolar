@@ -1,11 +1,17 @@
-import { useGetReportsMatricula } from "../lib/queries";
-import { ReportTable } from "../components/Tables/Table"; 
+import { useState } from "react";
+import { useGetReportsMatricula } from "@/lib/queries";
+import { ReportTable } from "../components/Tables/Table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const MatriculaTable: React.FC = () => {
-  const { data } = useGetReportsMatricula();
-    
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const { data } = useGetReportsMatricula(page, limit);
+  const total = data?.pagination?.total || 0;
+  const pageCount = Math.ceil(total / limit);
+
   return data && data.columns && data.data ? (
     <ReportTable
       title={data.title}
@@ -20,7 +26,6 @@ export const MatriculaTable: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Kinder">Kinder</SelectItem>
-              {/* Otros grados */}
             </SelectContent>
           </Select>
           <Select>
@@ -34,8 +39,15 @@ export const MatriculaTable: React.FC = () => {
           </Select>
         </>
       )}
+      pagination={{
+        page,
+        pageCount,
+        onNext: () => setPage(p => Math.min(p + 1, pageCount)),
+        onPrev: () => setPage(p => Math.max(p - 1, 1)),
+        onPageChange: setPage,
+      }}
     />
   ) : (
     <div>Cargando</div>
-  )
+  );
 };
