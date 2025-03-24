@@ -96,7 +96,7 @@ export class ReporteDetalladoDB {
     let paramIndex = 3;
   
     if (filters.nombre_estudiante) {
-      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.nombre_estudiante}%`);
     }
     if (filters.grado) {
@@ -107,6 +107,7 @@ export class ReporteDetalladoDB {
       where.push(`tipo_beneficio = $${paramIndex++}`);
       values.push(filters.tipo_beneficio);
     }
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
@@ -118,19 +119,18 @@ export class ReporteDetalladoDB {
     `;
   
     const result = await client.query(query, values);
+    console.log("result", result.rows)
     return result.rows;
   }
   
-  public async countReporteBeca(
-    filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string } = {}
-  ): Promise<number> {
+  public async countReporteBeca(filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string }): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
   
     if (filters.nombre_estudiante) {
-      where.push(`LOWER(nombre_estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.nombre_estudiante}%`);
     }
     if (filters.grado) {
@@ -141,12 +141,13 @@ export class ReporteDetalladoDB {
       where.push(`tipo_beneficio = $${paramIndex++}`);
       values.push(filters.tipo_beneficio);
     }
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const query = `SELECT COUNT(*) FROM sistema.reporte_becas_descuentos ${whereClause}`;
     const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
+  
   
   // ======= ESTUDIANTE =======
   public async getReporteEstudiante(

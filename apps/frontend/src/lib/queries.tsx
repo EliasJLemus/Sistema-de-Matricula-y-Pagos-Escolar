@@ -100,30 +100,32 @@ export const useGetReporteEstudiante = (
 };
 
 
-// Hook para becas
+type FiltrosBeca = {
+  nombre_estudiante?: string;
+  grado?: string;
+  tipo_beneficio?: string;
+};
+
 export const useGetReporteBeca = (
   page: number = 1,
   limit: number = 10,
-  filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string } = {}
+  filters: FiltrosBeca = {}
 ): UseQueryResult<StructureAndData<ReporteBecaType>, Error> => {
-  return useQuery<StructureAndData<ReporteBecaType>, Error>({
+  return useQuery({
     queryKey: ["getReporteBeca", page, limit, filters],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-      });
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== "") {
-          params.append(key, value);
-        }
-      });
-      const response = await client.get(`/reportes/beca?${params.toString()}`);
+      let url = `http://localhost:3000/reportes/beca?page=${page}&limit=${limit}`;
+      if (filters.nombre_estudiante) url += `&nombre_estudiante=${encodeURIComponent(filters.nombre_estudiante)}`;
+      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
+      if (filters.tipo_beneficio) url += `&tipo_beneficio=${encodeURIComponent(filters.tipo_beneficio)}`;
+
+      const response = await axios.get<StructureAndData<ReporteBecaType>>(url);
       return response.data;
     },
     staleTime: 1000,
   });
 };
+
 
 // Hook para reporte financiero anual
 export const useGetReporteFinancieroAnual = (): UseQueryResult<StructureAndData<ReporteFinancieroAnualType>, Error> => {

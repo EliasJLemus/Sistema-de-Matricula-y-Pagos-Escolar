@@ -129,10 +129,10 @@ export const getReporteBeca = async (req: Request, res: Response): Promise<void>
       grado: grado as string,
       tipo_beneficio: tipo_beneficio as string,
     };
-  
+
     const result = await reporteDetalladoDB.getReporteBeca(limit, offset, filters);
     const total = await reporteDetalladoDB.countReporteBeca(filters);
-  
+
     if (Array.isArray(result) && result.length > 0) {
       becaStructure.data = result;
       becaStructure.pagination = { limit, offset, count: result.length, total };
@@ -144,5 +144,6 @@ export const getReporteBeca = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 
