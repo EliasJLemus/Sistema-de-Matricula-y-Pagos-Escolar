@@ -237,7 +237,7 @@ export class ReporteDetalladoDB {
   public async getReporteMensualidad(
     limit: number,
     offset: number,
-    filters: { estudiante?: string; grado?: string; fecha?: string } = {}
+    filters: { estudiante?: string; grado?: string; fecha?: string }
   ): Promise<ReporteMensualidadType[]> {
     const client = await this.db.getClient();
     const where: string[] = [];
@@ -245,7 +245,7 @@ export class ReporteDetalladoDB {
     let paramIndex = 3;
   
     if (filters.estudiante) {
-      where.push(`LOWER(estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
     }
     if (filters.grado) {
@@ -253,10 +253,10 @@ export class ReporteDetalladoDB {
       values.push(filters.grado);
     }
     if (filters.fecha) {
-      // Aquí se asume que se filtra por fecha_inicio; ajusta si es necesario
       where.push(`fecha_inicio = $${paramIndex++}`);
       values.push(filters.fecha);
     }
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
@@ -272,7 +272,7 @@ export class ReporteDetalladoDB {
   }
   
   public async countReporteMensualidad(
-    filters: { estudiante?: string; grado?: string; fecha?: string } = {}
+    filters: { estudiante?: string; grado?: string; fecha?: string }
   ): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
@@ -280,7 +280,7 @@ export class ReporteDetalladoDB {
     let paramIndex = 1;
   
     if (filters.estudiante) {
-      where.push(`LOWER(estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
     }
     if (filters.grado) {
@@ -291,10 +291,11 @@ export class ReporteDetalladoDB {
       where.push(`fecha_inicio = $${paramIndex++}`);
       values.push(filters.fecha);
     }
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const query = `SELECT COUNT(*) FROM sistema.reporte_mensualidades ${whereClause}`;
     const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
+  
 }

@@ -69,26 +69,29 @@ export const getReporteMensualidad = async (req: Request, res: Response): Promis
   try {
     const { limit, offset } = getPaginationParams(req);
     const { estudiante, grado, fecha } = req.query;
+
     const filters = {
       estudiante: estudiante as string,
       grado: grado as string,
-      fecha: fecha as string,
+      fecha: fecha as string
     };
-  
+
     const result = await reporteDetalladoDB.getReporteMensualidad(limit, offset, filters);
     const total = await reporteDetalladoDB.countReporteMensualidad(filters);
-  
+
     if (Array.isArray(result) && result.length > 0) {
       mensualidadStructure.data = result;
       mensualidadStructure.pagination = { limit, offset, count: result.length, total };
       res.status(200).json(mensualidadStructure);
       return;
     }
+
     res.status(404).json({ message: "No se encontraron datos" });
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 
 

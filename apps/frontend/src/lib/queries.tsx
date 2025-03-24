@@ -42,24 +42,26 @@ export const useGetReportsMatricula = (
 };
 
 // Hook para mensualidad
+type FiltrosMensualidad = {
+  estudiante?: string;
+  grado?: string;
+  fecha?: string;
+};
+
 export const useGetReporteMensualidad = (
   page: number = 1,
   limit: number = 10,
-  filters: { estudiante?: string; grado?: string; fecha?: string } = {}
+  filters: FiltrosMensualidad = {}
 ): UseQueryResult<StructureAndData<ReporteMensualidadType>, Error> => {
-  return useQuery<StructureAndData<ReporteMensualidadType>, Error>({
+  return useQuery({
     queryKey: ["getReporteMensualidad", page, limit, filters],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-      });
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== "") {
-          params.append(key, value);
-        }
-      });
-      const response = await client.get(`http://localhost:3000/reportes/mensualidad?${params.toString()}`);
+      let url = `http://localhost:3000/reportes/mensualidad?page=${page}&limit=${limit}`;
+      if (filters.estudiante) url += `&estudiante=${encodeURIComponent(filters.estudiante)}`;
+      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
+      if (filters.fecha) url += `&fecha=${encodeURIComponent(filters.fecha)}`;
+
+      const response = await axios.get<StructureAndData<ReporteMensualidadType>>(url);
       return response.data;
     },
     staleTime: 1000,
