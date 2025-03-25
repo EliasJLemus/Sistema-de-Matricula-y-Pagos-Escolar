@@ -63,8 +63,6 @@ export const getReporteMatricula = async (req: Request, res: Response): Promise<
 };
 
 
-
-
 export const getReporteMensualidad = async (req: Request, res: Response): Promise<void> => {
   try {
     const { limit, offset } = getPaginationParams(req);
@@ -91,9 +89,6 @@ export const getReporteMensualidad = async (req: Request, res: Response): Promis
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
-
-
 
 export const getReporteEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {

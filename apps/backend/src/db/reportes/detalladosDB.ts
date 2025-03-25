@@ -119,7 +119,7 @@ export class ReporteDetalladoDB {
     `;
   
     const result = await client.query(query, values);
-    console.log("result", result.rows)
+    console.log(result.rows)
     return result.rows;
   }
   
@@ -159,7 +159,7 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-  console.log("filters", filters)
+
     if (filters.estudiante) {
       where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
@@ -167,7 +167,7 @@ export class ReporteDetalladoDB {
     
   
     if (filters.grado) {
-      console.log("grado", filters.grado)
+      
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }

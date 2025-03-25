@@ -57,7 +57,6 @@ export const BecaTable: React.FC = () => {
   };
 
   const { data, isFetching, isLoading, error } = useGetReporteBeca(page, limit, debouncedFilters);
-  console.log("Beca Data:", data);
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
@@ -70,10 +69,10 @@ export const BecaTable: React.FC = () => {
         </div>
       )}
       {error && <div className="text-red-500 p-2">Error: {error.message}</div>}
-      
+
       <ReportTable<ReporteBecaType>
         title={data ? data.title : "Reporte de Becas"}
-        columns={structureColumns} // 👈 Aquí se mandan manualmente
+        columns={structureColumns}
         data={tableData}
         filters={
           <div className="flex flex-wrap gap-4 items-end">
@@ -92,9 +91,10 @@ export const BecaTable: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="kinder">Kinder</SelectItem>
-                <SelectItem value="primero">Primero</SelectItem>
-                <SelectItem value="segundo">Segundo</SelectItem>
+                <SelectItem value="Kinder">Kinder</SelectItem>
+                <SelectItem value="Primero">Primero</SelectItem>
+                <SelectItem value="Segundo">Segundo</SelectItem>
+                {/* Agrega más grados si los necesitas */}
               </SelectContent>
             </Select>
             <Input

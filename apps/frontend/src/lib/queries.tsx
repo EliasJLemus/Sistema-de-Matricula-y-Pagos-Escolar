@@ -94,7 +94,7 @@ export const useGetReporteEstudiante = (
       if (filters.estado) params.append("estado", filters.estado);
       console.log(params)
       const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
-        `http://localhost:3000/reportes/estudiante?page:${page}&limit:${limit}${filters.estudiante ? `&estudiante=${filters.estudiante}` : ``}${filters.grado ? `&grado=${filters.grado}` : ``}${filters.estado ? `&estado=${filters.estado}` : ``}`
+        `http://localhost:3000/reportes/estudiante?page=${page}=limit:${limit}${filters.estudiante ? `&estudiante=${filters.estudiante}` : ``}${filters.grado ? `&grado=${filters.grado}` : ``}${filters.estado ? `&estado=${filters.estado}` : ``}`
       );
       console.log(response.data)
       return response.data;
@@ -117,7 +117,7 @@ export const useGetReporteBeca = (
   return useQuery({
     queryKey: ["getReporteBeca", page, limit, filters],
     queryFn: async () => {
-      let url = `http://localhost:3000/reportes/beca?page=${page}&limit=${limit}`;
+      let url = `http://localhost:3000/reportes/beca`;
       if (filters.nombre_estudiante) url += `&nombre_estudiante=${encodeURIComponent(filters.nombre_estudiante)}`;
       if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
       if (filters.tipo_beneficio) url += `&tipo_beneficio=${encodeURIComponent(filters.tipo_beneficio)}`;
