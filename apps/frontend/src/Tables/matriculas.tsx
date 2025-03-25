@@ -17,19 +17,18 @@ const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
   { name: "nombreEstudiante", label: "Nombre Estudiante" },
   { name: "grado", label: "Grado" },
   { name: "seccion", label: "Sección" },
-  { name: "tarifaMatricula", label: "Tarifa Matrícula" },
+  { name: "tarifaMatricula", label: "Tarifa Matrícula", type: "number" },
   { name: "beneficioAplicado", label: "Beneficio Aplicado" },
-  { name: "descuento", label: "Descuento" },
-  { name: "totalPagar", label: "Total a Pagar" },
+  { name: "descuento", label: "Descuento", type: "string" },
+  { name: "totalPagar", label: "Total a Pagar", type: "number" },
   { name: "estado", label: "Estado" },
   { name: "fechaMatricula", label: "Fecha Matrícula" },
 ];
 
 export const MatriculaTable: React.FC = () => {
   const [page, setPage] = useState<number>(1);
-  const limit = 10;
+  const limit = 5;
 
-  // ✅ Usamos la clave `nombre` para que coincida con la API
   const [filters, setFilters] = useState({
     nombre: "",
     grado: "",
@@ -37,10 +36,6 @@ export const MatriculaTable: React.FC = () => {
   });
 
   const debouncedFilters = useDebounce(filters, 400);
-
-  useEffect(() => {
-    console.log("Debounced Matricula Filters:", debouncedFilters);
-  }, [debouncedFilters]);
 
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({
@@ -55,22 +50,34 @@ export const MatriculaTable: React.FC = () => {
     setPage(1);
   };
 
-  const { data, isFetching, isLoading, error } = useGetReportsMatricula(page, limit, debouncedFilters);
+  const { data, isLoading, isFetching, error } = useGetReportsMatricula(
+    page,
+    limit,
+    debouncedFilters
+  );
 
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
+  useEffect(() => {
+    console.log("Página actual:", page);
+    console.log("Total registros:", total);
+    console.log("Data:", tableData);
+  }, [page, total, tableData]);
+
   return (
-    <div className="relative">
+    <div className="relative space-y-4">
       {(isLoading || isFetching) && (
         <div className="absolute top-0 right-0 p-2 text-sm text-muted-foreground animate-pulse">
           {isLoading ? "Cargando..." : "Actualizando..."}
         </div>
       )}
+
       {error && <div className="text-red-500 p-2">Error: {error.message}</div>}
+
       <ReportTable<ReporteMatriculaType>
-        title={data ? data.title : "Reporte de Matrícula"}
+        title={data?.title || "Reporte de Matrícula"}
         columns={structureColumns}
         data={tableData}
         filters={
@@ -121,6 +128,12 @@ export const MatriculaTable: React.FC = () => {
           onPageChange: setPage,
         }}
       />
+
+      {!isLoading && !isFetching && tableData.length === 0 && (
+        <div className="text-sm text-muted-foreground px-2 py-4">
+          No se encontraron resultados para los filtros actuales.
+        </div>
+      )}
     </div>
   );
 };

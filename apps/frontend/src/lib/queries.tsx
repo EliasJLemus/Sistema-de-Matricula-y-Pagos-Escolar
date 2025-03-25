@@ -29,13 +29,14 @@ export const useGetReportsMatricula = (
     queryKey: ["getReportsMatricula", page, limit, filters],
     queryFn: async () => {
       const baseUrl = `http://localhost:3000/reportes/matricula`;
-      let url = `${baseUrl}?page=${page}&limit=${limit}`;
+      let url = `${baseUrl}?page=${page}&limit=5`;
 
       if (filters.nombre) url += `&nombre=${encodeURIComponent(filters.nombre)}`;
       if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
       if (filters.estado) url += `&estado=${encodeURIComponent(filters.estado)}`;
 
       const response = await axios.get<StructureAndData<ReporteMatriculaType>>(url);
+      console.log(response)
       return response.data;
     },
     staleTime: 1000,
@@ -57,12 +58,13 @@ export const useGetReporteMensualidad = (
   return useQuery({
     queryKey: ["getReporteMensualidad", page, limit, filters],
     queryFn: async () => {
-      let url = `http://localhost:3000/reportes/mensualidad?page=${page}&limit=${limit}`;
+      let url = `http://localhost:3000/reportes/mensualidad?page=${page}&limit=5`;
       if (filters.estudiante) url += `&estudiante=${encodeURIComponent(filters.estudiante)}`;
       if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
       if (filters.fecha) url += `&fecha=${encodeURIComponent(filters.fecha)}`;
 
       const response = await axios.get<StructureAndData<ReporteMensualidadType>>(url);
+     
       return response.data;
     },
     staleTime: 1000,
@@ -92,11 +94,11 @@ export const useGetReporteEstudiante = (
       if (filters.estudiante) params.append("estudiante", filters.estudiante);
       if (filters.grado) params.append("grado", filters.grado);
       if (filters.estado) params.append("estado", filters.estado);
-      console.log(params)
+     
       const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
         `http://localhost:3000/reportes/estudiante?page=${page}=limit:${limit}${filters.estudiante ? `&estudiante=${filters.estudiante}` : ``}${filters.grado ? `&grado=${filters.grado}` : ``}${filters.estado ? `&estado=${filters.estado}` : ``}`
       );
-      console.log(response.data)
+    
       return response.data;
     }
   });

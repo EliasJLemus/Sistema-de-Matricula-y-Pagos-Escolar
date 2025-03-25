@@ -11,11 +11,24 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
-import { ReporteMensualidadType } from "@shared/reportsType";
+import { ReporteMensualidadType, StructureColumn } from "@shared/reportsType";
+
+const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
+  { name: "estudiante", label: "Estudiante" },
+  { name: "grado", label: "Grado" },
+  { name: "descuento", label: "Descuento" },
+  { name: "fecha_inicio", label: "Fecha Inicio" },
+  { name: "fecha_vencimiento", label: "Fecha Vencimiento" },
+  { name: "saldo_total", label: "Saldo Total", type: "number" },
+  { name: "saldo_pagado", label: "Saldo Pagado", type: "number" },
+  { name: "saldo_pendiente", label: "Saldo Pendiente", type: "number" },
+  { name: "recargo", label: "Recargo", type: "number" },
+  { name: "estado", label: "Estado" },
+];
 
 export const MensualidadTable: React.FC = () => {
   const [page, setPage] = useState<number>(1);
-  const limit = 10;
+  const limit = 5; // Puedes cambiarlo a 10 o más para producción
 
   const [filters, setFilters] = useState({
     estudiante: "",
@@ -24,10 +37,6 @@ export const MensualidadTable: React.FC = () => {
   });
 
   const debouncedFilters = useDebounce(filters, 400);
-
-  useEffect(() => {
-    console.log("Debounced Mensualidad Filters:", debouncedFilters);
-  }, [debouncedFilters]);
 
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({
@@ -48,8 +57,14 @@ export const MensualidadTable: React.FC = () => {
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
+  useEffect(() => {
+    console.log("Mensualidad page:", page);
+    console.log("Pagination total:", total);
+    console.log("Debounced filters:", debouncedFilters);
+  }, [page, total, debouncedFilters]);
+
   return (
-    <div className="relative">
+    <div className="relative space-y-4">
       {(isLoading || isFetching) && (
         <div className="absolute top-0 right-0 p-2 text-sm text-muted-foreground animate-pulse">
           {isLoading ? "Cargando..." : "Actualizando..."}
@@ -60,7 +75,7 @@ export const MensualidadTable: React.FC = () => {
 
       <ReportTable<ReporteMensualidadType>
         title={data?.title || "Reporte de Mensualidades"}
-        columns={data?.columns || []}
+        columns={structureColumns}
         data={tableData}
         filters={
           <div className="flex flex-wrap gap-4 items-end">
@@ -79,9 +94,15 @@ export const MensualidadTable: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="kinder">Kinder</SelectItem>
-                <SelectItem value="primero">Primero</SelectItem>
-                <SelectItem value="segundo">Segundo</SelectItem>
+                <SelectItem value="Primero">Primero</SelectItem>
+                <SelectItem value="Segundo">Segundo</SelectItem>
+                <SelectItem value="Tercero">Tercero</SelectItem>
+                <SelectItem value="Cuarto">Cuarto</SelectItem>
+                <SelectItem value="Quinto">Quinto</SelectItem>
+                <SelectItem value="Sexto">Sexto</SelectItem>
+                <SelectItem value="Séptimo">Séptimo</SelectItem>
+                <SelectItem value="Octavo">Octavo</SelectItem>
+                <SelectItem value="Noveno">Noveno</SelectItem>
               </SelectContent>
             </Select>
             <Input

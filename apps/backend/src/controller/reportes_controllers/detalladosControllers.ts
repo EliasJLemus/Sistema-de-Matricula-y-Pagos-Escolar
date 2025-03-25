@@ -80,6 +80,7 @@ export const getReporteMensualidad = async (req: Request, res: Response): Promis
     if (Array.isArray(result) && result.length > 0) {
       mensualidadStructure.data = result;
       mensualidadStructure.pagination = { limit, offset, count: result.length, total };
+      console.log(mensualidadStructure)
       res.status(200).json(mensualidadStructure);
       return;
     }
