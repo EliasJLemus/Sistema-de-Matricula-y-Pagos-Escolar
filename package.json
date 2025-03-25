@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "concurrently": "^9.1.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "pnpm": "^10.5.2"
   },
   "scripts": {

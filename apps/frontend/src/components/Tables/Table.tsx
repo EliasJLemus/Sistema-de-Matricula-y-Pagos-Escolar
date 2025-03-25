@@ -1,15 +1,11 @@
 import { ChevronLeft, Download } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "../ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
+import * as pdfUtils from "@/utils/pdfutils";
+
+
 
 type Column<T> = {
   name: keyof T;
@@ -43,67 +39,53 @@ export function ReportTable<T>({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          <p className="text-muted-foreground">
-            Fecha de emisión: {new Date().toLocaleDateString()}
-          </p>
+          <p className="text-muted-foreground">Fecha de emisión: {new Date().toLocaleDateString()}</p>
         </div>
-        <Button>
+
+        {/* Botón de descarga */}
+        <Button onClick={() => pdfUtils.generatePDF(title, columns, data)}>
           <Download className="mr-2 h-4 w-4" />
-          Descarga
+           Descargar
         </Button>
       </div>
 
-      {filters && (
-        <div className="flex flex-wrap gap-4">
-          {filters}
-        </div>
-      )}
+      {filters && <div className="flex flex-wrap gap-4">{filters}</div>}
 
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                {columns?.map((col) => (
+                {columns.map((col) => (
                   <TableHead key={String(col.name)}>{col.label}</TableHead>
                 ))}
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {Array.isArray(data) && data.length > 0 ? (
-                data.map((item, index) => (
-                  <TableRow key={index}>
-                    {columns.map((col) => (
-                      <TableCell key={String(col.name)}>
-                        {col.name === "estado" ? (
-                          <Badge
-                            variant="outline"
-                            className={
-                              String(item[col.name]) === "Pagado" ||
-                              String(item[col.name]) === "Activo"
-                                ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                                : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                            }
-                          >
-                            {String(item[col.name])}
-                          </Badge>
-                        ) : col.type === "number" ? (
-                          <>L. {Number(item[col.name]).toFixed(2)}</>
-                        ) : (
-                          String(item[col.name] ?? "")
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center">
-                    No hay datos
-                  </TableCell>
+              {data.map((item, index) => (
+                <TableRow key={index}>
+                  {columns.map((col) => (
+                    <TableCell key={String(col.name)}>
+                      {col.name === "estado" ? (
+                        <Badge
+                          variant="outline"
+                          className={
+                            item[col.name] === "Pagado"
+                              ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
+                              : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
+                          }
+                        >
+                          {String(item[col.name])}
+                        </Badge>
+                      ) : col.type === "number" ? (
+                        <>L. {item[col.name]}</>
+                      ) : (
+                        String(item[col.name])
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </CardContent>
@@ -114,16 +96,10 @@ export function ReportTable<T>({
               Mostrando {data.length} registros
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={pagination.onPrev}
-                disabled={pagination.page <= 1}
-              >
+              <Button variant="outline" size="sm" onClick={pagination.onPrev} disabled={pagination.page <= 1}>
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
               </Button>
-
               {Array.from({ length: pagination.pageCount }, (_, i) => (
                 <Button
                   key={i}
@@ -135,7 +111,6 @@ export function ReportTable<T>({
                   {i + 1}
                 </Button>
               ))}
-
               <Button
                 variant="outline"
                 size="sm"
