@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ReporteMensualidadType, StructureColumn } from "@shared/reportsType";
+import { useQueryClient } from "@tanstack/react-query";
 
 const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
   { name: "estudiante", label: "Estudiante" },
@@ -27,6 +28,7 @@ const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
 ];
 
 export const MensualidadTable: React.FC = () => {
+
   const [page, setPage] = useState<number>(1);
   const limit = 5; // Puedes cambiarlo a 10 o más para producción
 
@@ -35,6 +37,17 @@ export const MensualidadTable: React.FC = () => {
     grado: "",
     fecha: ""
   });
+
+  const queryClient = useQueryClient(); 
+
+  const handleFreshReload = () => {
+
+    setPage;
+
+    queryClient.invalidateQueries({
+      queryKey: ["getReporteMensualidad", page, limit, JSON.stringify(filters)],
+    });
+  }
 
   const debouncedFilters = useDebounce(filters, 400);
 
@@ -121,7 +134,7 @@ export const MensualidadTable: React.FC = () => {
           pageCount,
           onNext: () => setPage((p) => Math.min(p + 1, pageCount)),
           onPrev: () => setPage((p) => Math.max(p - 1, 1)),
-          onPageChange: setPage,
+          onPageChange: handleFreshReload,
         }}
       />
 

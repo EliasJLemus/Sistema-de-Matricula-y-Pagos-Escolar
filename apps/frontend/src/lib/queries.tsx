@@ -26,7 +26,7 @@ export const useGetReportsMatricula = (
   filters: FiltrosMatricula = {}
 ): UseQueryResult<StructureAndData<ReporteMatriculaType>, Error> => {
   return useQuery({
-    queryKey: ["getReportsMatricula", page, limit, filters],
+    queryKey: ["getReportsMatricula", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
       const baseUrl = `http://localhost:3000/reportes/matricula`;
       let url = `${baseUrl}?page=${page}&limit=5`;
@@ -56,7 +56,7 @@ export const useGetReporteMensualidad = (
   filters: FiltrosMensualidad = {}
 ): UseQueryResult<StructureAndData<ReporteMensualidadType>, Error> => {
   return useQuery({
-    queryKey: ["getReporteMensualidad", page, limit, filters],
+    queryKey: ["getReporteMensualidad", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
       let url = `http://localhost:3000/reportes/mensualidad?page=${page}&limit=5`;
       if (filters.estudiante) url += `&estudiante=${encodeURIComponent(filters.estudiante)}`;

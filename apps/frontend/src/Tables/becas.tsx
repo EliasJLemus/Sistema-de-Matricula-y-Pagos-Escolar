@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteBecaType } from "@shared/reportsType";
+import { useQueryClient } from "@tanstack/react-query";
 
 const structureColumns: StructureColumn<ReporteBecaType>[] = [
   { name: "nombre_estudiante", label: "Nombre Estudiante" },
@@ -32,6 +33,19 @@ export const BecaTable: React.FC = () => {
     grado: "",
     tipo_beneficio: ""
   });
+
+  
+    
+    const queryClient = useQueryClient(); 
+  
+    const handleFreshReload = () => {
+  
+      setPage;
+  
+      queryClient.invalidateQueries({
+        queryKey:["getReporteBeca", page, limit, filters],
+      });
+    }
 
   const debouncedFilters = useDebounce(filters, 400);
 
@@ -113,7 +127,7 @@ export const BecaTable: React.FC = () => {
           pageCount,
           onNext: () => setPage((p) => Math.min(p + 1, pageCount)),
           onPrev: () => setPage((p) => Math.max(p - 1, 1)),
-          onPageChange: setPage,
+          onPageChange: handleFreshReload,
         }}
       />
 

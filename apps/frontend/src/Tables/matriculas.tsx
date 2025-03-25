@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
+import { useQueryClient } from "@tanstack/react-query";
 
 const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
   { name: "nombreEstudiante", label: "Nombre Estudiante" },
@@ -26,6 +27,18 @@ const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
 ];
 
 export const MatriculaTable: React.FC = () => {
+
+  const queryClient = useQueryClient(); 
+
+  const handleFreshReload = () => {
+
+    setPage;
+
+    queryClient.invalidateQueries({
+      queryKey: ["getReportsMatricula", page, limit, JSON.stringify(filters)],
+    });
+  }
+
   const [page, setPage] = useState<number>(1);
   const limit = 5;
 
@@ -124,8 +137,8 @@ export const MatriculaTable: React.FC = () => {
           page,
           pageCount,
           onNext: () => setPage((p) => Math.min(p + 1, pageCount)),
-          onPrev: () => setPage((p) => Math.max(p - 1, 1)),
-          onPageChange: setPage,
+          onPrev: () => {setPage((p) => Math.max(p - 1, 1)); },
+          onPageChange: handleFreshReload,
         }}
       />
 

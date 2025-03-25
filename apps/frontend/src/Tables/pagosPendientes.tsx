@@ -12,6 +12,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 export const PagosPendientesTable: React.FC = () => {
   const { data } = useGetReportePagosPendientes();
 
+  
   const chartData = useMemo(() => {
     if (!data || !data.data) return [];
 

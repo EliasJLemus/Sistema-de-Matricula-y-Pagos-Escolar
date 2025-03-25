@@ -227,6 +227,7 @@ export class ReporteDetalladoDB {
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `SELECT COUNT(*) FROM sistema.reporte_estudiantes ${whereClause}`;
+
     const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
