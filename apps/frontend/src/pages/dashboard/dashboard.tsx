@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   BookOpen,
   Calendar,
@@ -11,7 +11,7 @@ import {
   LineChart,
   PieChart,
   Users,
-} from "lucide-react"
+} from "lucide-react";
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -23,38 +23,32 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts"
-import { Badge } from "../../components/ui/badge"
-import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../components/ui/chart"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { MatriculaTable } from "@/Tables/matriculas"
-import { MensualidadTable } from "@/Tables/mensualidad"
-import { EstudianteTable } from "@/Tables/estudiantes"
-import { BecaTable } from "@/Tables/becas"
-import { FinancieroAnualTable } from "@/Tables/financieroAnual"
-import { PagosPendientesTable } from "@/Tables/pagosPendientes"
-import { useChartData } from "@/hooks/useChartData"
-import { useGetReportePagosPendientes } from "@/lib/queries"
+} from "recharts";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { MatriculaTable } from "@/Tables/matriculas";
+import { MensualidadTable } from "@/Tables/mensualidad";
+import { EstudianteTable } from "@/Tables/estudiantes";
+import { BecaTable } from "@/Tables/becas";
+import { FinancieroAnualTable } from "@/Tables/financieroAnual";
+import { PagosPendientesTable } from "@/Tables/pagosPendientes";
+import { useChartData, useRetirosChartData } from "@/hooks/useChartData";
+import { useGetReportePagosPendientes } from "@/lib/queries";
+import { RetirosTable } from "@/Tables/retiroEstudiante";
+import { AntiguedadEstudianteTable } from "@/Tables/antiguedadEstudiante";
 
 export default function Dashboard() {
-  const [activeReport, setActiveReport] = useState<string | null>(null)
-  const { chartData, isLoading } = useChartData()
-  const { data: pagosPendientesData, isLoading: isLoadingPagos } = useGetReportePagosPendientes()
+  const [activeReport, setActiveReport] = useState<string | null>(null);
+  const { chartData, isLoading } = useChartData();
+  const { data: pagosPendientesData, isLoading: isLoadingPagos } = useGetReportePagosPendientes();
+  const { chartDataRetiro, isLoading: isLoadingRetiros } = useRetirosChartData();
 
   const handleBackToDashboard = () => {
-    setActiveReport(null)
-  }
-
-  const studentAttritionData = [
-    { level: "Pre-básica", active: 120, retired: 8, rate: "7%" },
-    { level: "Básica", active: 280, retired: 8.4, rate: "2.01%" },
-    { level: "Secundaria", active: 220, retired: 12.7, rate: "5.8%" },
-  ]
-
-  console.log("Pagos Pendientes Data:", pagosPendientesData)
+    setActiveReport(null);
+  };
 
   if (!activeReport) {
     return (
@@ -127,6 +121,7 @@ export default function Dashboard() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                {/* Reporte Financiero */}
                 <Card className="col-span-4">
                   <CardHeader>
                     <CardTitle>Reporte Financiero Anual</CardTitle>
@@ -162,32 +157,32 @@ export default function Dashboard() {
                   </CardFooter>
                 </Card>
 
+                {/* Retiro de Estudiantes */}
                 <Card className="col-span-3">
                   <CardHeader>
                     <CardTitle>Retiro de Estudiantes</CardTitle>
                     <CardDescription>Estudiantes activos vs retirados</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer
-                      config={{
-                        active: { label: "Estudiantes Activos", color: "hsl(var(--chart-1))" },
-                        retired: { label: "Estudiantes Retirados", color: "hsl(var(--chart-2))" },
-                      }}
-                      className="aspect-[4/3]"
-                    >
-                      <RechartsBarChart
-                        data={studentAttritionData}
-                        layout="vertical"
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="level" type="category" width={100} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="active" fill="var(--color-active)" name="Activos" />
-                        <Bar dataKey="retired" fill="var(--color-retired)" name="Retirados" />
-                      </RechartsBarChart>
-                    </ChartContainer>
+                  <CardContent className="pl-2">
+                    {isLoadingRetiros ? (
+                      <div className="h-[350px] flex items-center justify-center">Cargando...</div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={350}>
+                        <RechartsBarChart
+                          data={chartDataRetiro}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis dataKey="grado" type="category" width={100} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="estudiantesActivos" fill="hsl(var(--chart-1))" name="Activos" />
+                          <Bar dataKey="estudiantesRetirados" fill="hsl(var(--chart-2))" name="Retirados" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
+                    )}
                   </CardContent>
                   <CardFooter>
                     <Button variant="outline" className="w-full" onClick={() => setActiveReport("attrition")}>
@@ -197,6 +192,7 @@ export default function Dashboard() {
                 </Card>
               </div>
 
+              {/* Pagos Pendientes */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="col-span-2">
                   <CardHeader className="flex flex-row items-center">
@@ -214,42 +210,41 @@ export default function Dashboard() {
                     </Button>
                   </CardHeader>
                   <CardContent className="overflow-x-auto max-h-[300px] overflow-y-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grado</TableHead>
-                        <TableHead>Promedio de Deuda</TableHead>
-                        <TableHead>Deuda Total</TableHead>
-                        <TableHead className="text-right">Estado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoadingPagos ? (
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center">Cargando...</TableCell>
+                          <TableHead>Grado</TableHead>
+                          <TableHead>Promedio de Deuda</TableHead>
+                          <TableHead>Deuda Total</TableHead>
+                          <TableHead className="text-right">Estado</TableHead>
                         </TableRow>
-                      ) : pagosPendientesData && pagosPendientesData.data && pagosPendientesData.data.length > 0 ? (
-                        pagosPendientesData.data.map((item, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{item.grado}</TableCell>
-                            <TableCell>L. {Number(item.promedio_deuda_por_estudiante).toFixed(2)}</TableCell>
-                            <TableCell>L. {Number(item.deuda_total_del_grado).toFixed(2)}</TableCell>
-                            <TableCell className="text-right">
-                              <Badge variant={item.promedio_deuda_por_estudiante > 2000 ? "destructive" : "outline"}>
-                                {item.promedio_deuda_por_estudiante > 2000 ? "Alto" : "Normal"}
-                              </Badge>
-                            </TableCell>
+                      </TableHeader>
+                      <TableBody>
+                        {isLoadingPagos ? (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center">Cargando...</TableCell>
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center">Sin datos</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-
+                        ) : pagosPendientesData && pagosPendientesData.data && pagosPendientesData.data.length > 0 ? (
+                          pagosPendientesData.data.map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">{item.grado}</TableCell>
+                              <TableCell>L. {Number(item.promedio_deuda_por_estudiante).toFixed(2)}</TableCell>
+                              <TableCell>L. {Number(item.deuda_total_del_grado).toFixed(2)}</TableCell>
+                              <TableCell className="text-right">
+                                <Badge variant={item.promedio_deuda_por_estudiante > 2000 ? "destructive" : "outline"}>
+                                  {item.promedio_deuda_por_estudiante > 2000 ? "Alto" : "Normal"}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center">Sin datos</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
                 </Card>
 
                 <Card>
@@ -285,9 +280,10 @@ export default function Dashboard() {
           </Tabs>
         </main>
       </div>
-    )
+    );
   }
 
+  // Render individual reports
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -311,7 +307,11 @@ export default function Dashboard() {
             <FinancieroAnualTable />
           </div>
         )}
+        {activeReport === "attrition" && (
+          <RetirosTable />
+        )}
+        {activeReport === "seniority" && <AntiguedadEstudianteTable/>}
       </main>
     </div>
-  )
+  );
 }

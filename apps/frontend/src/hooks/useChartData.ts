@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useGetReporteFinancieroAnual, useGetReportePagosPendientes } from "../lib/queries";
+import { useGetReporteFinancieroAnual, useGetReportePagosPendientes, useGetReporteRetiroEstudiantes } from "../lib/queries";
 
 export const useChartData = () => {
   const { data, isLoading } = useGetReporteFinancieroAnual();
@@ -33,3 +33,19 @@ export const usePagosPendientesChartData = () => {
   return { chartData, isLoading };
 };
 
+export const useRetirosChartData = () => {
+  const { data, isLoading } = useGetReporteRetiroEstudiantes();
+
+  const chartDataRetiro = useMemo(() => {
+    if (!data || !data.data) return [];
+
+    return data.data.map((item) => ({
+      grado: item.grado,
+      estudiantesActivos: Number(item.estudiantes_activos),
+      estudiantesRetirados: Number(item.estudiantes_retirados),
+      tasaRetiro: parseFloat(item.tasa_retiro.replace("%", "")), // Convertir porcentaje string a número
+    }));
+  }, [data]);
+
+  return { chartDataRetiro, data, isLoading };
+};

@@ -8,6 +8,7 @@ import {
   ReporteFinancieroAnualType,
   ReportePagosPendientesType,
   ReporteRetiroEstudiantesType,
+  ReporteAntiguedadEstudiantes,
   StructureAndData 
 } from "@shared/reportsType";
 import axios from "axios";
@@ -158,9 +159,20 @@ export const useGetReporteRetiroEstudiantes = (): UseQueryResult<StructureAndDat
   return useQuery<StructureAndData<ReporteRetiroEstudiantesType>, Error>({
     queryKey: ["getReporteRetiroEstudiantes"],
     queryFn: async () => {
-      const response = await client.get(`/reportes/retiro-estudiantes`);
+      const response = await client.get(`/reportes/retiro-estudiante`);
       return response.data;
     },
     staleTime: 1000,
   });
 };
+
+//Hook para antiguedad estudiante
+export const useGetAntiguedadEstudiante = (): UseQueryResult<StructureAndData<ReporteAntiguedadEstudiantes>, Error> => {
+  return useQuery<StructureAndData<ReporteAntiguedadEstudiantes>, Error>({
+    queryKey: ["getReporteAntiguedadEstudiante"],
+    queryFn: async () => {
+      const response = await client.get(`/reportes/antiguedad-estudiante`);
+      return response.data
+    }
+  })
+}

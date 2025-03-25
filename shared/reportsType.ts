@@ -80,6 +80,15 @@ export type ReporteMatriculaDBType = {
     tasa_retiro: string; // Viene como porcentaje 'X%'
   };
   
+  export interface ReporteAntiguedadEstudiantes {
+    id_estudiante: string;          
+    nombre_estudiante: string;     
+    grado: string;                 
+    seccion: string;                
+    fecha_admision: string;         
+    antiguedad: string;             // 'Un año', 'Dos años', 'Tres años', etc.
+  }
+  
 
   export type StructureColumn<T> = {
     name: keyof T;
