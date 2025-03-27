@@ -1,86 +1,305 @@
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, ListItemButton, Avatar, Typography } from "@mui/material";
+import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import DescriptionIcon from "@mui/icons-material/Description";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import DescriptionIcon from "@mui/icons-material/Description";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   isSidebarVisible: boolean;
 }
 
+const fontFamily =
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
+const EXACT_PADDING = 24;
+const BUTTON_SIZE = 44;
+
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
+  const location = useLocation();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const navigationItems = [
+    { icon: <HomeIcon />, text: "Home", path: "/home" },
+    { icon: <SchoolIcon />, text: "Estudiantes", path: "/estudiantes" },
+    { icon: <PeopleIcon />, text: "Apoderados", path: "/apoderados" },
+    { icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" },
+    { icon: <PaymentIcon />, text: "Pagos", path: "/pagos" },
+  ];
+
+  useEffect(() => {
+    const pathIndex = navigationItems.findIndex(
+      (item) => item.path === location.pathname
+    );
+    if (pathIndex !== -1) {
+      setActiveIndex(pathIndex);
+    }
+  }, [location.pathname]);
+
+  const handleClick = (index: number) => {
+    setActiveIndex(index);
+  };
+
   return (
     <Box
       sx={{
-        width: isSidebarVisible ? "300px" : "0px",
+        width: isSidebarVisible ? "300px" : "70px",
         height: "100vh",
-        backgroundColor: "#9EB384",
+        background: "linear-gradient(180deg, #1A1363 0%, #538A3E 100%)",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         position: "fixed",
         left: 0,
         top: 0,
         overflow: "hidden",
         transition: "width 0.3s ease",
+        boxShadow: "4px 0px 10px rgba(0, 0, 0, 0.1)",
+        zIndex: 1000,
+        paddingTop: `${EXACT_PADDING}px`,
+        paddingBottom: `${EXACT_PADDING}px`,
       }}
     >
-      {isSidebarVisible && (
-        <>
-          {/* Perfil */}
-          <Box>
-            <Box textAlign="center" py={3}>
-              <Avatar
-                alt="User"
-                src="https://via.placeholder.com/100"
-                sx={{
-                  width: 90,
-                  height: 90,
-                  margin: "0 auto",
-                  border: "3px solid white",
-                }}
-              />
-            </Box>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mb: isSidebarVisible ? 3 : 4,
+          transition: "filter 0.2s ease",
+        }}
+      >
+        <Avatar
+          alt="Usuario"
+          src="https://via.placeholder.com/100"
+          sx={{
+            width: isSidebarVisible ? 90 : 40,
+            height: isSidebarVisible ? 90 : 40,
+            border: "3px solid #FFFFFF",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+            transition: "width 0.3s ease, height 0.3s ease",
+          }}
+        />
+      </Box>
 
-            {/* Lista */}
-            <List>
-              {[ 
-                { icon: <HomeIcon />, text: "Home", path: "/home" },
-                { icon: <SchoolIcon />, text: "Estudiantes", path: "/estudiantes" },
-                { icon: <PeopleIcon />, text: "Apoderados", path: "/apoderados" },
-                { icon: <AssignmentIcon />, text: "Matrículas", path: "/matriculas" },
-                { icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" },
-                { icon: <PaymentIcon />, text: "Pagos", path: "/pagos" },
-              ].map((item, index) => (
+      {isSidebarVisible && (
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: "#FFFFFF",
+            fontWeight: 600,
+            textAlign: "center",
+            fontFamily: fontFamily,
+            letterSpacing: "-0.2px",
+            mb: 3,
+          }}
+        >
+          Usuario
+        </Typography>
+      )}
+
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {isSidebarVisible && (
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: "rgba(255, 255, 255, 0.7)",
+              fontWeight: 600,
+              width: "100%",
+              pl: 4,
+              mb: 1.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.3px",
+              fontFamily: fontFamily,
+            }}
+          >
+            Navegación
+          </Typography>
+        )}
+
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            px: isSidebarVisible ? 2 : 0,
+          }}
+        >
+          {navigationItems.map((item, index) => {
+            const isActive = activeIndex === index;
+
+            return (
+              <Box
+                key={index}
+                sx={{
+                  width: isSidebarVisible ? "100%" : "auto",
+                  my: 0.5,
+                  display: "flex",
+                  justifyContent: "center",
+                  position: "relative",
+                  zIndex: hoveredIndex === index || isActive ? 2 : 1,
+                }}
+              >
                 <ListItemButton
-                  key={index}
                   component={Link}
                   to={item.path}
-                  sx={{ py: 2 }}
+                  onClick={() => handleClick(index)}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  sx={{
+                    width: isSidebarVisible ? "100%" : `${BUTTON_SIZE}px`,
+                    height: `${BUTTON_SIZE}px`,
+                    borderRadius: "8px",
+                    display: "flex",
+                    justifyContent: isSidebarVisible ? "flex-start" : "center",
+                    alignItems: "center",
+                    color: "#FFFFFF",
+                    transition:
+                      "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      transform: "scale(1.05) translateZ(10px)",
+                      boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
+                      filter: "brightness(1.2)",
+                    },
+                    "&:active": {
+                      transform: "scale(0.98) translateZ(5px)",
+                    },
+                    backgroundColor: isActive
+                      ? "rgba(255, 255, 255, 0.15)"
+                      : "transparent",
+                    fontWeight: isActive ? 700 : 500,
+                    padding: isSidebarVisible ? "8px 16px" : 0,
+                    transformStyle: "preserve-3d",
+                    perspective: "1000px",
+                  }}
                 >
-                  <ListItemIcon sx={{ minWidth: "40px" }}>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.text}
-                    primaryTypographyProps={{ fontSize: "18px", fontWeight: 500 }}
-                  />
-                </ListItemButton>
-              ))}
-            </List>
-          </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: isSidebarVisible ? "26px" : "auto",
+                      marginRight: isSidebarVisible ? 2 : 0,
+                      width: isSidebarVisible ? "auto" : "100%",
+                      height: isSidebarVisible ? "auto" : "100%",
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
 
-          {/* Salir */}
-          <Box p={2}>
-            <ListItemButton sx={{ backgroundColor: "#444", color: "#fff", py: 2 }}>
-              <ListItemIcon><ExitToAppIcon sx={{ color: "#fff" }} /></ListItemIcon>
-              <ListItemText primary="Salir" primaryTypographyProps={{ fontSize: "16px" }} />
-            </ListItemButton>
-          </Box>
-        </>
-      )}
+                  {isSidebarVisible && (
+                    <Typography
+                      sx={{
+                        fontSize: "16px",
+                        fontWeight: "inherit",
+                        fontFamily: fontFamily,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      {item.text}
+                    </Typography>
+                  )}
+                </ListItemButton>
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          px: isSidebarVisible ? 2 : 0,
+          mt: 2,
+          position: "relative",
+          zIndex: hoveredIndex === 999 || activeIndex === 999 ? 2 : 1,
+        }}
+      >
+        <Box
+          sx={{
+            width: isSidebarVisible ? "100%" : "auto",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <ListItemButton
+            onClick={() => handleClick(999)}
+            onMouseEnter={() => setHoveredIndex(999)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            sx={{
+              width: isSidebarVisible ? "100%" : `${BUTTON_SIZE}px`,
+              height: `${BUTTON_SIZE}px`,
+              backgroundColor: "#F38223",
+              color: "#FFFFFF",
+              borderRadius: "8px",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              transition:
+                "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+              "&:hover": {
+                backgroundColor: "#e67615",
+                transform: "scale(1.05) translateZ(10px)",
+                boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
+                filter: "brightness(1.2)",
+              },
+              "&:active": {
+                backgroundColor: "#d56a10",
+                transform: "scale(0.98) translateZ(5px)",
+              },
+              display: "flex",
+              justifyContent: isSidebarVisible ? "flex-start" : "center",
+              alignItems: "center",
+              padding: isSidebarVisible ? "8px 16px" : 0,
+              transformStyle: "preserve-3d",
+              perspective: "1000px",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: isSidebarVisible ? "26px" : "auto",
+                marginRight: isSidebarVisible ? 2 : 0,
+                width: isSidebarVisible ? "auto" : "100%",
+                height: isSidebarVisible ? "auto" : "100%",
+              }}
+            >
+              <ExitToAppIcon sx={{ color: "#FFFFFF" }} />
+            </Box>
+
+            {isSidebarVisible && (
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  fontFamily: fontFamily,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                Salir
+              </Typography>
+            )}
+          </ListItemButton>
+        </Box>
+      </Box>
     </Box>
   );
 };
