@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
     { icon: <HomeIcon />, text: "Home", path: "/home" },
     { icon: <SchoolIcon />, text: "Estudiantes", path: "/estudiantes" },
     { icon: <PeopleIcon />, text: "Apoderados", path: "/apoderados" },
-    { icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" },
     { icon: <PaymentIcon />, text: "Pagos", path: "/pagos" },
+    { icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" },
   ];
 
   useEffect(() => {
