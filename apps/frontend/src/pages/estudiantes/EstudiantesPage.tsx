@@ -47,7 +47,7 @@ const EstudiantesPage: React.FC = () => {
           color: "#1A1363",
         }}
       >
-        Gestión de Estudiantes
+        Registro de Estudiantes
       </Typography>
 
       <TablaEstudiantes

@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
@@ -17,10 +20,9 @@ import {
   Grid,
   CircularProgress,
   Divider,
-  TextareaAutosize,
+  IconButton,
 } from "@mui/material";
-import { format, parse } from "date-fns";
-import { EstudianteType } from "@/lib/queries/useGetEstudiantes";
+import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 
 // Font family constant to match sidebar and topbar
 const fontFamily =
@@ -54,7 +56,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     nacionalidad: "",
     identidad: "",
     genero: "M",
-    fecha_nacimiento: format(new Date(), "yyyy-MM-dd"),
+    fecha_nacimiento: "", // Sin fecha por defecto
     edad: 0,
     direccion: "",
     nombre_grado: "",
@@ -63,7 +65,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     dif_educacion_fisica: false,
     reaccion_alergica: false,
     descripcion_alergica: "",
-    fecha_admision: format(new Date(), "yyyy-MM-dd"),
+    fecha_admision: "", // Sin fecha por defecto
     estado: "Activo",
   });
 
@@ -257,10 +259,20 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     "& .MuiInputLabel-root": {
       fontFamily,
       fontSize: "14px",
+      color: "#1A1363", // Color que coincide con la imagen
     },
     "& .MuiInputBase-root": {
       fontFamily,
       borderRadius: "8px",
+      backgroundColor: "#f8f9fa", // Fondo sutil para los inputs
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E", // Color verde al hacer hover
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363", // Color morado al enfocar
+      },
     },
     "& .MuiFormHelperText-root": {
       fontFamily,
@@ -272,13 +284,16 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     "& .MuiInputLabel-root": {
       fontFamily,
       fontSize: "14px",
+      color: "#1A1363", // Color que coincide con la imagen
     },
     "& .MuiFormLabel-root": {
       fontFamily,
       fontSize: "14px",
+      color: "#1A1363", // Color que coincide con la imagen
     },
     "& .MuiSelect-select": {
       fontFamily,
+      backgroundColor: "#f8f9fa", // Fondo sutil para los selects
     },
     "& .MuiRadio-root": {
       color: "#538A3E",
@@ -288,6 +303,14 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     },
     "& .MuiInputBase-root": {
       borderRadius: "8px",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E", // Color verde al hacer hover
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363", // Color morado al enfocar
+      },
     },
     // Color verde menta al hacer hover en opciones desplegables
     "& .MuiMenuItem-root:hover": {
@@ -312,421 +335,330 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
   return (
     <Box>
-      <Paper
-        sx={{
-          p: 4,
-          mb: isModal ? 0 : 3,
-          borderRadius: isModal ? 0 : "8px",
-          boxShadow: isModal ? "none" : "0px 4px 10px rgba(0, 0, 0, 0.1)",
-          maxWidth: "1200px",
-          mx: "auto",
-          bgcolor: "#f9f9f9",
-        }}
-      >
-        {/* Título con fondo degradado como el sidebar */}
+      {/* No mostramos el encabezado aquí si estamos en un modal, ya que se muestra en el componente padre */}
+      {!isModal && (
         <Box
           sx={{
-            background: "linear-gradient(180deg, #1A1363 0%, #538A3E 100%)",
-            borderRadius: "8px",
-            p: 2,
-            mb: 3,
-            display: isModal ? "none" : "flex",
-            justifyContent: "center",
+            background: "linear-gradient(90deg, #1A1363 0%, #538A3E 100%)",
+            borderRadius: "12px 12px 50px 50px", // Bordes aún más curvos en la parte inferior
+            p: 2.5,
+            mb: 4,
+            display: "flex",
+            justifyContent: "center", // Centrar el contenido horizontalmente
             alignItems: "center",
+            boxShadow:
+              "0 8px 25px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.15)", // Sombreado reducido
+            position: "relative",
+            borderBottom: "none",
           }}
         >
-          <Typography
-            variant="h5"
-            gutterBottom
-            align="center"
+          <Box
             sx={{
-              fontFamily,
-              fontWeight: 700,
-              color: "#FFFFFF", // Texto en blanco
-              m: 0,
               display: "flex",
               alignItems: "center",
+              position: "absolute",
+              left: "20px",
             }}
           >
-            {isEditing ? (
-              <>
-                <Box component="span" sx={{ display: "inline-flex", mr: 1 }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path>
-                    <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
-                  </svg>
-                </Box>
-                Registro de Estudiante
-              </>
-            ) : (
-              <>
-                <Box component="span" sx={{ display: "inline-flex", mr: 1 }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
+            <Box component="span" sx={{ display: "inline-flex", mr: 1 }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {isEditing ? (
+                  <>
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </>
+                ) : (
+                  <>
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
                     <line x1="19" y1="8" x2="19" y2="14"></line>
                     <line x1="22" y1="11" x2="16" y2="11"></line>
-                  </svg>
-                </Box>
-                Registro de Estudiante
-              </>
-            )}
-          </Typography>
-        </Box>
-
-        <form onSubmit={handleSubmit}>
-          {/* Datos personales */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                color: "#538A3E",
-                fontFamily,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                "&::before": {
-                  content: '""',
-                  display: "inline-block",
-                  width: "4px",
-                  height: "20px",
-                  backgroundColor: "#538A3E",
-                  marginRight: "8px",
-                  borderRadius: "2px",
-                },
-              }}
-            >
-              Datos Personales
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            <Grid container spacing={2}>
-              {/* Primera fila */}
-              <Grid item xs={12} md={3}>
-                <TextField
-                  fullWidth
-                  label="Primer Nombre"
-                  name="primer_nombre"
-                  value={formData.primer_nombre || ""}
-                  onChange={handleChange}
-                  error={!!errors.primer_nombre}
-                  helperText={errors.primer_nombre}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  fullWidth
-                  label="Segundo Nombre"
-                  name="segundo_nombre"
-                  value={formData.segundo_nombre || ""}
-                  onChange={handleChange}
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  fullWidth
-                  label="Primer Apellido"
-                  name="primer_apellido"
-                  value={formData.primer_apellido || ""}
-                  onChange={handleChange}
-                  error={!!errors.primer_apellido}
-                  helperText={errors.primer_apellido}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  fullWidth
-                  label="Segundo Apellido"
-                  name="segundo_apellido"
-                  value={formData.segundo_apellido || ""}
-                  onChange={handleChange}
-                  sx={textFieldStyle}
-                />
-              </Grid>
-
-              {/* Segunda fila */}
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Identidad"
-                  name="identidad"
-                  value={formData.identidad || ""}
-                  onChange={handleChange}
-                  error={!!errors.identidad}
-                  helperText={errors.identidad}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Nacionalidad"
-                  name="nacionalidad"
-                  value={formData.nacionalidad || ""}
-                  onChange={handleChange}
-                  error={!!errors.nacionalidad}
-                  helperText={errors.nacionalidad}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl component="fieldset" sx={formControlStyle}>
-                  <FormLabel id="genero-label">Género</FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="genero-label"
-                    name="genero"
-                    value={formData.genero}
-                    onChange={handleSelectChange}
-                  >
-                    <FormControlLabel
-                      value="M"
-                      control={<Radio />}
-                      label="Masculino"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                    <FormControlLabel
-                      value="F"
-                      control={<Radio />}
-                      label="Femenino"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-
-              {/* Tercera fila */}
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Fecha de Nacimiento"
-                  name="fecha_nacimiento"
-                  type="date"
-                  value={formData.fecha_nacimiento || ""}
-                  onChange={handleFechaNacimientoChange}
-                  error={!!errors.fecha_nacimiento}
-                  helperText={errors.fecha_nacimiento}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Edad"
-                  name="edad"
-                  type="number"
-                  value={formData.edad || ""}
-                  InputProps={{ readOnly: true }}
-                  sx={textFieldStyle}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Dirección"
-                  name="direccion"
-                  value={formData.direccion || ""}
-                  onChange={handleChange}
-                  sx={textFieldStyle}
-                />
-              </Grid>
-            </Grid>
+                  </>
+                )}
+              </svg>
+            </Box>
           </Box>
-
-          {/* Información académica */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                color: "#538A3E",
-                fontFamily,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                "&::before": {
-                  content: '""',
-                  display: "inline-block",
-                  width: "4px",
-                  height: "20px",
-                  backgroundColor: "#538A3E",
-                  marginRight: "8px",
-                  borderRadius: "2px",
-                },
-              }}
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily,
+              fontWeight: 700,
+              color: "#FFFFFF",
+              m: 0,
+              textAlign: "center", // Centrar el texto
+            }}
+          >
+            {isEditing ? "Editar Estudiante" : "Registrar Nuevo Estudiante"}
+          </Typography>
+          <IconButton
+            onClick={() => navigate("/estudiantes")}
+            sx={{
+              color: "#FFFFFF", // X en color blanco
+              position: "absolute",
+              right: "20px",
+              "&:hover": {
+                backgroundColor: "rgba(243, 130, 35, 0.2)", // Fondo naranja al hacer hover
+              },
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              Información Académica
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </IconButton>
+        </Box>
+      )}
 
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <FormControl
-                  fullWidth
-                  error={!!errors.nombre_grado}
-                  required
-                  sx={formControlStyle}
-                >
-                  <InputLabel id="grado-label">Grado</InputLabel>
-                  <Select
-                    labelId="grado-label"
-                    name="nombre_grado"
-                    value={formData.nombre_grado || ""}
-                    label="Grado"
-                    onChange={handleSelectChange}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          "& .MuiMenuItem-root:hover": {
-                            backgroundColor: "#e7f5e8",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem value="Primero" sx={{ fontFamily }}>
-                      Primero
-                    </MenuItem>
-                    <MenuItem value="Segundo" sx={{ fontFamily }}>
-                      Segundo
-                    </MenuItem>
-                    <MenuItem value="Tercero" sx={{ fontFamily }}>
-                      Tercero
-                    </MenuItem>
-                    <MenuItem value="Cuarto" sx={{ fontFamily }}>
-                      Cuarto
-                    </MenuItem>
-                    <MenuItem value="Quinto" sx={{ fontFamily }}>
-                      Quinto
-                    </MenuItem>
-                    <MenuItem value="Sexto" sx={{ fontFamily }}>
-                      Sexto
-                    </MenuItem>
-                    <MenuItem value="Séptimo" sx={{ fontFamily }}>
-                      Séptimo
-                    </MenuItem>
-                    <MenuItem value="Octavo" sx={{ fontFamily }}>
-                      Octavo
-                    </MenuItem>
-                    <MenuItem value="Noveno" sx={{ fontFamily }}>
-                      Noveno
-                    </MenuItem>
-                  </Select>
-                  {errors.nombre_grado && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
-                    >
-                      {errors.nombre_grado}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl
-                  fullWidth
-                  error={!!errors.seccion}
-                  required
-                  sx={formControlStyle}
-                >
-                  <InputLabel id="seccion-label">Sección</InputLabel>
-                  <Select
-                    labelId="seccion-label"
-                    name="seccion"
-                    value={formData.seccion || ""}
-                    label="Sección"
-                    onChange={handleSelectChange}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          "& .MuiMenuItem-root:hover": {
-                            backgroundColor: "#e7f5e8",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem value="A" sx={{ fontFamily }}>
-                      A
-                    </MenuItem>
-                    <MenuItem value="B" sx={{ fontFamily }}>
-                      B
-                    </MenuItem>
-                    <MenuItem value="C" sx={{ fontFamily }}>
-                      C
-                    </MenuItem>
-                  </Select>
-                  {errors.seccion && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
-                    >
-                      {errors.seccion}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="Fecha de Admisión"
-                  name="fecha_admision"
-                  type="date"
-                  value={formData.fecha_admision || ""}
-                  onChange={handleChange}
-                  error={!!errors.fecha_admision}
-                  helperText={errors.fecha_admision}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  required
-                  sx={textFieldStyle}
-                />
-              </Grid>
+      <Paper
+        sx={{
+          p: 4,
+          mb: isModal ? 0 : 3,
+          borderRadius: isModal ? "0 0 16px 16px" : "16px", // Bordes más curvos
+          boxShadow: isModal ? "none" : "0px 8px 20px rgba(0, 0, 0, 0.08)",
+          maxWidth: "1200px",
+          mx: "auto",
+          bgcolor: "#ffffff",
+          minHeight: "calc(100vh - 200px)", // Asegurar altura mínima para bajar los botones
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <form
+          onSubmit={handleSubmit}
+          style={{ flex: 1, display: "flex", flexDirection: "column" }}
+        >
+          <Box sx={{ flex: 1 }}>
+            {/* Datos personales */}
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  color: "#1A1363", // Cambiar a color morado para coincidir con la imagen
+                  fontFamily,
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "18px", // Texto ligeramente más grande
+                  "&::before": {
+                    content: '""',
+                    display: "inline-block",
+                    width: "5px", // Línea más ancha
+                    height: "24px", // Línea más alta
+                    backgroundColor: "#538A3E",
+                    marginRight: "10px",
+                    borderRadius: "3px",
+                  },
+                }}
+              >
+                Datos Personales
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
 
-              {isEditing && (
+              <Grid container spacing={2}>
+                {/* Primera fila */}
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Primer Nombre"
+                    name="primer_nombre"
+                    value={formData.primer_nombre || ""}
+                    onChange={handleChange}
+                    error={!!errors.primer_nombre}
+                    helperText={errors.primer_nombre}
+                    required
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Segundo Nombre"
+                    name="segundo_nombre"
+                    value={formData.segundo_nombre || ""}
+                    onChange={handleChange}
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Primer Apellido"
+                    name="primer_apellido"
+                    value={formData.primer_apellido || ""}
+                    onChange={handleChange}
+                    error={!!errors.primer_apellido}
+                    helperText={errors.primer_apellido}
+                    required
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Segundo Apellido"
+                    name="segundo_apellido"
+                    value={formData.segundo_apellido || ""}
+                    onChange={handleChange}
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+
+                {/* Segunda fila */}
                 <Grid item xs={12} md={4}>
-                  <FormControl fullWidth sx={formControlStyle}>
-                    <InputLabel id="estado-label">Estado</InputLabel>
+                  <TextField
+                    fullWidth
+                    label="Identidad"
+                    name="identidad"
+                    value={formData.identidad || ""}
+                    onChange={handleChange}
+                    error={!!errors.identidad}
+                    helperText={errors.identidad}
+                    required
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Nacionalidad"
+                    name="nacionalidad"
+                    value={formData.nacionalidad || ""}
+                    onChange={handleChange}
+                    error={!!errors.nacionalidad}
+                    helperText={errors.nacionalidad}
+                    required
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={formControlStyle}>
+                    <FormLabel id="genero-label">Género</FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby="genero-label"
+                      name="genero"
+                      value={formData.genero}
+                      onChange={handleSelectChange}
+                    >
+                      <FormControlLabel
+                        value="M"
+                        control={<Radio />}
+                        label="Masculino"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                      <FormControlLabel
+                        value="F"
+                        control={<Radio />}
+                        label="Femenino"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+
+                {/* Tercera fila */}
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Fecha de Nacimiento"
+                    name="fecha_nacimiento"
+                    type="date"
+                    value={formData.fecha_nacimiento || ""}
+                    onChange={handleFechaNacimientoChange}
+                    error={!!errors.fecha_nacimiento}
+                    helperText={errors.fecha_nacimiento}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    required
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Edad"
+                    name="edad"
+                    type="number"
+                    value={formData.edad || ""}
+                    InputProps={{ readOnly: true }}
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Dirección"
+                    name="direccion"
+                    value={formData.direccion || ""}
+                    onChange={handleChange}
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Información académica */}
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  color: "#1A1363", // Cambiar a color morado para coincidir con la imagen
+                  fontFamily,
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "18px", // Texto ligeramente más grande
+                  "&::before": {
+                    content: '""',
+                    display: "inline-block",
+                    width: "5px", // Línea más ancha
+                    height: "24px", // Línea más alta
+                    backgroundColor: "#538A3E",
+                    marginRight: "10px",
+                    borderRadius: "3px",
+                  },
+                }}
+              >
+                Información Académica
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <FormControl
+                    fullWidth
+                    error={!!errors.nombre_grado}
+                    required
+                    sx={formControlStyle}
+                  >
+                    <InputLabel id="grado-label">Grado</InputLabel>
                     <Select
-                      labelId="estado-label"
-                      name="estado"
-                      value={formData.estado || "Activo"}
-                      label="Estado"
+                      labelId="grado-label"
+                      name="nombre_grado"
+                      value={formData.nombre_grado || ""}
+                      label="Grado"
                       onChange={handleSelectChange}
                       MenuProps={{
                         PaperProps: {
@@ -738,150 +670,278 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                         },
                       }}
                     >
-                      <MenuItem value="Activo" sx={{ fontFamily }}>
-                        Activo
+                      <MenuItem value="Primero" sx={{ fontFamily }}>
+                        Primero
                       </MenuItem>
-                      <MenuItem value="Inactivo" sx={{ fontFamily }}>
-                        Inactivo
+                      <MenuItem value="Segundo" sx={{ fontFamily }}>
+                        Segundo
+                      </MenuItem>
+                      <MenuItem value="Tercero" sx={{ fontFamily }}>
+                        Tercero
+                      </MenuItem>
+                      <MenuItem value="Cuarto" sx={{ fontFamily }}>
+                        Cuarto
+                      </MenuItem>
+                      <MenuItem value="Quinto" sx={{ fontFamily }}>
+                        Quinto
+                      </MenuItem>
+                      <MenuItem value="Sexto" sx={{ fontFamily }}>
+                        Sexto
+                      </MenuItem>
+                      <MenuItem value="Séptimo" sx={{ fontFamily }}>
+                        Séptimo
+                      </MenuItem>
+                      <MenuItem value="Octavo" sx={{ fontFamily }}>
+                        Octavo
+                      </MenuItem>
+                      <MenuItem value="Noveno" sx={{ fontFamily }}>
+                        Noveno
                       </MenuItem>
                     </Select>
+                    {errors.nombre_grado && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
+                      >
+                        {errors.nombre_grado}
+                      </Typography>
+                    )}
                   </FormControl>
                 </Grid>
-              )}
-            </Grid>
-          </Box>
-
-          {/* Información adicional */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                color: "#538A3E",
-                fontFamily,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                "&::before": {
-                  content: '""',
-                  display: "inline-block",
-                  width: "4px",
-                  height: "20px",
-                  backgroundColor: "#538A3E",
-                  marginRight: "8px",
-                  borderRadius: "2px",
-                },
-              }}
-            >
-              Información Adicional
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <FormControl component="fieldset" sx={formControlStyle}>
-                  <FormLabel component="legend">Es zurdo</FormLabel>
-                  <RadioGroup
-                    row
-                    name="es_zurdo"
-                    value={formData.es_zurdo?.toString()}
-                    onChange={handleRadioChange}
+                <Grid item xs={12} md={4}>
+                  <FormControl
+                    fullWidth
+                    error={!!errors.seccion}
+                    required
+                    sx={formControlStyle}
                   >
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Sí"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <FormControl component="fieldset" sx={formControlStyle}>
-                  <FormLabel component="legend">
-                    Dificultad en Educación Física
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    name="dif_educacion_fisica"
-                    value={formData.dif_educacion_fisica?.toString()}
-                    onChange={handleRadioChange}
-                  >
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Sí"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <FormControl component="fieldset" sx={formControlStyle}>
-                  <FormLabel component="legend">Reacción Alérgica</FormLabel>
-                  <RadioGroup
-                    row
-                    name="reaccion_alergica"
-                    value={formData.reaccion_alergica?.toString()}
-                    onChange={handleRadioChange}
-                  >
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Sí"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                      sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-
-              {formData.reaccion_alergica && (
-                <Grid item xs={12}>
+                    <InputLabel id="seccion-label">Sección</InputLabel>
+                    <Select
+                      labelId="seccion-label"
+                      name="seccion"
+                      value={formData.seccion || ""}
+                      label="Sección"
+                      onChange={handleSelectChange}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            "& .MuiMenuItem-root:hover": {
+                              backgroundColor: "#e7f5e8",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="A" sx={{ fontFamily }}>
+                        A
+                      </MenuItem>
+                      <MenuItem value="B" sx={{ fontFamily }}>
+                        B
+                      </MenuItem>
+                      <MenuItem value="C" sx={{ fontFamily }}>
+                        C
+                      </MenuItem>
+                    </Select>
+                    {errors.seccion && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
+                      >
+                        {errors.seccion}
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    label="Descripción de la Alergia"
-                    name="descripcion_alergica"
-                    value={formData.descripcion_alergica || ""}
+                    label="Fecha de Admisión"
+                    name="fecha_admision"
+                    type="date"
+                    value={formData.fecha_admision || ""}
                     onChange={handleChange}
-                    multiline
-                    rows={3}
-                    error={!!errors.descripcion_alergica}
-                    helperText={errors.descripcion_alergica}
+                    error={!!errors.fecha_admision}
+                    helperText={errors.fecha_admision}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
                     required
                     sx={textFieldStyle}
                   />
                 </Grid>
-              )}
-            </Grid>
+
+                {isEditing && (
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth sx={formControlStyle}>
+                      <InputLabel id="estado-label">Estado</InputLabel>
+                      <Select
+                        labelId="estado-label"
+                        name="estado"
+                        value={formData.estado || "Activo"}
+                        label="Estado"
+                        onChange={handleSelectChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <MenuItem value="Activo" sx={{ fontFamily }}>
+                          Activo
+                        </MenuItem>
+                        <MenuItem value="Inactivo" sx={{ fontFamily }}>
+                          Inactivo
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+
+            {/* Información adicional */}
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  color: "#1A1363", // Cambiar a color morado para coincidir con la imagen
+                  fontFamily,
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "18px", // Texto ligeramente más grande
+                  "&::before": {
+                    content: '""',
+                    display: "inline-block",
+                    width: "5px", // Línea más ancha
+                    height: "24px", // Línea más alta
+                    backgroundColor: "#538A3E",
+                    marginRight: "10px",
+                    borderRadius: "3px",
+                  },
+                }}
+              >
+                Información Adicional
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={formControlStyle}>
+                    <FormLabel component="legend">¿Es Zurdo?</FormLabel>
+                    <RadioGroup
+                      row
+                      name="es_zurdo"
+                      value={formData.es_zurdo?.toString()}
+                      onChange={handleRadioChange}
+                    >
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Sí"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={formControlStyle}>
+                    <FormLabel component="legend">
+                      ¿Dificultad en Educación Física?
+                    </FormLabel>
+                    <RadioGroup
+                      row
+                      name="dif_educacion_fisica"
+                      value={formData.dif_educacion_fisica?.toString()}
+                      onChange={handleRadioChange}
+                    >
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Sí"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={formControlStyle}>
+                    <FormLabel component="legend">
+                      ¿Reacción Alérgica?
+                    </FormLabel>
+                    <RadioGroup
+                      row
+                      name="reaccion_alergica"
+                      value={formData.reaccion_alergica?.toString()}
+                      onChange={handleRadioChange}
+                    >
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Sí"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                        sx={{ "& .MuiFormControlLabel-label": { fontFamily } }}
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+
+                {formData.reaccion_alergica && (
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Descripción de la Alergia"
+                      name="descripcion_alergica"
+                      value={formData.descripcion_alergica || ""}
+                      onChange={handleChange}
+                      multiline
+                      rows={3}
+                      error={!!errors.descripcion_alergica}
+                      helperText={errors.descripcion_alergica}
+                      required
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
           </Box>
 
-          {/* Botones de acción */}
+          {/* Botones de acción - POSICIONADOS CON MENOS ESPACIO */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
-              gap: 2,
-              mt: 4,
+              gap: 3, // Más espacio entre botones
+              mt: "auto", // Empuja los botones hacia abajo
+              pt: 3, // Padding top reducido
+              pb: 2, // Padding bottom reducido
             }}
           >
             <Button
@@ -891,32 +951,31 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
               }
               disabled={isSubmitting}
               sx={{
-                ml: 1,
                 fontFamily,
                 textTransform: "none",
-                borderRadius: "8px",
+                borderRadius: "10px", // Bordes más redondeados
                 bgcolor: "#F38223",
                 color: "white",
-                px: 3,
-                minWidth: "120px",
+                px: 4, // Más padding horizontal
+                py: 1.2, // Más padding vertical
+                minWidth: "140px", // Botones más anchos
                 fontWeight: 600,
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                fontSize: "15px", // Texto más grande
+                boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)", // Sombra del color del botón
                 "&:hover": {
                   backgroundColor: "#e67615",
-                  transform: "scale(1.05) translateZ(10px)",
-                  boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
-                  filter: "brightness(1.2)",
+                  transform: "translateY(-2px)", // Efecto de elevación más sutil
+                  boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
                 },
                 "&:active": {
                   backgroundColor: "#d56a10",
-                  transform: "scale(0.98) translateZ(5px)",
+                  transform: "translateY(1px)",
                 },
                 "&.Mui-disabled": {
                   bgcolor: "rgba(243, 130, 35, 0.7)",
                   color: "white",
                 },
-                transformStyle: "preserve-3d",
-                perspective: "1000px",
+                transition: "all 0.2s ease-in-out", // Transición más suave
               }}
             >
               Cancelar
@@ -929,28 +988,28 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 bgcolor: "#538A3E",
                 fontFamily,
                 textTransform: "none",
-                borderRadius: "8px",
-                px: 3,
-                minWidth: "120px",
+                borderRadius: "10px", // Bordes más redondeados
+                px: 4, // Más padding horizontal
+                py: 1.2, // Más padding vertical
+                minWidth: "140px", // Botones más anchos
                 fontWeight: 600,
-                color: "white", // Texto blanco como solicitado
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                fontSize: "15px", // Texto más grande
+                color: "white",
+                boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)", // Sombra del color del botón
                 "&:hover": {
                   backgroundColor: "#3e682e",
-                  transform: "scale(1.05) translateZ(10px)",
-                  boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
-                  filter: "brightness(1.2)",
+                  transform: "translateY(-2px)", // Efecto de elevación más sutil
+                  boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
                 },
                 "&:active": {
                   backgroundColor: "#2e5022",
-                  transform: "scale(0.98) translateZ(5px)",
+                  transform: "translateY(1px)",
                 },
                 "&.Mui-disabled": {
                   bgcolor: "rgba(83, 138, 62, 0.7)",
                   color: "white",
                 },
-                transformStyle: "preserve-3d",
-                perspective: "1000px",
+                transition: "all 0.2s ease-in-out", // Transición más suave
               }}
             >
               {isSubmitting ? (

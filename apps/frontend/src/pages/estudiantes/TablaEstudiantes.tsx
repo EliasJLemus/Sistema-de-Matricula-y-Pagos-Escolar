@@ -30,17 +30,14 @@ import useGetEstudiantes, {
   EstudianteType,
 } from "@/lib/queries/useGetEstudiantes";
 
-// Font family constant to match sidebar and topbar
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
-// Nueva interfaz para recibir las funciones de callback
 interface TablaEstudiantesProps {
   onNewStudent: () => void;
   onEditStudent: (id: number) => void;
 }
 
-// Componente principal TablaEstudiantes
 export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   onNewStudent,
   onEditStudent,
@@ -50,7 +47,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  // Definir filtros para la búsqueda y paginación
   const [filters, setFilters] = useState({
     nombre: "",
     grado: "",
@@ -59,14 +55,12 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  // Función para gestionar la recarga fresca de datos
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
       queryKey: ["getEstudiantes", page, limit, JSON.stringify(filters)],
     });
   };
 
-  // Manejadores para los cambios en los filtros
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -80,7 +74,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     setPage(1);
   };
 
-  // Obtener datos usando el hook useGetEstudiantes
   const { data, isLoading, isFetching, error } = useGetEstudiantes(
     page,
     limit,
@@ -91,25 +84,154 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  // Función para manejar el clic en editar - Modificada para usar callback
   const handleEdit = (id: number) => {
     onEditStudent(id);
   };
 
-  // Función para manejar el clic en eliminar
   const handleDelete = (id: number, nombre: string) => {
     if (
       window.confirm(`¿Está seguro que desea eliminar al estudiante ${nombre}?`)
     ) {
       console.log("Eliminar estudiante:", id);
-      // Aquí iría la llamada a la API para eliminar
       handleFreshReload();
     }
   };
 
+  // Estilos comunes para TextField
+  const textFieldStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiInputBase-root": {
+      fontFamily,
+      borderRadius: "8px",
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+      },
+    },
+    "& .MuiFormHelperText-root": {
+      fontFamily,
+    },
+  };
+
+  // Estilos comunes para FormControl
+  const formControlStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiFormLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiSelect-select": {
+      fontFamily,
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiRadio-root": {
+      color: "#538A3E",
+    },
+    "& .Mui-checked": {
+      color: "#538A3E",
+    },
+    "& .MuiInputBase-root": {
+      borderRadius: "8px",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+      },
+    },
+    "& .MuiMenuItem-root:hover": {
+      backgroundColor: "#e7f5e8",
+    },
+  };
+
+  // Estilo para botón primario verde
+  const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  // Estilo para botón secundario naranja
+  const secondaryButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    bgcolor: "#F38223",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)",
+    "&:hover": {
+      backgroundColor: "#e67615",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#d56a10",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(243, 130, 35, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  // Estilo para paginación
+  const paginationButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    minWidth: "34px",
+    height: "34px",
+    fontWeight: 600,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
+    transition: "all 0.2s ease-in-out",
+  };
+
   return (
     <Box sx={{ position: "relative" }}>
-      {/* Indicador de carga */}
       {(isLoading || isFetching) && (
         <Box
           sx={{
@@ -133,7 +255,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Box>
       )}
 
-      {/* Mostrar errores si existen */}
       {error && (
         <Box sx={{ p: 2, color: "error.main", mb: 2 }}>
           <Typography sx={{ fontFamily }}>
@@ -142,7 +263,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Box>
       )}
 
-      {/* Título de la sección */}
       <Box
         sx={{
           display: "flex",
@@ -180,13 +300,12 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Typography>
       </Box>
 
-      {/* Filtros */}
       <Paper
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: "8px",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          borderRadius: "12px",
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
         }}
       >
         <Box
@@ -204,14 +323,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             sx={{
               minWidth: 250,
               height: "40px",
-              "& .MuiInputLabel-root": {
-                fontFamily,
-                fontSize: "14px",
-              },
-              "& .MuiInputBase-root": {
-                fontFamily,
-                borderRadius: "8px",
-              },
+              ...textFieldStyle,
             }}
             value={filters.nombre}
             onChange={(e) => handleInputChange("nombre", e.target.value)}
@@ -221,18 +333,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             sx={{
               minWidth: 120,
               height: "40px",
-              "& .MuiInputLabel-root": {
-                fontFamily,
-                fontSize: "14px",
-              },
-              "& .MuiInputBase-root": {
-                fontFamily,
-                borderRadius: "8px",
-              },
-              // Color verde menta al desplegar opciones
-              "& .MuiMenuItem-root:hover": {
-                backgroundColor: "#e7f5e8",
-              },
+              ...formControlStyle,
             }}
             size="small"
           >
@@ -289,18 +390,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             sx={{
               minWidth: 150,
               height: "40px",
-              "& .MuiInputLabel-root": {
-                fontFamily,
-                fontSize: "14px",
-              },
-              "& .MuiInputBase-root": {
-                fontFamily,
-                borderRadius: "8px",
-              },
-              // Color verde menta al desplegar opciones
-              "& .MuiMenuItem-root:hover": {
-                backgroundColor: "#e7f5e8",
-              },
+              ...formControlStyle,
             }}
             size="small"
           >
@@ -335,30 +425,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           <Button
             variant="contained"
             onClick={clearFilters}
-            sx={{
-              ml: 1,
-              fontFamily,
-              textTransform: "none",
-              borderRadius: "8px",
-              bgcolor: "#F38223",
-              color: "white",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              "&:hover": {
-                backgroundColor: "#e67615",
-                transform: "scale(1.05) translateZ(10px)",
-                boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
-                filter: "brightness(1.2)",
-              },
-              "&:active": {
-                backgroundColor: "#d56a10",
-                transform: "scale(0.98) translateZ(5px)",
-              },
-              transformStyle: "preserve-3d",
-              perspective: "1000px",
-            }}
+            sx={secondaryButtonStyle}
             startIcon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -381,32 +448,10 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
           <Button
             variant="contained"
-            onClick={onNewStudent} // Usado callback en vez de navigate
+            onClick={onNewStudent}
             sx={{
+              ...primaryButtonStyle,
               ml: "auto",
-              bgcolor: "#538A3E",
-              color: "white",
-              fontFamily,
-              textTransform: "none",
-              borderRadius: "8px",
-              fontSize: "14px",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              fontWeight: 600,
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              "&:hover": {
-                backgroundColor: "#3e682e",
-                transform: "scale(1.05) translateZ(10px)",
-                boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
-                filter: "brightness(1.2)",
-              },
-              "&:active": {
-                backgroundColor: "#2e5022",
-                transform: "scale(0.98) translateZ(5px)",
-              },
-              transformStyle: "preserve-3d",
-              perspective: "1000px",
             }}
             startIcon={
               <svg
@@ -432,7 +477,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Box>
       </Paper>
 
-      {/* Componente de tabla con scroll horizontal */}
       <div className="border border-[#fef3c7] rounded-lg overflow-hidden">
         <div style={{ overflowX: "auto", width: "100%" }}>
           <Table className="bg-[#fff9db]">
@@ -639,13 +683,14 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       variant="outline"
                       className={
                         item.estado === "Activo"
-                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-24 justify-center" // Ancho fijo
-                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-24 justify-center" // Ancho fijo
+                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-16 justify-center" // Ancho más reducido
+                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-16 justify-center" // Ancho más reducido
                       }
                       style={{
                         fontFamily,
-                        padding: "4px 12px",
-                        borderRadius: "4px",
+                        padding: "4px 8px",
+                        borderRadius: "6px",
+                        fontWeight: 600,
                       }}
                     >
                       {item.estado}
@@ -687,7 +732,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </div>
       </div>
 
-      {/* Paginación */}
       <Box
         sx={{
           display: "flex",
@@ -695,8 +739,8 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           mt: 2,
           p: 2,
           bgcolor: "white",
-          borderRadius: "8px",
-          boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+          borderRadius: "12px",
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
         }}
       >
         <Typography
@@ -713,27 +757,21 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page <= 1}
             sx={{
-              fontFamily, 
-              minWidth: '34px',
-              width: '34px',
-              height: '34px',
-              padding: 0,
-              textTransform: 'none',
-              borderRadius: '6px',
-              bgcolor: "#F38223", // Naranja como solicitado
-              color: 'white',
-              '&:hover': {
+              ...paginationButtonStyle,
+              bgcolor: "#F38223",
+              color: "white",
+              "&:hover": {
                 backgroundColor: "#e67615",
-                transform: "scale(1.05)",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
               },
-              '&:active': {
+              "&:active": {
                 backgroundColor: "#d56a10",
-                transform: "scale(0.98)",
+                transform: "translateY(1px)",
               },
-              '&.Mui-disabled': {
-                bgcolor: 'rgba(243, 130, 35, 0.4)',
-                color: 'white',
+              "&.Mui-disabled": {
+                bgcolor: "rgba(243, 130, 35, 0.4)",
+                color: "white",
               },
             }}
           >
@@ -763,33 +801,24 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   sx={
                     pageNum === page
                       ? {
+                          ...paginationButtonStyle,
                           bgcolor: "#538A3E",
-                          fontFamily,
-                          fontWeight: 600,
-                          textTransform: 'none',
-                          borderRadius: '6px',
-                          boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.2)",
-                          minWidth: '34px',
-                          height: '34px',
-                          color: "white", // Texto blanco como solicitado
-                          '&:hover': {
+                          color: "white",
+                          "&:hover": {
                             bgcolor: "#3e682e",
-                            transform: "scale(1.05)",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
                           },
                         }
                       : {
-                          fontFamily,
-                          textTransform: 'none',
-                          borderRadius: '6px',
-                          bgcolor: "#6C757D",
-                          color: 'white',
-                          minWidth: '34px',
-                          height: '34px',
-                          '&:hover': {
-                            bgcolor: "#5a6268",
-                            transform: "scale(1.05)",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+                          ...paginationButtonStyle,
+                          bgcolor: "#f8f9fa",
+                          color: "#333",
+                          border: "1px solid #ddd",
+                          "&:hover": {
+                            bgcolor: "#e7f5e8",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.1)",
                           },
                         }
                   }
@@ -806,27 +835,21 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             onClick={() => setPage((p) => Math.min(p + 1, pageCount))}
             disabled={page >= pageCount}
             sx={{
-              fontFamily, 
-              minWidth: '34px',
-              width: '34px',
-              height: '34px',
-              padding: 0,
-              textTransform: 'none',
-              borderRadius: '6px',
-              bgcolor: "#F38223", // Naranja como solicitado
-              color: 'white',
-              '&:hover': {
+              ...paginationButtonStyle,
+              bgcolor: "#F38223",
+              color: "white",
+              "&:hover": {
                 backgroundColor: "#e67615",
-                transform: "scale(1.05)",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
               },
-              '&:active': {
+              "&:active": {
                 backgroundColor: "#d56a10",
-                transform: "scale(0.98)",
+                transform: "translateY(1px)",
               },
-              '&.Mui-disabled': {
-                bgcolor: 'rgba(243, 130, 35, 0.4)',
-                color: 'white',
+              "&.Mui-disabled": {
+                bgcolor: "rgba(243, 130, 35, 0.4)",
+                color: "white",
               },
             }}
           >
@@ -847,14 +870,13 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Box>
       </Box>
 
-      {/* Mensaje cuando no hay resultados */}
       {!isLoading && !isFetching && tableData.length === 0 && (
         <Paper
           sx={{
             p: 4,
             textAlign: "center",
-            borderRadius: "8px",
-            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
           }}
         >
           <Typography color="text.secondary" sx={{ fontFamily }}>
