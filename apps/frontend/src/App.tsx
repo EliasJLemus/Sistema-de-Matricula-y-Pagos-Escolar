@@ -7,9 +7,15 @@ import Sidebar from "./pages/global/Sidebar";
 import Home from "./pages/home/home";
 import { Route, Routes } from "react-router-dom";
 
+// Importación de componentes de estudiantes
+import EstudiantesPage from "./pages/estudiantes/EstudiantesPage";
+import NuevoEstudiantePage from "./pages/estudiantes/nuevo/NuevoEstudiantePage";
+import EditarEstudiantePage from "./pages/estudiantes/editar/EditarEstudiantePage";
+
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -22,11 +28,11 @@ function App() {
           <Box
             flexGrow={1}
             sx={{
-              marginLeft: isSidebarVisible ? "300px" : "70px", // Ajusta margen según el estado del sidebar
+              marginLeft: isSidebarVisible ? "300px" : "70px",
               transition: "margin-left 0.3s ease",
               padding: 0,
               position: "relative",
-              width: `calc(100% - ${isSidebarVisible ? "300px" : "70px"})`, // Ancho dinámico
+              width: `calc(100% - ${isSidebarVisible ? "300px" : "70px"})`,
             }}
           >
             <Topbar
@@ -42,6 +48,18 @@ function App() {
               <Routes>
                 <Route path="/home" element={<Home />} />
                 <Route path="/reportes" element={<DashboardPage />} />
+
+                {/* Rutas de estudiantes */}
+                <Route path="/estudiantes" element={<EstudiantesPage />} />
+                <Route
+                  path="/estudiantes/nuevo"
+                  element={<NuevoEstudiantePage />}
+                />
+                <Route
+                  path="/estudiantes/editar/:id"
+                  element={<EditarEstudiantePage />}
+                />
+
                 {/* Add other routes as needed */}
               </Routes>
             </Box>
