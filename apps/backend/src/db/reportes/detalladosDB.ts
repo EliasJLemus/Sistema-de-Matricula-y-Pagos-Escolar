@@ -293,7 +293,6 @@ public async countReporteMatricula(
     }
   }
   
-  
   // ======= ESTUDIANTE =======
   public async getReporteEstudiante(
     limit: number,
@@ -304,21 +303,19 @@ public async countReporteMatricula(
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-
+  
     if (filters.estudiante) {
-      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
     }
-    
   
     if (filters.grado) {
-      
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }
   
     if (filters.fecha) {
-      where.push(`fecha = $${paramIndex++}`);
+      where.push(`fecha_admision = $${paramIndex++}`);
       values.push(filters.fecha);
     }
   
@@ -330,15 +327,36 @@ public async countReporteMatricula(
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
-      SELECT estudiante, identidad, genero, alergias, zurdo, grado, estado, plan_pago, encargado, parentesco, telefono
-      FROM sistema.reporte_estudiantes
+      SELECT
+        nombre_estudiante,
+        identidad,
+        genero,
+        edad,
+        alergias,
+        zurdo,
+        discapacidad,
+        grado,
+        estado,
+        plan_pago,
+        encargado_principal,
+        parentesco_principal,
+        telefono_principal,
+        encargado_secundario,
+        parentesco_secundario,
+        telefono_secundario
+      FROM "Estudiantes".reporte_estudiantes(NULL, NULL, NULL)
       ${whereClause}
-      ORDER BY estudiante ASC
+      ORDER BY nombre_estudiante ASC
       LIMIT $1 OFFSET $2
     `;
   
-    const result = await client.query(query, values);
-    return result.rows;
+    try {
+      const result = await client.query(query, values);
+      return result.rows;
+    } catch (error) {
+      console.error("Error al obtener reporte de estudiantes:", error);
+      throw error;
+    }
   }
   
   public async countReporteEstudiante(
@@ -350,7 +368,7 @@ public async countReporteMatricula(
     let paramIndex = 1;
   
     if (filters.estudiante) {
-      where.push(`LOWER(estudiante) LIKE LOWER($${paramIndex++})`);
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
       values.push(`%${filters.estudiante}%`);
     }
   
@@ -360,7 +378,7 @@ public async countReporteMatricula(
     }
   
     if (filters.fecha) {
-      where.push(`fecha = $${paramIndex++}`);
+      where.push(`fecha_admision = $${paramIndex++}`);
       values.push(filters.fecha);
     }
   
@@ -371,11 +389,21 @@ public async countReporteMatricula(
   
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
-    const query = `SELECT COUNT(*) FROM sistema.reporte_estudiantes ${whereClause}`;
-
-    const result = await client.query(query, values);
-    return parseInt(result.rows[0].count, 10);
-  }
-
+    const query = `
+      SELECT COUNT(*) FROM (
+        SELECT * FROM "Estudiantes".reporte_estudiantes(NULL, NULL, NULL)
+      ) t
+      ${whereClause}
+    `;
   
+    try {
+      const result = await client.query(query, values);
+      return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+      console.error("Error al contar reporte de estudiantes:", error);
+      throw error;
+    }
+  }
+  
+
 }

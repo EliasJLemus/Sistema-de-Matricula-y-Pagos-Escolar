@@ -42,17 +42,22 @@ export type ReporteMatriculaDBType = {
   }
 
   export type ReporteEstudianteType = {
-    estudiante: string,
+    nombre_estudiante: string,
     identidad: string,
     genero: string,
+    edad: number,
     alergias: string | null,
     zurdo: "Sí" | "No",
+    discapacidad: string,
     grado: string,
     estado: string,
     plan_pago: string,
-    encargado: string | null,
-    parentesco: string | null,
-    telefono: string | null
+    encargado_principal: string | null,
+    parentesco_principal: string | null,
+    telefono_principal: string | null,
+    encargado_secundario?: string,
+    parentesco_secundario?: string,
+    telefono_secundario?: string
   }
 
   export type ReporteBecaType = {

@@ -2,7 +2,7 @@ import { StructureAndData, StructureColumn, ReporteEstudianteType } from "@share
 
 const columnsEstudiante: StructureColumn<ReporteEstudianteType>[] = [
   { 
-    name : "estudiante", 
+    name : "nombre_estudiante", 
     label: "Nombre del Estudiante" 
   },
   { 
@@ -13,6 +13,10 @@ const columnsEstudiante: StructureColumn<ReporteEstudianteType>[] = [
     name : "genero", 
     label: "Género" 
   },
+  {
+    name: "edad",
+    label: "Edad"
+  },
   { 
     name : "alergias", 
     label: "Alergias" 
@@ -20,6 +24,10 @@ const columnsEstudiante: StructureColumn<ReporteEstudianteType>[] = [
   { 
     name : "zurdo", 
     label: "Zurdo" 
+  },
+  {
+    name: "discapacidad",
+    label: "Discapacidad"
   },
   { 
     name : "grado", 
@@ -34,16 +42,28 @@ const columnsEstudiante: StructureColumn<ReporteEstudianteType>[] = [
     label: "Plan de Pago" 
   },
   { 
-    name : "encargado", 
-    label: "Encargado" 
+    name : "encargado_principal", 
+    label: "Encargado Principal" 
   },
   { 
-    name : "parentesco", 
-    label: "Parentesco" 
+    name : "parentesco_principal", 
+    label: "Parentesco Principal" 
   },
   { 
-    name : "telefono", 
-    label: "Teléfono" 
+    name : "telefono_principal", 
+    label: "Teléfono Principal" 
+  },
+  { 
+    name : "encargado_secundario", 
+    label: "Encargado Secundario" 
+  },
+  { 
+    name : "parentesco_secundario", 
+    label: "Parentesco Principal" 
+  },
+  { 
+    name : "telefono_secundario", 
+    label: "Teléfono Principal" 
   }
 ];
 
