@@ -22,13 +22,21 @@ const columnsBeca: StructureColumn<ReporteBecaType>[] = [
     label: "Fecha de Admisión",
     type : "date"
   },
-  { 
-    name : "tipo_beneficio", 
-    label: "Tipo de Beneficio"
+  {
+    name: "nombre_beca",
+    label: "Nombre de la Beca"
   },
-  { 
-    name : "porcentaje_beneficio", 
-    label: "Porcentaje de Beneficio"
+  {
+    name: "porcentaje_beca",
+    label: "Porcentaje"
+  },
+  {
+    name : "tipo_aplicacion",
+    label: "Tipo Aplicacion"
+  },
+  {
+    name: "fecha_aplicacion",
+    label: "Fecha Aplicada a la Beca"
   },
   { 
     name : "estado", 

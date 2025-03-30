@@ -1,4 +1,3 @@
-// ReporteDetalladoDB.ts
 import { Database } from "../service";
 import {
   ReporteMatriculaDBType,
@@ -14,7 +13,7 @@ export class ReporteDetalladoDB {
     this.db = new Database();
   }
 
-  // ======= MATRICULA (ya actualizada previamente) =======
+  // ======= MATRICULA =======
  public async getReporteMatricula(
   limit: number,
   offset: number,
@@ -52,14 +51,13 @@ export class ReporteDetalladoDB {
   `;
 
   try {
-    console.log(client)
     const result = await client.query(query, values);
     return result.rows as ReporteMatriculaDBType[];
   } catch (error) {
     console.error("Error ejecutando getReporteMatricula:", error);
     throw new Error("Error obteniendo el reporte de matrícula.");
   } finally {
-    client.release?.(); // liberamos el cliente siempre
+    client.release?.(); 
   }
 }
 
@@ -98,9 +96,6 @@ public async countReporteMatricula(
   return parseInt(result.rows[0].count, 10);
 }
 
-  
-  
-  
   // ======= MENSUALIDAD =======
   public async getReporteMensualidad(
     limit: number,
@@ -162,7 +157,6 @@ public async countReporteMatricula(
     }
   }
   
-  
   public async countReporteMensualidad(
     filters: { estudiante?: string; grado?: string; fecha?: string }
   ): Promise<number> {
@@ -208,7 +202,6 @@ public async countReporteMatricula(
     }
   }
   
-
   // ======= BECA =======
   public async getReporteBeca(
     limit: number,
@@ -229,24 +222,39 @@ public async countReporteMatricula(
       values.push(filters.grado);
     }
     if (filters.tipo_beneficio) {
-      where.push(`tipo_beneficio = $${paramIndex++}`);
+      where.push(`nombre_beca = $${paramIndex++}`);
       values.push(filters.tipo_beneficio);
     }
   
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
-      SELECT id_estudiante, nombre_estudiante, grado, seccion, fecha_admision, tipo_beneficio, porcentaje_beneficio, estado
-      FROM sistema.reporte_becas_descuentos
+      SELECT 
+        nombre_estudiante,
+        grado,
+        seccion,
+        fecha_admision,
+        nombre_beca,
+        porcentaje_beca,
+        tipo_aplicacion,
+        estado,
+        nombre_encargado,
+        fecha_aplicacion
+      FROM "Pagos".reporte_becas_aplicadas(NULL, NULL, NULL)
       ${whereClause}
-      ORDER BY porcentaje_beneficio DESC
+      ORDER BY porcentaje_beca DESC
       LIMIT $1 OFFSET $2
     `;
   
-    const result = await client.query(query, values);
-    console.log(result.rows)
-    return result.rows;
+    try {
+      const result = await client.query(query, values);
+      return result.rows;
+    } catch (error) {
+      console.error('Error en getReporteBeca:', error);
+      throw new Error('Error al obtener el reporte de becas');
+    }
   }
+  
   
   public async countReporteBeca(filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string }): Promise<number> {
     const client = await this.db.getClient();
@@ -263,14 +271,26 @@ public async countReporteMatricula(
       values.push(filters.grado);
     }
     if (filters.tipo_beneficio) {
-      where.push(`tipo_beneficio = $${paramIndex++}`);
+      where.push(`nombre_beca = $${paramIndex++}`);
       values.push(filters.tipo_beneficio);
     }
   
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-    const query = `SELECT COUNT(*) FROM sistema.reporte_becas_descuentos ${whereClause}`;
-    const result = await client.query(query, values);
-    return parseInt(result.rows[0].count, 10);
+  
+    const query = `
+      SELECT COUNT(*) FROM (
+        SELECT * FROM "Pagos".reporte_becas_aplicadas(NULL, NULL, NULL)
+      ) AS sub
+      ${whereClause}
+    `;
+  
+    try {
+      const result = await client.query(query, values);
+      return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+      console.error('Error en countReporteBeca:', error);
+      throw new Error('Error al contar el reporte de becas');
+    }
   }
   
   

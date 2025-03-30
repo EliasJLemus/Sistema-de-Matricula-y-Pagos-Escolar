@@ -56,14 +56,17 @@ export type ReporteMatriculaDBType = {
   }
 
   export type ReporteBecaType = {
-    id_estudiante: string;
-    nombre_estudiante: string;
-    grado: string;
-    seccion: string;
-    fecha_admision: string; 
-    tipo_beneficio: string;
-    porcentaje_beneficio: string; 
-    estado: string;
+    id_estudiante?: string;
+    nombre_estudiante?: string;
+    grado?: string;
+    seccion?: string;
+    fecha_admision?: string; 
+    nombre_beca?: string;
+    porcentaje_beca?: string;
+    tipo_aplicacion?: string;
+    estado?: string;
+    nombre_encargado?: string;
+    fecha_aplicacion?: string
   };
   
   export type ReportePagosPendientesType = {
