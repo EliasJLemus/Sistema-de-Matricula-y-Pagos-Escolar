@@ -107,7 +107,7 @@ export const getReporteMensualidad = async (
 
     res.status(404).json({ message: "No se encontraron datos." });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor." });
+    res.status(500).json({ message: "Error en el servidor.", error:error});
   }
 };
 

@@ -7,12 +7,18 @@ const columnsMatricula: StructureColumn<ReporteMatriculaType>[] = [
     label: "Grado" },
   { name: "seccion", 
     label: "Sección" },
+    {
+      name: "tipoPlan",
+      label: "Plan de matricula"
+    },
   { name: "tarifaMatricula", 
     label: "Tarifa Matrícula", type: "number" },
   { name: "beneficioAplicado", 
     label: "Beneficio" },
-  { name: "descuento", 
-    label: "Descuento" },
+    {
+      name: "pocentajeDescuento",
+      label: "Porcentaje de Descuento"
+    },
   { name: "totalPagar", 
     label: "Total a Pagar", 
     type: "number" },
@@ -20,7 +26,8 @@ const columnsMatricula: StructureColumn<ReporteMatriculaType>[] = [
     label: "Estado" },
   { name: "fechaMatricula", 
     label: "Fecha Matrícula", 
-    type: "date" }
+    type: "date" },
+    
 ];
 
 export const matriculaStructure: StructureAndData<ReporteMatriculaType> = {

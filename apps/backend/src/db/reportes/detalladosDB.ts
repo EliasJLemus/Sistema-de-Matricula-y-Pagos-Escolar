@@ -63,8 +63,6 @@ export class ReporteDetalladoDB {
   }
 }
 
-  
-  
 public async countReporteMatricula(
   filters: { nombre?: string; grado?: string; estado?: string }
 ): Promise<number> {
@@ -102,6 +100,115 @@ public async countReporteMatricula(
 
   
   
+  
+  // ======= MENSUALIDAD =======
+  public async getReporteMensualidad(
+    limit: number,
+    offset: number,
+    filters: { estudiante?: string; grado?: string; fecha?: string }
+  ): Promise<ReporteMensualidadType[]> {
+    const client = await this.db.getClient();
+    const where: string[] = [];
+    const values: any[] = [limit, offset];
+    let paramIndex = 3;
+  
+    if (filters.estudiante) {
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      values.push(`%${filters.estudiante}%`);
+    }
+    if (filters.grado) {
+      where.push(`grado = $${paramIndex++}`);
+      values.push(filters.grado);
+    }
+    if (filters.fecha) {
+      where.push(`fecha_inicio = $${paramIndex++}`);
+      values.push(filters.fecha);
+    }
+  
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  
+    const query = `
+      SELECT 
+        nombre_estudiante,
+        grado,
+        beneficio_aplicado,
+        porcentaje_descuento,
+        fecha_inicio,
+        fecha_vencimiento,
+        subtotal,
+        saldo_pendiente,
+        saldo_pagado,
+        recargo,
+        estado
+      FROM "Pagos".reporte_mensualidades(
+        NULL,
+        NULL,
+        '2025-01-01',
+        '2025-12-31'
+      )
+      ${whereClause}
+      ORDER BY fecha_vencimiento DESC
+      LIMIT $1 OFFSET $2;
+    `;
+  
+    try {
+      const result = await client.query(query, values);
+      return result.rows;
+    } catch (error) {
+      console.error('Error en getReporteMensualidad:', error);
+      throw new Error('No se pudo obtener el reporte de mensualidades.');
+    } finally {
+      client.release?.();
+    }
+  }
+  
+  
+  public async countReporteMensualidad(
+    filters: { estudiante?: string; grado?: string; fecha?: string }
+  ): Promise<number> {
+    const client = await this.db.getClient();
+    const where: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+  
+    if (filters.estudiante) {
+      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      values.push(`%${filters.estudiante}%`);
+    }
+    if (filters.grado) {
+      where.push(`grado = $${paramIndex++}`);
+      values.push(filters.grado);
+    }
+    if (filters.fecha) {
+      where.push(`fecha_inicio = $${paramIndex++}`);
+      values.push(filters.fecha);
+    }
+  
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  
+    const query = `
+      SELECT COUNT(*) 
+      FROM "Pagos".reporte_mensualidades(
+        NULL,
+        NULL,
+        '2025-01-01',
+        '2025-12-31'
+      ) 
+      ${whereClause};
+    `;
+  
+    try {
+      const result = await client.query(query, values);
+      return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+      console.error("Error en countReporteMensualidad:", error);
+      throw new Error("No se pudo contar los registros del reporte de mensualidades.");
+    } finally {
+      client.release?.();
+    }
+  }
+  
+
   // ======= BECA =======
   public async getReporteBeca(
     limit: number,
@@ -249,72 +356,6 @@ public async countReporteMatricula(
     const result = await client.query(query, values);
     return parseInt(result.rows[0].count, 10);
   }
-  
-  
-  
-  // ======= MENSUALIDAD =======
-  public async getReporteMensualidad(
-    limit: number,
-    offset: number,
-    filters: { estudiante?: string; grado?: string; fecha?: string }
-  ): Promise<ReporteMensualidadType[]> {
-    const client = await this.db.getClient();
-    const where: string[] = [];
-    const values: any[] = [limit, offset];
-    let paramIndex = 3;
-  
-    if (filters.estudiante) {
-      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.estudiante}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-  
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  
-    const query = `
-      SELECT estudiante, grado, descuento, fecha_inicio, fecha_vencimiento, saldo_total, saldo_pagado, saldo_pendiente, recargo, estado
-      FROM sistema.reporte_mensualidades
-      ${whereClause}
-      ORDER BY fecha_vencimiento DESC
-      LIMIT $1 OFFSET $2
-    `;
-  
-    const result = await client.query(query, values);
-    return result.rows;
-  }
-  
-  public async countReporteMensualidad(
-    filters: { estudiante?: string; grado?: string; fecha?: string }
-  ): Promise<number> {
-    const client = await this.db.getClient();
-    const where: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-  
-    if (filters.estudiante) {
-      where.push(`unaccent(estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.estudiante}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-  
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-    const query = `SELECT COUNT(*) FROM sistema.reporte_mensualidades ${whereClause}`;
-    const result = await client.query(query, values);
-    return parseInt(result.rows[0].count, 10);
-  }
+
   
 }

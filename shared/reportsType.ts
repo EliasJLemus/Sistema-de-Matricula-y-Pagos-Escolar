@@ -28,16 +28,17 @@ export type ReporteMatriculaDBType = {
   };
   
   export type ReporteMensualidadType = {
-    estudiante: string,
+    nombre_estudiante: string,
     grado: string,
-    descuento: string,
+    beneficio_aplicado: string
+    porcentaje_descuento: string,
     fecha_inicio: string | Date,         
     fecha_vencimiento: string | Date,    
-    saldo_total: number,
-    saldo_pagado: number,
+    subtotal: number,
     saldo_pendiente: number,
+    saldo_pagado: number,
     recargo: number,
-    estado: string
+    estado:string
   }
 
   export type ReporteEstudianteType = {
