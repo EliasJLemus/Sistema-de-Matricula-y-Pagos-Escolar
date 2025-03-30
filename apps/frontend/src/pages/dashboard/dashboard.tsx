@@ -221,11 +221,11 @@ export default function Dashboard() {
                           pagosPendientesData.data.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell className="font-medium">{item.grado}</TableCell>
-                              <TableCell>L. {Number(item.promedio_deuda_por_estudiante).toFixed(2)}</TableCell>
-                              <TableCell>L. {Number(item.deuda_total_del_grado).toFixed(2)}</TableCell>
+                              <TableCell>L. {Number(item.promedio_deuda_moroso).toFixed(2)}</TableCell>
+                              <TableCell>L. {Number(item.estudiantes_morosos).toFixed(2)}</TableCell>
                               <TableCell className="text-right">
-                                <Badge variant={item.promedio_deuda_por_estudiante > 2000 ? "destructive" : "outline"}>
-                                  {item.promedio_deuda_por_estudiante > 2000 ? "Alto" : "Normal"}
+                                <Badge variant={item.promedio_deuda_moroso > 2000 ? "destructive" : "outline"}>
+                                  {item.promedio_deuda_moroso > 2000 ? "Alto" : "Normal"}
                                 </Badge>
                               </TableCell>
                             </TableRow>

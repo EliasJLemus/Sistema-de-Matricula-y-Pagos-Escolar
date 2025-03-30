@@ -15,13 +15,47 @@ import { StructureColumn, ReporteBecaType } from "@shared/reportsType";
 import { useQueryClient } from "@tanstack/react-query";
 
 const structureColumns: StructureColumn<ReporteBecaType>[] = [
-  { name: "nombre_estudiante", label: "Nombre Estudiante" },
-  { name: "grado", label: "Grado" },
-  { name: "seccion", label: "Sección" },
-  { name: "fecha_admision", label: "Fecha Admisión" },
-  { name: "tipo_beneficio", label: "Tipo Beneficio" },
-  { name: "porcentaje_beneficio", label: "Porcentaje Beneficio" },
-  { name: "estado", label: "Estado" },
+  { 
+    name : "id_estudiante", 
+    label: "ID Estudiante",
+  },
+  { 
+    name : "nombre_estudiante", 
+    label: "Nombre del Estudiante"
+  },
+  { 
+    name : "grado", 
+    label: "Grado"
+  },
+  { 
+    name : "seccion", 
+    label: "Sección"
+  },
+  { 
+    name : "fecha_admision", 
+    label: "Fecha de Admisión",
+    type : "date"
+  },
+  {
+    name: "nombre_beca",
+    label: "Nombre de la Beca"
+  },
+  {
+    name: "porcentaje_beca",
+    label: "Porcentaje"
+  },
+  {
+    name : "tipo_aplicacion",
+    label: "Tipo Aplicacion"
+  },
+  {
+    name: "fecha_aplicacion",
+    label: "Fecha Aplicada a la Beca"
+  },
+  { 
+    name : "estado", 
+    label: "Estado"
+  }
 ];
 
 export const BecaTable: React.FC = () => {

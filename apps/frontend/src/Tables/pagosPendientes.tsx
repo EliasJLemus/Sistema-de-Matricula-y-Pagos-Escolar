@@ -18,9 +18,9 @@ export const PagosPendientesTable: React.FC = () => {
 
     return data.data.map((item) => ({
       grado: item.grado,
-      totalDeudas: item.total_deudas,
-      promedioDeuda: item.promedio_deuda_por_estudiante,
-      deudaTotal: item.deuda_total_del_grado,
+      totalDeudas: item.deuda_total,
+      promedioDeuda: item.promedio_deuda_moroso,
+      deudaTotal: item.porcentaje_morosidad,
     }));
   }, [data]);
 
@@ -56,9 +56,9 @@ export const PagosPendientesTable: React.FC = () => {
               {data.data.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>{row.grado}</TableCell>
-                  <TableCell>{row.total_deudas}</TableCell>
-                  <TableCell>$ {row.promedio_deuda_por_estudiante}</TableCell>
-                  <TableCell>$ {row.deuda_total_del_grado}</TableCell>
+                  <TableCell>{row.deuda_total}</TableCell>
+                  <TableCell>$ {row.promedio_deuda_moroso}</TableCell>
+                  <TableCell>$ {row.porcentaje_morosidad}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

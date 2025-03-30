@@ -25,8 +25,8 @@ export const usePagosPendientesChartData = () => {
 
     return data.data.map((item) => ({
       grado: item.grado,
-      promedioDeuda: item.promedio_deuda_por_estudiante,
-      deudaTotal: item.deuda_total_del_grado,
+      promedioDeuda: item.promedio_deuda_moroso,
+      deudaTotal: item.deuda_total,
     }));
   }, [data]);
 
@@ -40,10 +40,10 @@ export const useRetirosChartData = () => {
     if (!data || !data.data) return [];
 
     return data.data.map((item) => ({
-      grado: item.grado,
+      grado: item.nivel,
       estudiantesActivos: Number(item.estudiantes_activos),
       estudiantesRetirados: Number(item.estudiantes_retirados),
-      tasaRetiro: parseFloat(item.tasa_retiro.replace("%", "")), // Convertir porcentaje string a número
+      tasaRetiro: item.tasa_retiro ? parseFloat(item.tasa_retiro.replace("%", "")): "0%", // Convertir porcentaje string a número
     }));
   }, [data]);
 

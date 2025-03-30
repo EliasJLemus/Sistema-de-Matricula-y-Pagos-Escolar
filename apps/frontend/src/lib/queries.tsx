@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { client } from "./client";
-import { 
-  ReporteMatriculaType, 
+import {
+  ReporteMatriculaType,
   ReporteMensualidadType,
   ReporteEstudianteType,
   ReporteBecaType,
@@ -9,7 +9,7 @@ import {
   ReportePagosPendientesType,
   ReporteRetiroEstudiantesType,
   ReporteAntiguedadEstudiantes,
-  StructureAndData 
+  StructureAndData,
 } from "@shared/reportsType";
 import axios from "axios";
 
@@ -28,16 +28,21 @@ export const useGetReportsMatricula = (
   return useQuery({
     queryKey: ["getReportsMatricula", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
-      const baseUrl = `http://localhost:3000/reportes/matricula`;
-      let url = `${baseUrl}?page=${page}&limit=5`;
+      try {
+        const baseUrl = `http://localhost:3000/reportes/matricula`;
+        const params = new URLSearchParams();
+        params.append("page", page.toString());
+        params.append("limit", limit.toString());
 
-      if (filters.nombre) url += `&nombre=${encodeURIComponent(filters.nombre)}`;
-      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
-      if (filters.estado) url += `&estado=${encodeURIComponent(filters.estado)}`;
+        if (filters.nombre) params.append("nombre", filters.nombre);
+        if (filters.grado) params.append("grado", filters.grado);
+        if (filters.estado) params.append("estado", filters.estado);
 
-      const response = await axios.get<StructureAndData<ReporteMatriculaType>>(url);
-      console.log(response)
-      return response.data;
+        const response = await axios.get<StructureAndData<ReporteMatriculaType>>(`${baseUrl}?${params.toString()}`);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de matrícula");
+      }
     },
     staleTime: 1000,
   });
@@ -58,14 +63,22 @@ export const useGetReporteMensualidad = (
   return useQuery({
     queryKey: ["getReporteMensualidad", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
-      let url = `http://localhost:3000/reportes/mensualidad?page=${page}&limit=5`;
-      if (filters.estudiante) url += `&estudiante=${encodeURIComponent(filters.estudiante)}`;
-      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
-      if (filters.fecha) url += `&fecha=${encodeURIComponent(filters.fecha)}`;
+      try {
+        const params = new URLSearchParams();
+        params.append("page", page.toString());
+        params.append("limit", limit.toString());
 
-      const response = await axios.get<StructureAndData<ReporteMensualidadType>>(url);
-     
-      return response.data;
+        if (filters.estudiante) params.append("estudiante", filters.estudiante);
+        if (filters.grado) params.append("grado", filters.grado);
+        if (filters.fecha) params.append("fecha", filters.fecha);
+
+        const response = await axios.get<StructureAndData<ReporteMensualidadType>>(
+          `http://localhost:3000/reportes/mensualidad?${params.toString()}`
+        );
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de mensualidad");
+      }
     },
     staleTime: 1000,
   });
@@ -82,28 +95,30 @@ export const useGetReporteEstudiante = (
   page: number,
   limit: number,
   filters: Filters
-) => {
+): UseQueryResult<StructureAndData<ReporteEstudianteType>, Error> => {
   return useQuery({
-  
-    queryKey: ["reporteEstudiante", page, filters],
+    queryKey: ["reporteEstudiante", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append("page", page.toString());
-      params.append("limit", limit.toString());
+      try {
+        const params = new URLSearchParams();
+        params.append("page", page.toString());
+        params.append("limit", limit.toString());
 
-      if (filters.estudiante) params.append("estudiante", filters.estudiante);
-      if (filters.grado) params.append("grado", filters.grado);
-      if (filters.estado) params.append("estado", filters.estado);
-     
-      const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
-        `http://localhost:3000/reportes/estudiante?page=${page}=limit:${limit}${filters.estudiante ? `&estudiante=${filters.estudiante}` : ``}${filters.grado ? `&grado=${filters.grado}` : ``}${filters.estado ? `&estado=${filters.estado}` : ``}`
-      );
-    
-      return response.data;
-    }
+        if (filters.estudiante) params.append("estudiante", filters.estudiante);
+        if (filters.grado) params.append("grado", filters.grado);
+        if (filters.estado) params.append("estado", filters.estado);
+
+        const response = await axios.get<StructureAndData<ReporteEstudianteType>>(
+          `http://localhost:3000/reportes/estudiante?${params.toString()}`
+        );
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de estudiante");
+      }
+    },
+    staleTime: 1000,
   });
 };
-
 
 type FiltrosBeca = {
   nombre_estudiante?: string;
@@ -117,28 +132,40 @@ export const useGetReporteBeca = (
   filters: FiltrosBeca = {}
 ): UseQueryResult<StructureAndData<ReporteBecaType>, Error> => {
   return useQuery({
-    queryKey: ["getReporteBeca", page, limit, filters],
+    queryKey: ["getReporteBeca", page, limit, JSON.stringify(filters)],
     queryFn: async () => {
-      let url = `http://localhost:3000/reportes/beca`;
-      if (filters.nombre_estudiante) url += `&nombre_estudiante=${encodeURIComponent(filters.nombre_estudiante)}`;
-      if (filters.grado) url += `&grado=${encodeURIComponent(filters.grado)}`;
-      if (filters.tipo_beneficio) url += `&tipo_beneficio=${encodeURIComponent(filters.tipo_beneficio)}`;
+      try {
+        const params = new URLSearchParams();
+        params.append("page", page.toString());
+        params.append("limit", limit.toString());
 
-      const response = await axios.get<StructureAndData<ReporteBecaType>>(url);
-      return response.data;
+        if (filters.nombre_estudiante) params.append("nombre_estudiante", filters.nombre_estudiante);
+        if (filters.grado) params.append("grado", filters.grado);
+        if (filters.tipo_beneficio) params.append("tipo_beneficio", filters.tipo_beneficio);
+
+        const response = await axios.get<StructureAndData<ReporteBecaType>>(
+          `http://localhost:3000/reportes/beca?${params.toString()}`
+        );
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de becas");
+      }
     },
     staleTime: 1000,
   });
 };
 
-
 // Hook para reporte financiero anual
 export const useGetReporteFinancieroAnual = (): UseQueryResult<StructureAndData<ReporteFinancieroAnualType>, Error> => {
-  return useQuery<StructureAndData<ReporteFinancieroAnualType>, Error>({
+  return useQuery({
     queryKey: ["getReporteFinancieroAnual"],
     queryFn: async () => {
-      const response = await client.get(`/reportes/financiero-anual`);
-      return response.data;
+      try {
+        const response = await client.get(`/reportes/financiero-anual`);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte financiero anual");
+      }
     },
     staleTime: 1000,
   });
@@ -146,11 +173,15 @@ export const useGetReporteFinancieroAnual = (): UseQueryResult<StructureAndData<
 
 // Hook para pagos pendientes
 export const useGetReportePagosPendientes = (): UseQueryResult<StructureAndData<ReportePagosPendientesType>, Error> => {
-  return useQuery<StructureAndData<ReportePagosPendientesType>, Error>({
+  return useQuery({
     queryKey: ["getReportePagosPendientes"],
     queryFn: async () => {
-      const response = await client.get(`/reportes/pagos-pendientes`);
-      return response.data;
+      try {
+        const response = await client.get(`/reportes/pagos-pendientes`);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de pagos pendientes");
+      }
     },
     staleTime: 1000,
   });
@@ -158,23 +189,32 @@ export const useGetReportePagosPendientes = (): UseQueryResult<StructureAndData<
 
 // Hook para retiro de estudiantes
 export const useGetReporteRetiroEstudiantes = (): UseQueryResult<StructureAndData<ReporteRetiroEstudiantesType>, Error> => {
-  return useQuery<StructureAndData<ReporteRetiroEstudiantesType>, Error>({
+  return useQuery({
     queryKey: ["getReporteRetiroEstudiantes"],
     queryFn: async () => {
-      const response = await client.get(`/reportes/retiro-estudiante`);
-      return response.data;
+      try {
+        const response = await client.get(`/reportes/retiro-estudiante`);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de retiro de estudiantes");
+      }
     },
     staleTime: 1000,
   });
 };
 
-//Hook para antiguedad estudiante
+// Hook para antigüedad de estudiantes
 export const useGetAntiguedadEstudiante = (): UseQueryResult<StructureAndData<ReporteAntiguedadEstudiantes>, Error> => {
-  return useQuery<StructureAndData<ReporteAntiguedadEstudiantes>, Error>({
+  return useQuery({
     queryKey: ["getReporteAntiguedadEstudiante"],
     queryFn: async () => {
-      const response = await client.get(`/reportes/antiguedad-estudiante`);
-      return response.data
-    }
-  })
-}
+      try {
+        const response = await client.get(`/reportes/antiguedad-estudiante`);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al obtener reporte de antigüedad de estudiantes");
+      }
+    },
+    staleTime: 1000,
+  });
+};
