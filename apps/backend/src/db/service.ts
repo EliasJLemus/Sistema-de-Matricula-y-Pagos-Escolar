@@ -11,6 +11,10 @@ class Database {
             user: Keys.Database.Username,
             password: Keys.Database.Password,
             database: Keys.Database.Database,
+            ssl: {
+              rejectUnauthorized: false
+            },
+            
         });
     }
 

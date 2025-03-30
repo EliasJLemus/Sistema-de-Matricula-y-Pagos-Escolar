@@ -4,10 +4,13 @@ export type ReporteMatriculaDBType = {
     seccion: string;
     tarifa_matricula: number;
     beneficio_aplicado: string;
-    descuento: string;
+    descuento?: string;
     total_pagar: number;
     estado: string;
     fecha_matricula: string; 
+    porcentaje_descuento?: string;
+    tipo_plan
+
   };
 
   export type ReporteMatriculaType = {
@@ -16,10 +19,12 @@ export type ReporteMatriculaDBType = {
     seccion: string;
     tarifaMatricula: number;
     beneficioAplicado: string;
-    descuento: string;
+    descuento?: string;
     totalPagar: number;
     estado: string;
     fechaMatricula: string | Date;
+    pocentajeDescuento?:string;
+    tipoPlan: string;
   };
   
   export type ReporteMensualidadType = {

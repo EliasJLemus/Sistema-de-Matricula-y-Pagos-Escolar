@@ -15,73 +15,91 @@ export class ReporteDetalladoDB {
   }
 
   // ======= MATRICULA (ya actualizada previamente) =======
-  public async getReporteMatricula(
-    limit: number,
-    offset: number,
-    filters: { nombre?: string; grado?: string; estado?: string }
-  ): Promise<ReporteMatriculaDBType[]> {
-    const client = await this.db.getClient();
-  
-    const where: string[] = [];
-    const values: any[] = [limit, offset];
-    let paramIndex = 3;
-  
-    if (filters.nombre) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.nombre}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.estado) {
-      where.push(`estado = $${paramIndex++}`);
-      values.push(filters.estado);
-    }
-  
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  
-    const query = `
-      SELECT nombre_estudiante, grado, seccion, tarifa_matricula, beneficio_aplicado, descuento, total_pagar, estado, fecha_matricula
-      FROM sistema.reporte_matricula
-      ${whereClause}
-      ORDER BY fecha_matricula DESC
-      LIMIT $1 OFFSET $2
-    `;
-  
-    const result = await client.query(query, values);
-    return result.rows;
+ public async getReporteMatricula(
+  limit: number,
+  offset: number,
+  filters: { nombre?: string; grado?: string; estado?: string }
+): Promise<ReporteMatriculaDBType[]> {
+  const client = await this.db.getClient();
+
+  const where: string[] = [];
+  const values: any[] = [limit, offset];
+  let paramIndex = 3;
+
+  if (filters.nombre) {
+    where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+    values.push(`%${filters.nombre}%`);
   }
-  
-  
-  public async countReporteMatricula(
-    filters: { nombre?: string; grado?: string; estado?: string }
-  ): Promise<number> {
-    const client = await this.db.getClient();
-  
-    const where: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-  
-    if (filters.nombre) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.nombre}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.estado) {
-      where.push(`estado = $${paramIndex++}`);
-      values.push(filters.estado);
-    }
-  
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  
-    const query = `SELECT COUNT(*) FROM sistema.reporte_matricula ${whereClause}`;
-    const result = await client.query(query, values);
-    return parseInt(result.rows[0].count, 10);
+  if (filters.grado) {
+    where.push(`grado = $${paramIndex++}`);
+    values.push(filters.grado);
   }
+  if (filters.estado) {
+    where.push(`estado = $${paramIndex++}`);
+    values.push(filters.estado);
+  }
+
+  const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const query = `
+    SELECT nombre_estudiante, grado, seccion, tarifa_matricula,
+           beneficio_aplicado, porcentaje_descuento, total_a_pagar,
+           estado, fecha_matricula, tipo_plan
+    FROM "Pagos".reporte_matricula_por_anio(2025)
+    ${whereClause}
+    ORDER BY fecha_matricula DESC
+    LIMIT $1 OFFSET $2
+  `;
+
+  try {
+    console.log(client)
+    const result = await client.query(query, values);
+    return result.rows as ReporteMatriculaDBType[];
+  } catch (error) {
+    console.error("Error ejecutando getReporteMatricula:", error);
+    throw new Error("Error obteniendo el reporte de matrícula.");
+  } finally {
+    client.release?.(); // liberamos el cliente siempre
+  }
+}
+
+  
+  
+public async countReporteMatricula(
+  filters: { nombre?: string; grado?: string; estado?: string }
+): Promise<number> {
+  const client = await this.db.getClient();
+
+  const where: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  if (filters.nombre) {
+    where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+    values.push(`%${filters.nombre}%`);
+  }
+  if (filters.grado) {
+    where.push(`grado = $${paramIndex++}`);
+    values.push(filters.grado);
+  }
+  if (filters.estado) {
+    where.push(`estado = $${paramIndex++}`);
+    values.push(filters.estado);
+  }
+
+  const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const query = `
+    SELECT COUNT(*) FROM (
+      SELECT * FROM "Pagos".reporte_matricula_por_anio(2025)
+    ) AS reporte
+    ${whereClause}
+  `;
+
+  const result = await client.query(query, values);
+  return parseInt(result.rows[0].count, 10);
+}
+
   
   
   // ======= BECA =======
