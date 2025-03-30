@@ -76,9 +76,11 @@ export type ReporteMatriculaDBType = {
   
   export type ReportePagosPendientesType = {
     grado: string;
-    total_deudas: number;
-    promedio_deuda_por_estudiante: number;
-    deuda_total_del_grado: number;
+    estudiantes_morosos: number;
+    total_estudiantes: number;
+    porcentaje_morosidad: string;
+    deuda_total: number;
+    promedio_deuda_moroso: number;
   };
   
   export type ReporteFinancieroAnualType = {
@@ -88,7 +90,7 @@ export type ReporteMatriculaDBType = {
   };
   
   export type ReporteRetiroEstudiantesType = {
-    grado: string;
+    nivel: string;
     estudiantes_activos: number;
     estudiantes_retirados: number;
     tasa_retiro: string; // Viene como porcentaje 'X%'

@@ -16,10 +16,16 @@ class ReporteSintetizadoDB {
         try {
             const client = await this.db.getClient();
 
-            const query = `SELECT grado, 
-            total_deudas, promedio_deuda_por_estudiante, 
-            deuda_total_del_grado
-	        FROM sistema.reporte_pagos_pendientes;`
+            const query = `
+            SELECT 
+            grado,
+            estudiantes_morosos,
+            total_estudiantes,
+            porcentaje_morosidad,
+            deuda_total,
+            promedio_deuda_moroso
+            FROM "Pagos".reporte_morosidad_por_grado(2025)
+            `
 
             const result = await client.query(query);
 
@@ -37,8 +43,13 @@ class ReporteSintetizadoDB {
         try{
             const client = await this.db.getClient();
 
-            const query = `SELECT tipo_pago, ingresos, deudas_por_cobrar
-	        FROM sistema.reporte_financiero_anual;`
+            const query = `
+            SELECT 
+            tipo_pago,
+            ingresos,
+            deudas_por_cobrar
+            FROM "Pagos".reporte_financiero_anual(2025);
+            `
 
             const result = await client.query(query)
 
@@ -57,8 +68,17 @@ class ReporteSintetizadoDB {
         try {
             const client = await this.db.getClient();
 
-            const query = `SELECT grado, estudiantes_activos, estudiantes_retirados, tasa_retiro
-            FROM sistema.reporte_retiro_estudiantes;`;
+            const query = `SELECT 
+                        nivel,
+                        estudiantes_activos,
+                        estudiantes_retirados,
+                        tasa_retiro
+                        FROM "Estudiantes".reporte_retiro_estudiantes(
+                        2025,                    -- p_anio (año lectivo)
+                        '2025-01-01',            -- p_fecha_inicio (inicio del rango de fechas de retiro)
+                        '2025-12-31'             -- p_fecha_fin (fin del rango de fechas de retiro)
+                        )
+                        `;
 
             const result = await client.query(query);
 
