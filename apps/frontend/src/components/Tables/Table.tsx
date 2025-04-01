@@ -1,11 +1,16 @@
 import { ChevronLeft, Download } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 import { Badge } from "../ui/badge";
 import * as pdfUtils from "@/utils/pdfutils";
-
-
 
 type Column<T> = {
   name: keyof T;
@@ -32,25 +37,29 @@ export function ReportTable<T>({
   columns,
   data,
   filters,
-  pagination
+  pagination,
 }: ReportTableProps<T>) {
   return (
     <div className="space-y-4">
+      {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          <p className="text-muted-foreground">Fecha de emisión: {new Date().toLocaleDateString()}</p>
+          <p className="text-muted-foreground">
+            Fecha de emisión: {new Date().toLocaleDateString()}
+          </p>
         </div>
 
-        {/* Botón de descarga */}
         <Button onClick={() => pdfUtils.generatePDF(title, columns, data)}>
           <Download className="mr-2 h-4 w-4" />
-           Descargar
+          Descargar
         </Button>
       </div>
 
+      {/* Filtros */}
       {filters && <div className="flex flex-wrap gap-4">{filters}</div>}
 
+      {/* Tabla */}
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -90,27 +99,63 @@ export function ReportTable<T>({
           </Table>
         </CardContent>
 
+        {/* Paginación */}
         {pagination && (
           <CardFooter className="flex items-center justify-between border-t p-4">
             <div className="text-sm text-muted-foreground">
               Mostrando {data.length} registros
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={pagination.onPrev} disabled={pagination.page <= 1}>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={pagination.onPrev}
+                disabled={pagination.page <= 1}
+              >
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
               </Button>
-              {Array.from({ length: pagination.pageCount }, (_, i) => (
-                <Button
-                  key={i}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => pagination.onPageChange(i + 1)}
-                  className={pagination.page === i + 1 ? "bg-muted" : ""}
-                >
-                  {i + 1}
-                </Button>
-              ))}
+
+              {(() => {
+                const buttons = [];
+                const maxVisible = 5;
+                const half = Math.floor(maxVisible / 2);
+                let start = Math.max(1, pagination.page - half);
+                let end = Math.min(
+                  pagination.pageCount,
+                  start + maxVisible - 1
+                );
+
+                if (end - start < maxVisible - 1) {
+                  start = Math.max(1, end - maxVisible + 1);
+                }
+
+                if (start > 1) {
+                  buttons.push(<span key="start">...</span>);
+                }
+
+                for (let i = start; i <= end; i++) {
+                  buttons.push(
+                    <Button
+                      key={i}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => pagination.onPageChange(i)}
+                      className={pagination.page === i ? "bg-muted" : ""}
+                    >
+                      {i}
+                    </Button>
+                  );
+                }
+
+                if (end < pagination.pageCount) {
+                  buttons.push(<span key="end">...</span>);
+                }
+
+                return buttons;
+              })()}
+
               <Button
                 variant="outline"
                 size="sm"
