@@ -43,7 +43,7 @@ export const getReporteMatricula = async (
       filters
     );
     const total = await reporteDetalladoDB.countReporteMatricula(filters);
-
+    
     if (Array.isArray(result) && result.length > 0) {
       const report = result.map((row) => ({
         nombreEstudiante: row.nombre_estudiante,
@@ -51,10 +51,11 @@ export const getReporteMatricula = async (
         seccion: row.seccion,
         tarifaMatricula: row.tarifa_matricula,
         beneficioAplicado: row.beneficio_aplicado,
-        descuento: row.descuento,
+        descuento: row.porcentaje_descuento,
         totalPagar: row.total_pagar,
         estado: row.estado,
         fechaMatricula: row.fecha_matricula,
+        tipoPlan: row.tipo_plan
       }));
 
       res.status(200).json({
@@ -66,7 +67,7 @@ export const getReporteMatricula = async (
       res.status(404).json({ message: "No se encontraron datos." });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor." });
+    res.status(500).json({ message: "Error en el servidor.", error: error });
   }
 };
 
@@ -106,7 +107,7 @@ export const getReporteMensualidad = async (
 
     res.status(404).json({ message: "No se encontraron datos." });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor." });
+    res.status(500).json({ message: "Error en el servidor.", error:error});
   }
 };
 

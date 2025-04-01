@@ -19,25 +19,20 @@ export const getReporteAntiguedad = async (
   res: Response
 ): Promise<void> => {
   try {
-    // Obtener parámetros de paginación desde la query
     const { limit, offset } = getPaginationParams(req);
 
-    // Obtener los datos del reporte de antigüedad de estudiantes desde la base de datos
     const result = await reporteExperimentalDB.getAntiguedadEstudiante(
       limit,
       offset
     );
-    console.log(result);
-    // Comprobar si se encontraron resultados
+
     if (Array.isArray(result) && result.length > 0) {
-      // Enviar respuesta con los datos del reporte y la paginación
       res.status(200).json({
         ...antiguedadStructure,
         data: result,
         pagination: { limit, offset, count: result.length },
       });
     } else {
-      // Si no se encontraron datos, retornar un mensaje de error
       res.status(404).json({ message: "No se encontraron datos." });
     }
   } catch (error) {

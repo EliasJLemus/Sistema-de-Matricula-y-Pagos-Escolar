@@ -3,19 +3,30 @@ import { StructureAndData, StructureColumn, ReportePagosPendientesType } from "@
 const columnsPagosPendientes: StructureColumn<ReportePagosPendientesType>[] = [
   { name: "grado", 
     label: "Grado" },
-  { name: "total_deudas", 
-    label: "Total Deudas", 
-    type: "number" },
-  { name: "promedio_deuda_por_estudiante", 
-    label: "Promedio de Deuda por Estudiante", 
-    type: "number" },
-  { name: "deuda_total_del_grado", 
-    label: "Deuda Total del Grado", 
-    type: "number" },
+  {
+    name: "estudiantes_morosos",
+    label: "Cantidad  Morosos"
+  },
+  {
+    name: "total_estudiantes",
+    label: "Total Estudiantes en el Grado"
+  },
+  {
+    name: "porcentaje_morosidad",
+    label: "Porcentaje Morosidad"
+  },
+  {
+    name: "deuda_total",
+    label: "Deuda Total"
+  },
+  {
+    name: "promedio_deuda_moroso",
+    label: "Promedio Deuda Moroso"
+  }
 ];
 
 export const pagosPendientesStructure: StructureAndData<ReportePagosPendientesType> = {
-  title: "Reporte de Pagos Pendientes",
+  title: "Reporte de Morosidad Por Grado",
   columns: columnsPagosPendientes,
   data: [] as ReportePagosPendientesType[],
 };

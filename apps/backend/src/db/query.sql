@@ -101,6 +101,9 @@ CREATE TABLE "Estudiantes"."EstudianteEncargado" (
 	ON DELETE CASCADE
 	ON UPDATE CASCADE
 )
+ALTER TABLE "Estudiantes"."EstudianteEncargado"
+ADD COLUMN es_principal BOOLEAN DEFAULT FALSE;
+
 
 /*ESQUEMA: ADMINISTRACION*/
 --Tabla: Grado

@@ -2,7 +2,7 @@ import { StructureAndData, StructureColumn, ReporteMensualidadType } from "@shar
 
 const columnsMensualidad: StructureColumn<ReporteMensualidadType>[] = [
   { 
-    name : "estudiante", 
+    name : "nombre_estudiante", 
     label: "Estudiante" 
   },
   { 
@@ -10,8 +10,12 @@ const columnsMensualidad: StructureColumn<ReporteMensualidadType>[] = [
     label: "Grado" 
   },
   { 
-    name : "descuento", 
-    label: "Descuento" 
+    name : "beneficio_aplicado", 
+    label: "Beneficio Aplicado" 
+  },
+  {
+    name: "porcentaje_descuento",
+    label: "Porcentaje de Descuento"
   },
   { 
     name : "fecha_inicio", 
@@ -24,7 +28,7 @@ const columnsMensualidad: StructureColumn<ReporteMensualidadType>[] = [
     type : "date" 
   },
   { 
-    name : "saldo_total", 
+    name : "subtotal", 
     label: "Saldo Total", 
     type : "number" 
   },
