@@ -45,10 +45,10 @@ export const RetirosTable: React.FC = () => {
             <TableBody>
               {data.data.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell>{row.grado}</TableCell>
+                  <TableCell>{row.nivel}</TableCell>
                   <TableCell>{row.estudiantes_activos}</TableCell>
                   <TableCell>{row.estudiantes_retirados}</TableCell>
-                  <TableCell>{row.tasa_retiro}</TableCell>
+                  <TableCell>{row.tasa_retiro ? row.tasa_retiro: 0}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
