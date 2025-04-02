@@ -41,7 +41,7 @@ export class ReporteDetalladoDB {
   const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
   const query = `
-    SELECT nombre_estudiante, grado, seccion, tarifa_matricula,
+    SELECT codigo_matricula, nombre_estudiante, grado, seccion, tarifa_matricula,
            beneficio_aplicado, porcentaje_descuento, total_a_pagar,
            estado, fecha_matricula, tipo_plan
     FROM "Pagos".reporte_matricula_por_anio(2025)
@@ -123,7 +123,8 @@ public async countReporteMatricula(
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
-      SELECT 
+     SELECT 
+		codigo_mensualidad,
         nombre_estudiante,
         grado,
         beneficio_aplicado,
@@ -230,6 +231,7 @@ public async countReporteMatricula(
   
     const query = `
       SELECT 
+ 		    codigo_beca,
         nombre_estudiante,
         grado,
         seccion,
@@ -327,7 +329,8 @@ public async countReporteMatricula(
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
-      SELECT
+       SELECT
+  		  codigo_estudiante,
         nombre_estudiante,
         identidad,
         genero,
