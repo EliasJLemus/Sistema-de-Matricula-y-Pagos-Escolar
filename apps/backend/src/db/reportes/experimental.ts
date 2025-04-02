@@ -14,8 +14,8 @@ export class ReporteExcepcionalDB {
     ): Promise<ReporteAntiguedadEstudiantes[] | Error> {
         try {
             const query = `
-                 SELECT 
-                id_estudiante,
+                    SELECT 
+                codigo_estudiante,
                 nombre_estudiante,
                 grado,
                 seccion,
