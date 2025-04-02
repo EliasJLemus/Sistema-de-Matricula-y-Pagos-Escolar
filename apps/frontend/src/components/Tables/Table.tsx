@@ -39,7 +39,7 @@ export function ReportTable<T>({
   filters,
   pagination,
 }: ReportTableProps<T>) {
-  return (
+  return ( 
     <div className="space-y-4">
       {/* Encabezado */}
       <div className="flex items-center justify-between">

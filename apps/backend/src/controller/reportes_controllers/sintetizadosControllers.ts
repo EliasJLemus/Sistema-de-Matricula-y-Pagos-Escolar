@@ -14,7 +14,7 @@ export const getReportePagosPendientes = async (
 ) => {
   try {
     const result = await reporteSintetizadoDB.getReportePagosPendientes();
-
+    console.log("MENSAJEE: ", result)
     if (Array.isArray(result) && result.length > 0) {
       pagosPendientesStructure.data = result;
 
@@ -25,7 +25,7 @@ export const getReportePagosPendientes = async (
     res.status(404).json({ message: "No se encontraron datos" });
     return;
   } catch (error) {
-    throw error;
+    res.status(500).json({error: error.message})
   }
 };
 
