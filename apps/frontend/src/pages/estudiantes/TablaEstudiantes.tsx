@@ -1,3 +1,7 @@
+"use client";
+
+import type React from "react";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,10 +29,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import { StructureColumn } from "@shared/reportsType";
-import useGetEstudiantes, {
-  EstudianteType,
-} from "@/lib/queries/useGetEstudiantes";
+import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -53,7 +54,32 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     estado: "",
   });
 
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
+
   const debouncedFilters = useDebounce(filters, 400);
+
+  // Efecto para aplicar el zoom solo al contenido de la tabla, no al sidebar
+  useEffect(() => {
+    // En lugar de aplicar zoom a todo el HTML, lo aplicamos solo al contenedor actual
+    const currentContainer = document.getElementById(
+      "tabla-estudiantes-container"
+    );
+
+    if (currentContainer) {
+      if (isZoomed) {
+        currentContainer.style.zoom = "60%"; // Reducido a 60% para mostrar más contenido
+      } else {
+        currentContainer.style.zoom = "100%";
+      }
+    }
+
+    return () => {
+      // Restaurar el zoom al desmontar el componente
+      if (currentContainer) {
+        currentContainer.style.zoom = "100%";
+      }
+    };
+  }, [isZoomed]);
 
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
@@ -95,6 +121,10 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
       console.log("Eliminar estudiante:", id);
       handleFreshReload();
     }
+  };
+
+  const toggleZoom = () => {
+    setIsZoomed((prev) => !prev);
   };
 
   // Estilos comunes para TextField
@@ -167,7 +197,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     textTransform: "none",
     borderRadius: "10px",
     color: "white",
-    px: 4,
+    px: 3, // Reduced from 4 to 3
     py: 1.2,
     height: "40px",
     fontWeight: 600,
@@ -196,7 +226,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     borderRadius: "10px",
     bgcolor: "#F38223",
     color: "white",
-    px: 4,
+    px: 3, // Reduced from 4 to 3
     py: 1.2,
     height: "40px",
     fontWeight: 600,
@@ -230,8 +260,32 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     transition: "all 0.2s ease-in-out",
   };
 
+  const zoomButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    bgcolor: "#1A1363",
+    color: "white",
+    px: 3, // Reduced from 4 to 3
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(26, 19, 99, 0.3)",
+    "&:hover": {
+      backgroundColor: "#13104d",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(26, 19, 99, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#0c0a33",
+      transform: "translateY(1px)",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
   return (
-    <Box sx={{ position: "relative" }}>
+    <Box id="tabla-estudiantes-container" sx={{ position: "relative" }}>
       {(isLoading || isFetching) && (
         <Box
           sx={{
@@ -446,164 +500,207 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             Quitar filtros
           </Button>
 
-          <Button
-            variant="contained"
-            onClick={onNewStudent}
+          {/* Contenedor para alinear los botones a la derecha - modificado para mantener botones en línea */}
+          <Box
             sx={{
-              ...primaryButtonStyle,
+              display: "flex",
               ml: "auto",
+              gap: 2,
+              flexWrap: "nowrap", // Esto evita que los botones se envuelvan
             }}
-            startIcon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <line x1="19" y1="8" x2="19" y2="14"></line>
-                <line x1="22" y1="11" x2="16" y2="11"></line>
-              </svg>
-            }
           >
-            Nuevo Estudiante
-          </Button>
+            <Button
+              variant="contained"
+              onClick={toggleZoom}
+              sx={zoomButtonStyle}
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {isZoomed ? (
+                    <>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                    </>
+                  ) : (
+                    <>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </>
+                  )}
+                </svg>
+              }
+            >
+              {isZoomed ? "Vista Normal" : "Ver Tabla Completa"}
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={onNewStudent}
+              sx={primaryButtonStyle}
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <line x1="19" y1="8" x2="19" y2="14"></line>
+                  <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+              }
+            >
+              Nuevo Estudiante
+            </Button>
+          </Box>
         </Box>
       </Paper>
 
-      <div className="border border-[#fef3c7] rounded-lg overflow-hidden">
+      <div className="border border-[#edad4c] rounded-lg overflow-hidden">
         <div style={{ overflowX: "auto", width: "100%" }}>
           <Table className="bg-[#fff9db]">
-            <TableHeader className="bg-[#fef3c7] sticky top-0 z-10">
+            <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   ID
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Número
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Primer Nombre
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Segundo Nombre
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Primer Apellido
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Segundo Apellido
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Nacionalidad
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Identidad
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Género
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Fecha Nacimiento
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Edad
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Dirección
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Grado
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Sección
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Es Zurdo
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Dif. Educación
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Alergia
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Desc. Alergia
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Fecha Admisión
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Estado
                 </TableHead>
                 <TableHead
-                  className="text-black font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Acciones
