@@ -1,4 +1,4 @@
-import { Box, ListItemButton, Avatar, Typography } from "@mui/material";
+import { Box, ListItemButton, Typography, Avatar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
   return (
     <Box
       sx={{
-        width: isSidebarVisible ? "300px" : "70px",
+        width: isSidebarVisible ? "240px" : "70px",
         height: "100vh",
         background: "linear-gradient(180deg, #1A1363 0%, #538A3E 100%)",
         display: "flex",
@@ -75,15 +75,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
       >
         <Avatar
           alt="Usuario"
-          src="https://via.placeholder.com/100"
           sx={{
-            width: isSidebarVisible ? 90 : 40,
-            height: isSidebarVisible ? 90 : 40,
+            width: isSidebarVisible ? 80 : 40,
+            height: isSidebarVisible ? 80 : 40,
             border: "3px solid #FFFFFF",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
             transition: "width 0.3s ease, height 0.3s ease",
+            fontSize: isSidebarVisible ? 32 : 18,
           }}
-        />
+        >
+          U
+        </Avatar>
       </Box>
 
       {isSidebarVisible && (

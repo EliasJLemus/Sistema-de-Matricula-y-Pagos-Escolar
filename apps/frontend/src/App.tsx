@@ -28,11 +28,10 @@ function App() {
           <Box
             flexGrow={1}
             sx={{
-              marginLeft: isSidebarVisible ? "300px" : "70px",
-              transition: "margin-left 0.3s ease",
+              marginLeft: isSidebarVisible ? "240px" : "70px",
               padding: 0,
               position: "relative",
-              width: `calc(100% - ${isSidebarVisible ? "300px" : "70px"})`,
+              width: `calc(100% - ${isSidebarVisible ? "240px" : "70px"})`,
             }}
           >
             <Topbar
