@@ -82,4 +82,15 @@ export class Estudiantes {
       throw new AppError(error.message || "Error al registrar estudiante", 500);
     }
   }
+
+  // OBTENER ESTUDIANTES
+  public async obtenerEstudiantes(){
+    try{
+      const client = await this.db.getClient();
+      
+    }catch(error){
+      console.error(error);
+      throw new AppError("Error al obtener estudiantes", 500);
+    }
+  }
 }

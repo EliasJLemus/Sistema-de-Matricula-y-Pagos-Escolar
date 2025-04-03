@@ -3,6 +3,7 @@ import { Estudiantes } from "@/db/estudiantes/estudiantesDB";
 import { v4 as uuidv4 } from 'uuid';
 import { registrarEstudianteSchema } from "../schema/estudianteSchema";
 import { ZodError } from "zod";
+import {getPaginationParams} from "@/controller/utils/pagination";
 
 const estudianteDB = new Estudiantes();
 
@@ -85,3 +86,28 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
     });
   }
 };
+
+//Obtener registros
+
+export const obtenerEstudiantes = async (req: Request, res: Response): Promise<void> => {
+  try{
+
+    const { limit, offset } = getPaginationParams(req);
+    const { nombre, grado, estado } = req.query;
+
+    const filters = {
+      nombre: nombre as string,
+      grado: grado as string,
+      estado: estado as string,
+    };
+
+  }catch(error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      detail: error.message,
+    });
+
+    return;
+  }
+}

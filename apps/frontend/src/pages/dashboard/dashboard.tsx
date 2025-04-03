@@ -28,7 +28,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 
-import { ReportCard } from "@/components/Card/cardReport";
+import { ReportCard } from "@/components/Card/CardReport";
 
 import { EstudianteTable } from "@/Tables/estudiantes";
 import { MatriculaTable } from "@/Tables/matriculas";
