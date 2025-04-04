@@ -239,6 +239,11 @@ interface StructureAndDataResult<T> {
   };
 }
 
+interface StructureBackendResponse<T>{
+  status: string;
+  data: T;
+}
+
 // =======================
 // Hook para registrar estudiante
 // =======================
@@ -295,14 +300,18 @@ export const useGetEstudiantes = (
 // ======================
 // Obtener estudiante por UUID
 // ======================
-export const useGetEstudianteByUuid = (uuid: string): UseQueryResult<EstudiantesTablaType, Error> => {
+export const useGetEstudianteByUuid = (uuid: string): UseQueryResult<StructureBackendResponse<EstudiantesTablaType>, Error> => {
+  console.log("UUID en el hook:", uuid);
   return useQuery({
     queryKey: ["getEstudiante", uuid],
     queryFn: async () => {
-      const res = await client.get(`/obtener-estudiante/${uuid}`);
-      return res.data.data;
+      const res = await client.get(`/estudiantes/obtener-estudiante/${uuid}`);
+      console.log("Respuesta del servidor:", res.data);
+      return res.data;
     },
     enabled: !!uuid,
+    staleTime: 1000,
+    
   });
 };
 

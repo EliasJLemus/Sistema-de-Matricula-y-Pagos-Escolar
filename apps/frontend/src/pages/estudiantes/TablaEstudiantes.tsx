@@ -735,7 +735,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     {item.identidad}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.genero}
+                    {String(item.genero)}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.fecha_nacimiento}
@@ -788,7 +788,8 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => handleEdit(item?.uuid as string)}
+                        onClick={() => {console.log(item?.uuid )
+                          handleEdit(item?.uuid as string)}}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{

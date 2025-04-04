@@ -10,7 +10,7 @@ const fontFamily =
 const EstudiantesPage: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null
   );
 
@@ -25,8 +25,9 @@ const EstudiantesPage: React.FC = () => {
   };
 
   // Función para abrir el modal de edición
-  const handleOpenEditModal = (id: number) => {
-    setSelectedStudentId(id);
+  const handleOpenEditModal = (uuid: string) => {
+    console.log("UUID del estudiante a editar:", uuid);
+    setSelectedStudentId(uuid);
     setEditModalOpen(true);
   };
 

@@ -31,7 +31,7 @@ import {
 } from "@mui/material";
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
-import {useRegistrarEstudiante} from "@/lib/queries"
+import {useGetEstudianteByUuid, useRegistrarEstudiante} from "@/lib/queries"
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -76,6 +76,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     return `${año}-${mes}-${dia}`;
   };
 
+
   const [formData, setFormData] = useState<Partial<EstudiantesTablaType>>({
     primer_nombre: "",
     segundo_nombre: "",
@@ -98,11 +99,20 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     tipo_persona: "Estudiante",
   });
 
+  const [estudianteUUID, setEstudianteUUID] = useState<string | null>(null);
+
+  const {data} = useGetEstudianteByUuid(actualId?.toString() || "")
+
+  const datos = data?.data
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isEditing && actualId) {
       setIsLoading(true);
+
+      console.log("ID del estudiante:", datos);
+      
 
       setTimeout(() => {
         // Datos de ejemplo para el modo edición
@@ -128,34 +138,34 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           fecha_admision: "02-01-2025",
           estado: "Activo" as "Activo" | "Inactivo",
         };
-
+        console.log("Datos del estudiante:", datos);
         // Formatear las fechas para que funcionen correctamente con el input type="date"
         setFormData({
-          primer_nombre: mockStudent.primer_nombre,
-          segundo_nombre: mockStudent.segundo_nombre,
-          primer_apellido: mockStudent.primer_apellido,
-          segundo_apellido: mockStudent.segundo_apellido,
-          nacionalidad: mockStudent.nacionalidad,
-          identidad: mockStudent.identidad,
-          genero: mockStudent.genero,
-          fecha_nacimiento: formatearFechaParaInput(mockStudent.fecha_nacimiento),
-          edad: mockStudent.edad,
-          direccion: mockStudent.direccion,
-          grado: mockStudent.nombre_grado, // <--- este lo mapeás bien
-          seccion: mockStudent.seccion,
-          es_zurdo: mockStudent.es_zurdo,
-          dif_educacion: mockStudent.dif_educacion, // <--- mapeás correctamente
-          alergia: mockStudent.reaccion_alergica, // <--- igual acá
-          desc_alergia: mockStudent.descripcion_alergica,
-          fecha_admision: formatearFechaParaInput(mockStudent.fecha_admision),
-          estado: mockStudent.estado,
+          primer_nombre: datos?.primer_nombre || "",
+          segundo_nombre: datos?.segundo_nombre || "",
+          primer_apellido:datos?.primer_apellido || "",
+          segundo_apellido: datos?.segundo_apellido || "",
+          nacionalidad: datos?.nacionalidad || "",
+          identidad: datos?.identidad,
+          genero: datos?.genero || "Masculino",
+          fecha_nacimiento: formatearFechaParaInput(datos?.fecha_nacimiento),
+          edad: datos?.edad || 0,
+          direccion: datos?.direccion,
+          grado: datos?.grado, // <--- este lo mapeás bien
+          seccion: datos?.seccion,
+          es_zurdo: datos?.es_zurdo,
+          dif_educacion: datos?.dif_educacion, // <--- mapeás correctamente
+          alergia: datos?.alergia, // <--- igual acá
+          desc_alergia: datos?.desc_alergia,
+          fecha_admision: formatearFechaParaInput(datos?.fecha_admision),
+          estado: datos?.estado || "Activo",
           tipo_persona: "Estudiante",
         });
         
         setIsLoading(false);
       }, 1000);
     }
-  }, [isEditing, actualId]);
+  }, [isEditing, actualId, datos]);
 
   const validateInput = (name: string, value: string): boolean => {
     // Solo letras con acentos y diéresis para nombres y apellidos (sin espacios al inicio)
@@ -197,7 +207,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     return true;
   };
-
+console.log(formData);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -2117,6 +2127,9 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 setTimeout(() => {
                   setIsNavigating(false);
                 }, 100);
+
+                setEstudianteUUID(formData?.uuid ?? null);
+
               }}
               sx={secondaryButtonStyle}
               startIcon={

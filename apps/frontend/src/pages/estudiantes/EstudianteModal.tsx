@@ -16,8 +16,10 @@ interface EstudianteModalProps {
 }
 
 const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudianteId, isEditing = false }) => {
+
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"))
+
 
   return (
     <Dialog

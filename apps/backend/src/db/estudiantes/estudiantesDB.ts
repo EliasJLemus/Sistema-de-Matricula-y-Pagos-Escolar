@@ -119,7 +119,7 @@ export class Estudiantes {
         baseQuery += " WHERE " + conditions.join(" AND ");
       }
 
-      baseQuery += " ORDER BY fecha_admision DESC, codigo_estudiante DESC";
+      baseQuery += " ORDER BY codigo_estudiante DESC";
       baseQuery += ` LIMIT $${idx} OFFSET $${idx + 1}`;
       values.push(limite, offset);
 
