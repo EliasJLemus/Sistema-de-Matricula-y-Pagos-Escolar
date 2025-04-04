@@ -16,6 +16,18 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
 
     console.log("estoo",req.body)
 
+    const {success, error} = registrarEstudianteSchema.safeParse(
+      {
+        uuid: uuid_estudiante,
+        uuid_info_general: uuid_info_general,
+        ...req.body,
+      }
+    )
+
+    if(!success){
+      console.log(error)
+    }
+
     const parsed = registrarEstudianteSchema.parse({
       uuid: uuid_estudiante,
       uuid_info_general: uuid_info_general,
