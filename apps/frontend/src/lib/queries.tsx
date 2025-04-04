@@ -272,9 +272,10 @@ export const useGetEstudiantes = (
       params.append("page", page.toString());
       params.append("limit", limit.toString());
 
-      if (filters.nombre) params.append("nombre", filters.nombre);
-      if (filters.grado) params.append("grado", filters.grado);
-      if (filters.estado) params.append("estado", filters.estado);
+      // Solo agregamos los filtros si tienen valor no vacío
+      if (filters.nombre?.trim()) params.append("nombre", filters.nombre.trim());
+      if (filters.grado?.trim()) params.append("grado", filters.grado.trim());
+      if (filters.estado?.trim()) params.append("estado", filters.estado.trim());
 
       const res = await axios.get<StructureAndDataResult<EstudiantesTablaType>>(
         `http://localhost:3000/estudiantes/obtener-estudiantes?${params.toString()}`
