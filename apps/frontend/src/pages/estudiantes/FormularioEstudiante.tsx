@@ -30,7 +30,8 @@ import {
   useTheme,
 } from "@mui/material";
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
-
+import {EstudiantesTablaType} from "@shared/estudiantesType"
+import {useRegistrarEstudiante} from "@/lib/queries"
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -75,25 +76,26 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     return `${año}-${mes}-${dia}`;
   };
 
-  const [formData, setFormData] = useState<Partial<EstudianteType>>({
+  const [formData, setFormData] = useState<Partial<EstudiantesTablaType>>({
     primer_nombre: "",
     segundo_nombre: "",
     primer_apellido: "",
     segundo_apellido: "",
     nacionalidad: "",
     identidad: "",
-    genero: "M",
+    genero: "Masculino",
     fecha_nacimiento: "",
     edad: 0,
     direccion: "",
-    nombre_grado: "",
+    grado: "",
     seccion: "",
     es_zurdo: false,
-    dif_educacion_fisica: false,
+    dif_educacion: false,
     reaccion_alergica: false,
-    descripcion_alergica: "",
+    desc_alergia: null,
     fecha_admision: "",
     estado: "Activo",
+    tipo_persona: "Estudiante",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -120,7 +122,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           nombre_grado: "Sexto",
           seccion: "A",
           es_zurdo: true,
-          dif_educacion_fisica: false,
+          dif_educacion: false,
           reaccion_alergica: true,
           descripcion_alergica: "Mariscos",
           fecha_admision: "02-01-2025",
@@ -129,12 +131,27 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
         // Formatear las fechas para que funcionen correctamente con el input type="date"
         setFormData({
-          ...mockStudent,
-          fecha_nacimiento: formatearFechaParaInput(
-            mockStudent.fecha_nacimiento
-          ),
+          primer_nombre: mockStudent.primer_nombre,
+          segundo_nombre: mockStudent.segundo_nombre,
+          primer_apellido: mockStudent.primer_apellido,
+          segundo_apellido: mockStudent.segundo_apellido,
+          nacionalidad: mockStudent.nacionalidad,
+          identidad: mockStudent.identidad,
+          genero: mockStudent.genero,
+          fecha_nacimiento: formatearFechaParaInput(mockStudent.fecha_nacimiento),
+          edad: mockStudent.edad,
+          direccion: mockStudent.direccion,
+          grado: mockStudent.nombre_grado, // <--- este lo mapeás bien
+          seccion: mockStudent.seccion,
+          es_zurdo: mockStudent.es_zurdo,
+          dif_educacion: mockStudent.dif_educacion, // <--- mapeás correctamente
+          alergia: mockStudent.reaccion_alergica, // <--- igual acá
+          desc_alergia: mockStudent.descripcion_alergica,
           fecha_admision: formatearFechaParaInput(mockStudent.fecha_admision),
+          estado: mockStudent.estado,
+          tipo_persona: "Estudiante",
         });
+        
         setIsLoading(false);
       }, 1000);
     }
@@ -362,7 +379,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     setFormData((prev) => ({
       ...prev,
-      genero: value as "M" | "F",
+      genero: value as "Masculino" | "Femenino",
     }));
   };
 
@@ -467,7 +484,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     }
 
     // Validaciones de información académica
-    if (!formData.nombre_grado) {
+    if (!formData.grado) {
       newErrors.nombre_grado = "El grado es requerido";
       sectionWithErrors = sectionWithErrors || "academico";
     }
@@ -482,11 +499,11 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     // Validar descripción alérgica si tiene reacción alérgica
     if (formData.reaccion_alergica) {
-      if (!formData.descripcion_alergica) {
+      if (!formData.desc_alergia) {
         newErrors.descripcion_alergica =
           "La descripción de la alergia es requerida";
         sectionWithErrors = sectionWithErrors || "adicional";
-      } else if (formData.descripcion_alergica.trim() === "") {
+      } else if (formData.desc_alergia.trim() === "") {
         newErrors.descripcion_alergica = "La descripción no puede estar vacía";
         sectionWithErrors = sectionWithErrors || "adicional";
       }
@@ -508,34 +525,59 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  const { mutate: registrarEstudiante } = useRegistrarEstudiante();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (isNavigating) {
-      // If we're just navigating between sections, don't submit
       setIsNavigating(false);
       return;
     }
-
+  
     if (validateForm()) {
       setIsSubmitting(true);
-
-      // Simular envío a la API
-      setTimeout(() => {
-        console.log("Datos a enviar:", formData);
-
-        setIsSubmitting(false);
-
-        // Si estamos en un modal, cerrarlo
-        if (isModal && onClose) {
-          onClose();
-        } else {
-          // Redirigir a la lista de estudiantes
-          navigate("/estudiantes");
-        }
-      }, 1500);
+  
+      const payload = {
+        primer_nombre: formData.primer_nombre,
+        segundo_nombre: formData.segundo_nombre,
+        primer_apellido: formData.primer_apellido,
+        segundo_apellido: formData.segundo_apellido,
+        identidad: formData.identidad,
+        nacionalidad: formData.nacionalidad,
+        genero: formData.genero,
+        fecha_nacimiento: formData.fecha_nacimiento,
+        edad: formData.edad,
+        direccion: formData.direccion,
+        nombre_grado: formData.grado, // ✅
+        seccion: formData.seccion,
+        es_zurdo: formData.es_zurdo,
+        dif_educacion_fisica: formData.dif_educacion, // ✅
+        reaccion_alergica: formData.reaccion_alergica,
+        descripcion_alergica: formData.desc_alergia, // ✅
+        tipo_persona: formData.tipo_persona,
+        fecha_admision: formData.fecha_admision,
+      };
+      
+  
+      if (!isEditing) {
+        registrarEstudiante(payload, {
+          onSuccess: () => {
+            setIsSubmitting(false);
+            if (isModal && onClose) onClose();
+            else navigate("/estudiantes");
+          },
+          onError: (error) => {
+            setIsSubmitting(false);
+            console.error("Error al registrar estudiante:", error);
+            setAlertMessage("Ocurrió un error al registrar el estudiante.");
+            setAlertOpen(true);
+          },
+        });
+      }
     }
   };
+  
 
   const handleSectionChange = (section: string) => {
     setIsNavigating(true);
@@ -1431,7 +1473,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                           onChange={handleGenderChange}
                         >
                           <FormControlLabel
-                            value="M"
+                            value="Masculino"
                             control={
                               <Radio
                                 sx={{
@@ -1458,7 +1500,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                             }}
                           />
                           <FormControlLabel
-                            value="F"
+                            value="Femenino"
                             control={
                               <Radio
                                 sx={{
@@ -1600,8 +1642,8 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                         </InputLabel>
                         <Select
                           labelId="grado-label"
-                          name="nombre_grado"
-                          value={formData.nombre_grado || ""}
+                          name="grado"
+                          value={formData.grado || ""}
                           label="Grado"
                           onChange={handleSelectChange}
                           error={!!errors.nombre_grado}
@@ -1916,7 +1958,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                           <RadioGroup
                             row
                             name="dif_educacion_fisica"
-                            value={formData.dif_educacion_fisica?.toString()}
+                            value={formData.dif_educacion?.toString()}
                             onChange={handleRadioChange}
                           >
                             <FormControlLabel
@@ -2015,7 +2057,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                           fullWidth
                           label="Descripción de la Alergia"
                           name="descripcion_alergica"
-                          value={formData.descripcion_alergica || ""}
+                          value={formData.desc_alergia || ""}
                           onChange={handleChange}
                           onKeyDown={handleKeyDown}
                           onPaste={handlePaste}

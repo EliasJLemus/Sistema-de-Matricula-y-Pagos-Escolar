@@ -248,7 +248,12 @@ export const useRegistrarEstudiante = () => {
     mutationKey: ["registrarEstudiante"],
     mutationFn: async (data: Omit<EstudiantesTablaType, "codigo_estudiante" | "uuid">) => {
       try {
-        const response = await client.post("/estudiantes/registro-estudiante", data);
+        console.log("Data a registrar:", data);
+        const response = await client.post("/estudiantes/registro-estudiante", JSON.stringify(data), {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
         return response.data;
       } catch (error: any) {
         throw new Error(error?.response?.data?.message || "Error al registrar estudiante");
@@ -256,6 +261,7 @@ export const useRegistrarEstudiante = () => {
     },
   });
 };
+
 
 // ======================
 // Obtener lista de estudiantes

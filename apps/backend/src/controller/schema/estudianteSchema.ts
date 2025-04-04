@@ -34,7 +34,7 @@ export const registrarEstudianteSchema = z.object({
 
 export const actualizarEstudianteSchema = z.object({
   uuid: z.string().uuid(),
-  
+
   primer_nombre: z.string().min(1, "El primer nombre es requerido."),
   segundo_nombre: z.string().optional().nullable(),
   primer_apellido: z.string().min(1, "El primer apellido es requerido."),
@@ -60,7 +60,7 @@ export const actualizarEstudianteSchema = z.object({
 
   estado: z.string().min(1, "El estado es requerido."),
 
-  tipo_persona: z.enum(["Estudiante", "Encargado"]),
+    tipo_persona: z.enum(["Estudiante", "Encargado"]),
 
   fecha_admision: z.coerce.date(),
 });

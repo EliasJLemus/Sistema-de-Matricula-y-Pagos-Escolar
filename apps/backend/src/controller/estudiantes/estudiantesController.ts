@@ -10,8 +10,11 @@ const estudianteDB = new Estudiantes();
 
 export const registroEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {
+    res.setHeader("Content-Type", "application/json");
     const uuid_estudiante = uuidv4();
     const uuid_info_general = uuidv4();
+
+    console.log("estoo",req.body)
 
     const parsed = registrarEstudianteSchema.parse({
       uuid: uuid_estudiante,
