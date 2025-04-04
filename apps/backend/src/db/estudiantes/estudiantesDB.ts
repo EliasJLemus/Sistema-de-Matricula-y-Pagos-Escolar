@@ -180,6 +180,123 @@ export class Estudiantes {
     }
   }
   
+  //Estudiante por UUID
+  public async obtenerEstudiantePorUuid(uuid: string): Promise<EstudiantesTablaType> {
+    const client = await this.db.getClient();
+    try {
+      const query = `
+        SELECT *
+        FROM "Estudiantes".vw_estudiantes
+        WHERE uuid = $1;
+      `;
+      const result = await client.query(query, [uuid]);
+      if (result.rowCount === 0) {
+        throw new AppError("Estudiante no encontrado", 404);
+      }
+      return result.rows[0] as EstudiantesTablaType;
+    } catch (error) {
+      console.error("Error al obtener el estudiante por UUID:", error);
+      throw new AppError("Error al obtener el estudiante", 500);
+    } finally {
+      client.release?.();
+    }
+  }
+ 
+  //Actualizar estudiante
+  public async actualizarEstudiante(data: any): Promise<string> {
+    const client = await this.db.getClient();
   
+    try {
+      const {
+        uuid,
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        identidad,
+        nacionalidad,
+        genero,
+        fecha_nacimiento,
+        edad,
+        direccion,
+        nombre_grado,
+        seccion,
+        es_zurdo,
+        dif_educacion_fisica,
+        reaccion_alergica,
+        descripcion_alergica,
+        tipo_persona,
+        fecha_admision
+      } = data;
   
+      // Obtener UUID de info_general y grado
+      const infoQuery = `SELECT uuid_info_general FROM "Estudiantes"."Estudiantes" WHERE uuid = $1`;
+      const infoResult = await client.query(infoQuery, [uuid]);
+  
+      if (infoResult.rowCount === 0) {
+        throw new AppError("Estudiante no encontrado", 404);
+      }
+  
+      const uuid_info_general = infoResult.rows[0].uuid_info_general;
+  
+      const gradoQuery = `
+        SELECT uuid FROM "Administracion"."Grados"
+        WHERE nombre_grado = $1 AND seccion = $2
+      `;
+      const gradoResult = await client.query(gradoQuery, [nombre_grado, seccion]);
+  
+      if (gradoResult.rowCount === 0) {
+        throw new AppError("No se encontró el grado y sección especificados", 404);
+      }
+  
+      const uuid_grado = gradoResult.rows[0].uuid;
+  
+      // Actualizar InformacionGeneral
+      await client.query(`
+        UPDATE "Estudiantes"."InformacionGeneral"
+        SET primer_nombre = $1, segundo_nombre = $2,
+            primer_apellido = $3, segundo_apellido = $4,
+            identidad = $5, nacionalidad = $6, genero = $7,
+            fecha_nacimiento = $8, edad = $9, direccion = $10,
+            tipo_persona = $11
+        WHERE uuid = $12
+      `, [
+        primer_nombre, segundo_nombre,
+        primer_apellido, segundo_apellido,
+        identidad, nacionalidad, genero,
+        fecha_nacimiento, edad, direccion,
+        tipo_persona, uuid_info_general
+      ]);
+  
+      // Actualizar Estudiante
+      await client.query(`
+        UPDATE "Estudiantes"."Estudiantes"
+        SET uuid_grado = $1,
+            es_zurdo = $2,
+            dif_educacion_fisica = $3,
+            reaccion_alergica = $4,
+            descripcion_alergica = $5,
+            fecha_admision = $6
+        WHERE uuid = $7
+      `, [
+        uuid_grado,
+        es_zurdo,
+        dif_educacion_fisica,
+        reaccion_alergica,
+        descripcion_alergica,
+        fecha_admision,
+        uuid
+      ]);
+  
+      return uuid;
+    } catch (error: any) {
+      console.error("Error en actualizarEstudiante:", error);
+      throw new AppError(error.message || "Error al actualizar el estudiante", 500);
+    } finally {
+      client.release?.();
+    }
+  }
+  
+
 }
+

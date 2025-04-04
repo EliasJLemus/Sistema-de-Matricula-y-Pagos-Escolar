@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { registrarEstudianteSchema } from "../schema/estudianteSchema";
 import { ZodError } from "zod";
 import {getPaginationParams} from "@/controller/utils/pagination";
+import { AppError } from "@/utils/AppError";
 
 const estudianteDB = new Estudiantes();
 
@@ -129,7 +130,90 @@ export const obtenerEstudiantes = async (req: Request, res: Response): Promise<v
       message: "Error interno del servidor",
       detail: error.message,
     });
-
     return;
   }
 }
+
+export const obtenerEstudiantePorUuid = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { uuid } = req.params;
+    if (!uuid) {
+      res.status(400).json({
+        success: false,
+        message: "El UUID es requerido."
+      });
+      return;
+    }
+
+    const estudiante = await estudianteDB.obtenerEstudiantePorUuid(uuid);
+    res.status(200).json({
+      success: true,
+      data: estudiante
+    });
+  } catch (error: any) {
+    // Manejo de errores personalizados
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+    console.error("Error al obtener estudiante por UUID:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor"
+    });
+  }
+};
+
+
+//Actualizar estudiante
+
+export const actualizarEstudiante = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { uuid } = req.params;
+    if (!uuid) {
+      res.status(400).json({ success: false, message: "UUID requerido" });
+      return;
+    }
+
+    const parsed = registrarEstudianteSchema.parse({
+      uuid,
+      ...req.body
+    });
+
+    const result = await estudianteDB.actualizarEstudiante(parsed);
+
+    res.status(200).json({
+      success: true,
+      message: "Estudiante actualizado correctamente",
+      data: result
+    });
+
+  } catch (error: any) {
+    if (error instanceof ZodError) {
+      res.status(400).json({
+        success: false,
+        message: "Datos inválidos",
+        errors: error.errors
+      });
+      return;
+    }
+
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+
+    console.error("Error al actualizar estudiante:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      detail: error.message
+    });
+  }
+};
