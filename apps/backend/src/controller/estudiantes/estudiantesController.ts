@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Estudiantes } from "@/db/estudiantes/estudiantesDB";
 import { v4 as uuidv4 } from 'uuid';
-import { registrarEstudianteSchema } from "../schema/estudianteSchema";
+import { actualizarEstudianteSchema, registrarEstudianteSchema } from "../schema/estudianteSchema";
 import { ZodError } from "zod";
 import {getPaginationParams} from "@/controller/utils/pagination";
 import { AppError } from "@/utils/AppError";
@@ -173,29 +173,53 @@ export const obtenerEstudiantePorUuid = async (req: Request, res: Response): Pro
 export const actualizarEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {
     const { uuid } = req.params;
+
     if (!uuid) {
-      res.status(400).json({ success: false, message: "UUID requerido" });
+      res.status(400).json({
+        success: false,
+        message: "El UUID del estudiante es requerido en la URL.",
+      });
       return;
     }
 
-    const parsed = registrarEstudianteSchema.parse({
-      uuid,
-      ...req.body
+    const parsed = actualizarEstudianteSchema.parse({
+      uuid, 
+      ...req.body,
     });
 
-    const result = await estudianteDB.actualizarEstudiante(parsed);
+    await estudianteDB.actualizarEstudiante(
+      parsed.uuid,
+      parsed.primer_nombre,
+      parsed.segundo_nombre,
+      parsed.primer_apellido,
+      parsed.segundo_apellido,
+      parsed.nacionalidad,
+      parsed.identidad,
+      parsed.genero,
+      parsed.fecha_nacimiento,
+      parsed.edad,
+      parsed.direccion,
+      parsed.nombre_grado,
+      parsed.seccion,
+      parsed.es_zurdo,
+      parsed.dif_educacion_fisica,
+      parsed.reaccion_alergica,
+      parsed.descripcion_alergica,
+      parsed.tipo_persona,
+      parsed.fecha_admision,
+      parsed.estado
+    );
 
     res.status(200).json({
       success: true,
-      message: "Estudiante actualizado correctamente",
-      data: result
+      message: "Estudiante actualizado correctamente.",
     });
 
   } catch (error: any) {
     if (error instanceof ZodError) {
       res.status(400).json({
         success: false,
-        message: "Datos inválidos",
+        message: "Datos inválidos.",
         errors: error.errors
       });
       return;
@@ -204,16 +228,17 @@ export const actualizarEstudiante = async (req: Request, res: Response): Promise
     if (error instanceof AppError) {
       res.status(error.statusCode).json({
         success: false,
-        message: error.message
+        message: error.message,
+        detail: error.message
       });
       return;
     }
 
-    console.error("Error al actualizar estudiante:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor",
+      message: "Error interno del servidor al intentar actualizar estudiante.",
       detail: error.message
     });
   }
 };
+
