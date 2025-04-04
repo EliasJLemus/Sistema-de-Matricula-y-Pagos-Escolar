@@ -147,15 +147,15 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           segundo_apellido: datos?.segundo_apellido || "",
           nacionalidad: datos?.nacionalidad || "",
           identidad: datos?.identidad,
-          genero: datos?.genero || "Masculino",
+          genero: datos?.genero === "F" ? "Femenino" : "Masculino",
           fecha_nacimiento: formatearFechaParaInput(datos?.fecha_nacimiento),
           edad: datos?.edad || 0,
           direccion: datos?.direccion,
-          grado: datos?.grado, // <--- este lo mapeás bien
+          nombre_grado: datos?.grado,
           seccion: datos?.seccion,
-          es_zurdo: datos?.es_zurdo,
-          dif_educacion: datos?.dif_educacion, // <--- mapeás correctamente
-          alergia: datos?.alergia, // <--- igual acá
+          es_zurdo: datos?.es_zurdo === 'Sí',
+          dif_educacion: datos?.dif_educacion === 'Sí', 
+          alergia: datos?.alergia === 'Sí', 
           desc_alergia: datos?.desc_alergia,
           fecha_admision: formatearFechaParaInput(datos?.fecha_admision),
           estado: datos?.estado || "Activo",
