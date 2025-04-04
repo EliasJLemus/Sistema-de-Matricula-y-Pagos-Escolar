@@ -22,5 +22,7 @@ export type EstudiantesTablaType = {
     tipo_persona?: "Estudiante" | "Docente" | "Administrativo" | "Otro";
     nombre_grado?: string;
     reaccion_alergica?: boolean;
+    dif_educacion_fisica?: "Sí" | "No" | Boolean;
+    descripcion_alergica?: string | null;
   };
   

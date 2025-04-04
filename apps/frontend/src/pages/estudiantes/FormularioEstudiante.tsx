@@ -87,12 +87,12 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     fecha_nacimiento: "",
     edad: 0,
     direccion: "",
-    grado: "",
+    nombre_grado: "",
     seccion: "",
     es_zurdo: false,
-    dif_educacion: false,
+    dif_educacion_fisica: false,
     reaccion_alergica: false,
-    desc_alergia: null,
+    descripcion_alergica: null,
     fecha_admision: "",
     estado: "Activo",
     tipo_persona: "Estudiante",
@@ -364,9 +364,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Prevent default behavior
-    e.preventDefault();
-
     // Just update the state without any side effects
     setFormData((prev) => ({
       ...prev,
@@ -484,7 +481,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     }
 
     // Validaciones de información académica
-    if (!formData.grado) {
+    if (!formData.nombre_grado) {
       newErrors.nombre_grado = "El grado es requerido";
       sectionWithErrors = sectionWithErrors || "academico";
     }
@@ -499,11 +496,11 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     // Validar descripción alérgica si tiene reacción alérgica
     if (formData.reaccion_alergica) {
-      if (!formData.desc_alergia) {
+      if (!formData.descripcion_alergica) {
         newErrors.descripcion_alergica =
           "La descripción de la alergia es requerida";
         sectionWithErrors = sectionWithErrors || "adicional";
-      } else if (formData.desc_alergia.trim() === "") {
+      } else if (formData.descripcion_alergica.trim() === "") {
         newErrors.descripcion_alergica = "La descripción no puede estar vacía";
         sectionWithErrors = sectionWithErrors || "adicional";
       }
@@ -549,12 +546,12 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         fecha_nacimiento: formData.fecha_nacimiento,
         edad: formData.edad,
         direccion: formData.direccion,
-        nombre_grado: formData.grado, // ✅
+        nombre_grado: formData.nombre_grado, // ✅
         seccion: formData.seccion,
         es_zurdo: formData.es_zurdo,
-        dif_educacion_fisica: formData.dif_educacion, // ✅
+        dif_educacion_fisica: formData.dif_educacion_fisica, // ✅
         reaccion_alergica: formData.reaccion_alergica,
-        descripcion_alergica: formData.desc_alergia, // ✅
+        descripcion_alergica: formData.descripcion_alergica, // ✅
         tipo_persona: formData.tipo_persona,
         fecha_admision: formData.fecha_admision,
       };
@@ -563,16 +560,18 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       if (!isEditing) {
         registrarEstudiante(payload, {
           onSuccess: () => {
+            setAlertMessage("🎉 Estudiante registrado exitosamente");
+            setAlertOpen(true);
             setIsSubmitting(false);
             if (isModal && onClose) onClose();
             else navigate("/estudiantes");
           },
-          onError: (error) => {
-            setIsSubmitting(false);
-            console.error("Error al registrar estudiante:", error);
-            setAlertMessage("Ocurrió un error al registrar el estudiante.");
+          onError: () => {
+            setAlertMessage("❌ Ocurrió un error al registrar al estudiante");
             setAlertOpen(true);
+            setIsSubmitting(false);
           },
+          
         });
       }
     }
@@ -1642,8 +1641,8 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                         </InputLabel>
                         <Select
                           labelId="grado-label"
-                          name="grado"
-                          value={formData.grado || ""}
+                          name="nombre_grado"
+                          value={formData.nombre_grado || ""}
                           label="Grado"
                           onChange={handleSelectChange}
                           error={!!errors.nombre_grado}
@@ -2057,7 +2056,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                           fullWidth
                           label="Descripción de la Alergia"
                           name="descripcion_alergica"
-                          value={formData.desc_alergia || ""}
+                          value={formData.descripcion_alergica || ""}
                           onChange={handleChange}
                           onKeyDown={handleKeyDown}
                           onPaste={handlePaste}
