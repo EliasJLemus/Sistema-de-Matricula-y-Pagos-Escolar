@@ -29,14 +29,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
+// import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
+import {useGetEstudiantes} from "@/lib/queries"
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaEstudiantesProps {
   onNewStudent: () => void;
-  onEditStudent: (id: number) => void;
+  onEditStudent: (id: string) => void;
 }
 
 export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
@@ -110,7 +111,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     onEditStudent(id);
   };
 
@@ -583,13 +584,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   className="text-white font-bold"
                   style={{ fontFamily }}
                 >
-                  ID
-                </TableHead>
-                <TableHead
-                  className="text-white font-bold"
-                  style={{ fontFamily }}
-                >
-                  Número
+                  Codigo
                 </TableHead>
                 <TableHead
                   className="text-white font-bold"
@@ -710,7 +705,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             <TableBody>
               {tableData.map((item, index) => (
                 <TableRow
-                  key={item.id}
+                  key={item.uuid}
                   className={`${
                     index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
@@ -719,10 +714,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     className="font-medium text-[#4D4D4D]"
                     style={{ fontFamily }}
                   >
-                    {item.id}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.numero_estudiante}
+                    {item.codigo_estudiante}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.primer_nombre}
@@ -755,7 +747,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     {item.direccion}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.nombre_grado}
+                    {item.grado}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.seccion}
@@ -764,13 +756,13 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     {item.es_zurdo ? "Sí" : "No"}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.dif_educacion_fisica ? "Sí" : "No"}
+                    {item.dif_educacion ? "Sí" : "No"}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.reaccion_alergica ? "Sí" : "No"}
+                    {item.alergia ? "Sí" : "No"}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.descripcion_alergica || "N/A"}
+                    {item.desc_alergia || "N/A"}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.fecha_admision}
@@ -796,7 +788,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => handleEdit(item.id)}
+                        onClick={() => handleEdit(item?.uuid as string)}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -805,21 +797,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       >
                         <EditIcon fontSize="small" />
                       </button>
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            item.id,
-                            `${item.primer_nombre} ${item.primer_apellido}`
-                          )
-                        }
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
-                        title="Eliminar"
-                        style={{
-                          transition: "all 0.2s ease, transform 0.2s ease",
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </button>
+    
                     </div>
                   </TableCell>
                 </TableRow>

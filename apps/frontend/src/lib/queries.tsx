@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import { client } from "./client";
 import {
   ReporteMatriculaType,
@@ -12,6 +12,7 @@ import {
   StructureAndData,
 } from "@shared/reportsType";
 import axios from "axios";
+import { EstudiantesTablaType } from "@shared/estudiantesType";
 
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
@@ -216,5 +217,104 @@ export const useGetAntiguedadEstudiante = (): UseQueryResult<StructureAndData<Re
       }
     },
     staleTime: 1000,
+  });
+};
+
+// ======================
+// Tipos y filtros
+// ======================
+type FiltrosEstudiantes = {
+  nombre?: string;
+  grado?: string;
+  estado?: string;
+};
+
+interface StructureAndDataResult<T> {
+  data: T[];
+  pagination: {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
+  };
+}
+
+// =======================
+// Hook para registrar estudiante
+// =======================
+
+export const useRegistrarEstudiante = () => {
+  return useMutation({
+    mutationKey: ["registrarEstudiante"],
+    mutationFn: async (data: Omit<EstudiantesTablaType, "codigo_estudiante" | "uuid">) => {
+      try {
+        const response = await client.post("/estudiantes/registro-estudiante", data);
+        return response.data;
+      } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Error al registrar estudiante");
+      }
+    },
+  });
+};
+
+// ======================
+// Obtener lista de estudiantes
+// ======================
+export const useGetEstudiantes = (
+  page: number = 1,
+  limit: number = 10,
+  filters: FiltrosEstudiantes = {}
+): UseQueryResult<StructureAndDataResult<EstudiantesTablaType>, Error> => {
+  return useQuery({
+    queryKey: ["getEstudiantes", page, limit, JSON.stringify(filters)],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      if (filters.nombre) params.append("nombre", filters.nombre);
+      if (filters.grado) params.append("grado", filters.grado);
+      if (filters.estado) params.append("estado", filters.estado);
+
+      const res = await axios.get<StructureAndDataResult<EstudiantesTablaType>>(
+        `http://localhost:3000/estudiantes/obtener-estudiantes?${params.toString()}`
+      );
+      return res.data;
+    },
+    staleTime: 1000,
+  });
+};
+
+// ======================
+// Obtener estudiante por UUID
+// ======================
+export const useGetEstudianteByUuid = (uuid: string): UseQueryResult<EstudiantesTablaType, Error> => {
+  return useQuery({
+    queryKey: ["getEstudiante", uuid],
+    queryFn: async () => {
+      const res = await client.get(`/obtener-estudiante/${uuid}`);
+      return res.data.data;
+    },
+    enabled: !!uuid,
+  });
+};
+
+// ======================
+// Actualizar estudiante
+// ======================
+export const useUpdateEstudiante = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ uuid, data }: { uuid: string; data: Partial<EstudiantesTablaType> }) => {
+      const res = await axios.put(`http://localhost:3000/actualizar-estudiante/${uuid}`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getEstudiantes"] });
+    },
+    onError: (error: any) => {
+      throw new Error(error?.response?.data?.message || "Error al actualizar estudiante");
+    },
   });
 };
