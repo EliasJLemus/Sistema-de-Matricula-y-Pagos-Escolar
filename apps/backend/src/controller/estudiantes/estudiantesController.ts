@@ -101,6 +101,28 @@ export const obtenerEstudiantes = async (req: Request, res: Response): Promise<v
       estado: estado as string,
     };
 
+    const result = await estudianteDB.obtenerEstudiantes(limit, offset, filters);
+    const total = await estudianteDB.countEstudiantes(filters);
+
+    if (Array.isArray(result) && result.length > 0) {
+      res.status(200).json({
+        success: true,
+        data: result,
+        pagination: {
+          limit,
+          offset,
+          count: result.length,
+          total,
+        },
+      });
+      return;
+    }
+    res.status(404).json({
+      success: false,
+      message: "No se encontraron datos.",
+    });
+    return;
+
   }catch(error: any) {
     res.status(500).json({
       success: false,
