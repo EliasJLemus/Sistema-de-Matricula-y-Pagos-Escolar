@@ -12,6 +12,11 @@ import EstudiantesPage from "./pages/estudiantes/EstudiantesPage";
 import NuevoEstudiantePage from "./pages/estudiantes/nuevo/NuevoEstudiantePage";
 import EditarEstudiantePage from "./pages/estudiantes/editar/EditarEstudiantePage";
 
+// Importación de componentes de apoderados
+import ApoderadoPage from "./pages/apoderados/ApoderadosPage";
+import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
+import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
+
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -57,6 +62,17 @@ function App() {
                 <Route
                   path="/estudiantes/editar/:id"
                   element={<EditarEstudiantePage />}
+                />
+
+                {/* Rutas de apoderados */}
+                <Route path="/apoderados" element={<ApoderadoPage />} />
+                <Route
+                  path="/apoderados/nuevo"
+                  element={<NuevoApoderado />}
+                />
+                <Route
+                  path="/apoderados/editar/:id"
+                  element={<EditarApoderado />}
                 />
 
                 {/* Add other routes as needed */}
