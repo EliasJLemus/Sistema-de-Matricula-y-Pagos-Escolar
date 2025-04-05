@@ -7,7 +7,13 @@ interface LoginForm {
   password: string;
 }
 
-const Login: React.FC = () => {
+interface LoginProps {
+  onLogin: () => void;
+}
+
+const Login: React.FC<LoginProps> = ({
+  onLogin
+}) => {
   const {
     register,
     handleSubmit,
@@ -16,6 +22,7 @@ const Login: React.FC = () => {
 
   const onSubmit = (data: LoginForm) => {
     console.log("Datos ingresados:", data);
+    onLogin()
   };
 
   return (
