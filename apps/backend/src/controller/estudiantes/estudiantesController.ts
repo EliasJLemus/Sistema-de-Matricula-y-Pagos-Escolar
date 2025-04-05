@@ -14,8 +14,6 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
     const uuid_estudiante = uuidv4();
     const uuid_info_general = uuidv4();
 
-    console.log("estoo",req.body)
-
     const {success, error} = registrarEstudianteSchema.safeParse(
       {
         uuid: uuid_estudiante,
@@ -188,13 +186,24 @@ export const obtenerEstudiantePorUuid = async (req: Request, res: Response): Pro
 export const actualizarEstudiante = async (req: Request, res: Response): Promise<void> => {
   try {
     const { uuid } = req.params;
-
+    console.log("UUID", req.body) 
     if (!uuid) {
       res.status(400).json({
         success: false,
         message: "El UUID del estudiante es requerido en la URL.",
       });
       return;
+    }
+
+    const {success, error} = actualizarEstudianteSchema.safeParse({
+      uuid,
+      ...req.body
+    })
+
+    console.log("error",error)
+    if(!success){
+      console.log("error",error)
+
     }
 
     const parsed = actualizarEstudianteSchema.parse({

@@ -323,7 +323,7 @@ export const useUpdateEstudiante = () => {
 
   return useMutation({
     mutationFn: async ({ uuid, data }: { uuid: string; data: Partial<EstudiantesTablaType> }) => {
-      const res = await axios.put(`http://localhost:3000/actualizar-estudiante/${uuid}`, data);
+      const res = await axios.put(`http://localhost:3000/estudiantes/actualizar-estudiante/${uuid}`, data);
       return res.data;
     },
     onSuccess: () => {

@@ -31,7 +31,7 @@ import {
 } from "@mui/material";
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
-import {useGetEstudianteByUuid, useRegistrarEstudiante} from "@/lib/queries"
+import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -111,9 +111,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     if (isEditing && actualId) {
       setIsLoading(true);
 
-      console.log("ID del estudiante:", datos);
-      
-
       setTimeout(() => {
         // Datos de ejemplo para el modo edición
         const mockStudent = {
@@ -138,7 +135,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           fecha_admision: "02-01-2025",
           estado: "Activo" as "Activo" | "Inactivo",
         };
-        console.log("Datos del estudiante:", datos);
         // Formatear las fechas para que funcionen correctamente con el input type="date"
         setFormData({
           primer_nombre: datos?.primer_nombre || "",
@@ -153,9 +149,9 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           direccion: datos?.direccion,
           nombre_grado: datos?.grado,
           seccion: datos?.seccion,
-          es_zurdo: datos?.es_zurdo === 'Sí',
-          dif_educacion: datos?.dif_educacion === 'Sí', 
-          alergia: datos?.alergia === 'Sí', 
+          dif_educacion_fisica: datos?.dif_educacion === 'Sí',
+          reaccion_alergica: datos?.alergia === 'Sí',
+          descripcion_alergica: datos?.desc_alergia,
           desc_alergia: datos?.desc_alergia,
           fecha_admision: formatearFechaParaInput(datos?.fecha_admision),
           estado: datos?.estado || "Activo",
@@ -207,7 +203,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     return true;
   };
-console.log(formData);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -533,6 +528,7 @@ console.log(formData);
   };
 
   const { mutate: registrarEstudiante } = useRegistrarEstudiante();
+  const {mutate: actualizarEstudiante} = useUpdateEstudiante();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -564,6 +560,7 @@ console.log(formData);
         descripcion_alergica: formData.descripcion_alergica, // ✅
         tipo_persona: formData.tipo_persona,
         fecha_admision: formData.fecha_admision,
+        estado: formData.estado
       };
       
   
@@ -583,6 +580,25 @@ console.log(formData);
           },
           
         });
+      } else{
+        actualizarEstudiante({
+          uuid: actualId?.toString() || "",
+          data: payload,
+        }, {
+          onSuccess: () => {
+            
+            setAlertMessage("🎉 Estudiante actualizado exitosamente");
+            setAlertOpen(true);
+            setIsSubmitting(false);
+            if (isModal && onClose) onClose();
+            else navigate("/estudiantes");
+          },
+          onError: () => {
+            setAlertMessage("❌ Ocurrió un error al actualizar al estudiante");
+            setAlertOpen(true);
+            setIsSubmitting(false);
+          },
+        })
       }
     }
   };
