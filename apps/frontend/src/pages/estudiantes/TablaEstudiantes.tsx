@@ -61,19 +61,21 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
   // Efecto para aplicar el zoom solo al contenido de la tabla, no al sidebar
   useEffect(() => {
+    // En lugar de aplicar zoom a todo el HTML, lo aplicamos solo al contenedor actual
     const currentContainer = document.getElementById(
       "tabla-estudiantes-container"
     );
 
     if (currentContainer) {
       if (isZoomed) {
-        currentContainer.style.zoom = "60%";
+        currentContainer.style.zoom = "60%"; // Reducido a 60% para mostrar más contenido
       } else {
         currentContainer.style.zoom = "100%";
       }
     }
 
     return () => {
+      // Restaurar el zoom al desmontar el componente
       if (currentContainer) {
         currentContainer.style.zoom = "100%";
       }
@@ -196,7 +198,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     textTransform: "none",
     borderRadius: "10px",
     color: "white",
-    px: 3,
+    px: 3, // Reduced from 4 to 3
     py: 1.2,
     height: "40px",
     fontWeight: 600,
@@ -225,7 +227,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     borderRadius: "10px",
     bgcolor: "#F38223",
     color: "white",
-    px: 3,
+    px: 3, // Reduced from 4 to 3
     py: 1.2,
     height: "40px",
     fontWeight: 600,
@@ -265,7 +267,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     borderRadius: "10px",
     bgcolor: "#1A1363",
     color: "white",
-    px: 3,
+    px: 3, // Reduced from 4 to 3
     py: 1.2,
     height: "40px",
     fontWeight: 600,
@@ -499,12 +501,13 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             Quitar filtros
           </Button>
 
+          {/* Contenedor para alinear los botones a la derecha - modificado para mantener botones en línea */}
           <Box
             sx={{
               display: "flex",
               ml: "auto",
               gap: 2,
-              flexWrap: "nowrap",
+              flexWrap: "nowrap", // Esto evita que los botones se envuelvan
             }}
           >
             <Button
@@ -572,109 +575,127 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         </Box>
       </Paper>
 
-      <div className="border border-[#f1e0a6] rounded-lg overflow-hidden">
+      <div className="border border-[#edad4c] rounded-lg overflow-hidden">
         <div style={{ overflowX: "auto", width: "100%" }}>
           <Table className="bg-[#fff9db]">
-            <TableHeader className="bg-[#f1e0a6] sticky top-0 z-10">
+            <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Codigo
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
-                  Nombre Completo
+                  Primer Nombre
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
+                  style={{ fontFamily }}
+                >
+                  Segundo Nombre
+                </TableHead>
+                <TableHead
+                  className="text-white font-bold"
+                  style={{ fontFamily }}
+                >
+                  Primer Apellido
+                </TableHead>
+                <TableHead
+                  className="text-white font-bold"
+                  style={{ fontFamily }}
+                >
+                  Segundo Apellido
+                </TableHead>
+                <TableHead
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Nacionalidad
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Identidad
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Género
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Fecha Nacimiento
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Edad
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Dirección
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Grado
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Sección
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Es Zurdo
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Dif. Educación
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Alergia
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Desc. Alergia
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Fecha Admisión
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Estado
                 </TableHead>
                 <TableHead
-                  className="[text-#202020] font-bold"
+                  className="text-white font-bold"
                   style={{ fontFamily }}
                 >
                   Acciones
@@ -686,7 +707,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                 <TableRow
                   key={item.uuid}
                   className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-[#fffceb]"
+                    index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
                 >
                   <TableCell
@@ -751,8 +772,8 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       variant="outline"
                       className={
                         item.estado === "Activo"
-                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-16 justify-center"
-                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-16 justify-center"
+                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-16 justify-center" // Ancho más reducido
+                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-16 justify-center" // Ancho más reducido
                       }
                       style={{
                         fontFamily,

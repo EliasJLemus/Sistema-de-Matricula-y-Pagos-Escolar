@@ -25,12 +25,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import useGetApoderados, {
-  ApoderadoType,
-} from "@/lib/queries/useGetApoderados";
+import useGetApoderados, { ApoderadoType } from "@/lib/queries/useGetApoderados";
 
-const fontFamily =
-  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const fontFamily = "'Nunito', sans-serif";
 
 interface TablaApoderadosProps {
   onNewApoderado: () => void;
@@ -46,31 +43,14 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
   const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  const [filters, setFilters] = useState({
-    nombre: "",
-    estudiante: "",
-    parentesco: "",
-  });
-
+  const [filters, setFilters] = useState({ nombre: "", estudiante: "", parentesco: "" });
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
-
   const debouncedFilters = useDebounce(filters, 400);
 
-  // Efecto para aplicar el zoom solo al contenido de la tabla
   useEffect(() => {
     const currentContainer = document.getElementById("tabla-apoderados-container");
-    if (currentContainer) {
-      if (isZoomed) {
-        currentContainer.style.zoom = "60%";
-      } else {
-        currentContainer.style.zoom = "100%";
-      }
-    }
-    return () => {
-      if (currentContainer) {
-        currentContainer.style.zoom = "100%";
-      }
-    };
+    if (currentContainer) currentContainer.style.zoom = isZoomed ? "60%" : "100%";
+    return () => { if (currentContainer) currentContainer.style.zoom = "100%"; };
   }, [isZoomed]);
 
   const handleFreshReload = () => {
@@ -80,10 +60,7 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
   };
 
   const handleInputChange = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === "todos" ? "" : value,
-    }));
+    setFilters((prev) => ({ ...prev, [key]: value === "todos" ? "" : value }));
     setPage(1);
   };
 
@@ -92,30 +69,16 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
     setPage(1);
   };
 
-  const { data, isLoading, isFetching, error } = useGetApoderados(
-    page,
-    limit,
-    debouncedFilters
-  );
+  const { data, isLoading, isFetching, error } = useGetApoderados(page, limit, debouncedFilters);
 
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  // Función para concatenar el nombre completo
-  const getNombreCompleto = (apoderado: ApoderadoType) => {
-    return `${apoderado.primer_nombre || ''} ${apoderado.segundo_nombre || ''} ${apoderado.primer_apellido || ''} ${apoderado.segundo_apellido || ''}`.trim().replace(/\s+/g, ' ');
-  };
+  const getNombreCompleto = (a: ApoderadoType) => `${a.primer_nombre ?? ''} ${a.segundo_nombre ?? ''} ${a.primer_apellido ?? ''} ${a.segundo_apellido ?? ''}`.trim();
+  const getNombreEstudiante = (a: ApoderadoType) => `${a.estudiante_primer_nombre ?? ''} ${a.estudiante_primer_apellido ?? ''}`.trim();
 
-  // Función para concatenar el nombre del estudiante
-  const getNombreEstudiante = (apoderado: ApoderadoType) => {
-    return `${apoderado.estudiante_primer_nombre || ''} ${apoderado.estudiante_primer_apellido || ''}`.trim().replace(/\s+/g, ' ');
-  };
-
-  const handleEdit = (id: number) => {
-    onEditApoderado(id);
-  };
-
+  const handleEdit = (id: number) => onEditApoderado(id);
   const handleDelete = (id: number, nombre: string) => {
     if (window.confirm(`¿Está seguro que desea eliminar al apoderado ${nombre}?`)) {
       console.log("Eliminar apoderado:", id);
@@ -123,187 +86,12 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
     }
   };
 
-  const toggleZoom = () => {
-    setIsZoomed((prev) => !prev);
-  };
-
-  // Estilos comunes para TextField
-  const textFieldStyle = {
-    "& .MuiInputLabel-root": {
-      fontFamily,
-      fontSize: "14px",
-      color: "#1A1363",
-    },
-    "& .MuiInputBase-root": {
-      fontFamily,
-      borderRadius: "8px",
-      backgroundColor: "#f8f9fa",
-    },
-    "& .MuiOutlinedInput-root": {
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#538A3E",
-      },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#1A1363",
-      },
-    },
-    "& .MuiFormHelperText-root": {
-      fontFamily,
-    },
-  };
-
-  // Estilos comunes para FormControl
-  const formControlStyle = {
-    "& .MuiInputLabel-root": {
-      fontFamily,
-      fontSize: "14px",
-      color: "#1A1363",
-    },
-    "& .MuiFormLabel-root": {
-      fontFamily,
-      fontSize: "14px",
-      color: "#1A1363",
-    },
-    "& .MuiSelect-select": {
-      fontFamily,
-      backgroundColor: "#f8f9fa",
-    },
-    "& .MuiRadio-root": {
-      color: "#538A3E",
-    },
-    "& .Mui-checked": {
-      color: "#538A3E",
-    },
-    "& .MuiInputBase-root": {
-      borderRadius: "8px",
-    },
-    "& .MuiOutlinedInput-root": {
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#538A3E",
-      },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#1A1363",
-      },
-    },
-    "& .MuiMenuItem-root:hover": {
-      backgroundColor: "#e7f5e8",
-    },
-  };
-
-  // Estilo para botón primario verde
-  const primaryButtonStyle = {
-    bgcolor: "#538A3E",
-    fontFamily,
-    textTransform: "none",
-    borderRadius: "10px",
-    color: "white",
-    px: 3,
-    py: 1.2,
-    height: "40px",
-    fontWeight: 600,
-    fontSize: "15px",
-    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
-    "&:hover": {
-      backgroundColor: "#3e682e",
-      transform: "translateY(-2px)",
-      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
-    },
-    "&:active": {
-      backgroundColor: "#2e5022",
-      transform: "translateY(1px)",
-    },
-    "&.Mui-disabled": {
-      bgcolor: "rgba(83, 138, 62, 0.7)",
-      color: "white",
-    },
-    transition: "all 0.2s ease-in-out",
-  };
-
-  // Estilo para botón secundario naranja
-  const secondaryButtonStyle = {
-    fontFamily,
-    textTransform: "none",
-    borderRadius: "10px",
-    bgcolor: "#F38223",
-    color: "white",
-    px: 3,
-    py: 1.2,
-    height: "40px",
-    fontWeight: 600,
-    fontSize: "15px",
-    boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)",
-    "&:hover": {
-      backgroundColor: "#e67615",
-      transform: "translateY(-2px)",
-      boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
-    },
-    "&:active": {
-      backgroundColor: "#d56a10",
-      transform: "translateY(1px)",
-    },
-    "&.Mui-disabled": {
-      bgcolor: "rgba(243, 130, 35, 0.7)",
-      color: "white",
-    },
-    transition: "all 0.2s ease-in-out",
-  };
-
-  // Estilo para paginación
-  const paginationButtonStyle = {
-    fontFamily,
-    textTransform: "none",
-    borderRadius: "10px",
-    minWidth: "34px",
-    height: "34px",
-    fontWeight: 600,
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
-    transition: "all 0.2s ease-in-out",
-  };
-
-  const zoomButtonStyle = {
-    fontFamily,
-    textTransform: "none",
-    borderRadius: "10px",
-    bgcolor: "#1A1363",
-    color: "white",
-    px: 3,
-    py: 1.2,
-    height: "40px",
-    fontWeight: 600,
-    fontSize: "15px",
-    boxShadow: "0px 4px 10px rgba(26, 19, 99, 0.3)",
-    "&:hover": {
-      backgroundColor: "#13104d",
-      transform: "translateY(-2px)",
-      boxShadow: "0px 6px 12px rgba(26, 19, 99, 0.4)",
-    },
-    "&:active": {
-      backgroundColor: "#0c0a33",
-      transform: "translateY(1px)",
-    },
-    transition: "all 0.2s ease-in-out",
-  };
-
   return (
     <Box id="tabla-apoderados-container" sx={{ position: "relative" }}>
       {(isLoading || isFetching) && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            p: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
+        <Box sx={{ position: "absolute", top: 0, right: 0, p: 2, display: "flex", alignItems: "center", gap: 1 }}>
           <CircularProgress size={20} sx={{ color: "#538A3E" }} />
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ fontFamily }}
-          >
+          <Typography variant="body2" color="text.secondary" sx={{ fontFamily }}>
             {isLoading ? "Cargando..." : "Actualizando..."}
           </Typography>
         </Box>
@@ -317,303 +105,69 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
         </Box>
       )}
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 3,
-          pl: 1,
-        }}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#1A1363"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ marginRight: "10px" }}
-        >
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-        </svg>
-        <Typography
-          variant="h5"
-          sx={{
-            fontFamily,
-            color: "#1A1363",
-            fontWeight: 700,
-          }}
-        >
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3, pl: 1 }}>
+        <Typography variant="h5" sx={{ fontFamily, color: "#1A1363", fontWeight: 700 }}>
           Lista de Apoderados
         </Typography>
       </Box>
 
-      <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          borderRadius: "12px",
-          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <TextField
-            label="Nombre del apoderado"
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 250,
-              height: "40px",
-              ...textFieldStyle,
-            }}
-            value={filters.nombre}
-            onChange={(e) => handleInputChange("nombre", e.target.value)}
-          />
+      <Paper sx={{ p: 3, mb: 3, borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}>
+          <TextField label="Nombre del apoderado" variant="outlined" size="small" sx={{ minWidth: 250 }} value={filters.nombre} onChange={(e) => handleInputChange("nombre", e.target.value)} />
+          <TextField label="Nombre del estudiante" variant="outlined" size="small" sx={{ minWidth: 250 }} value={filters.estudiante} onChange={(e) => handleInputChange("estudiante", e.target.value)} />
 
-          <TextField
-            label="Nombre del estudiante"
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 250,
-              height: "40px",
-              ...textFieldStyle,
-            }}
-            value={filters.estudiante}
-            onChange={(e) => handleInputChange("estudiante", e.target.value)}
-          />
-
-          <FormControl
-            sx={{
-              minWidth: 150,
-              height: "40px",
-              ...formControlStyle,
-            }}
-            size="small"
-          >
+          <FormControl sx={{ minWidth: 150 }} size="small">
             <InputLabel id="parentesco-label">Parentesco</InputLabel>
-            <Select
-              labelId="parentesco-label"
-              value={filters.parentesco || "todos"}
-              label="Parentesco"
-              onChange={(e) => handleInputChange("parentesco", e.target.value)}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    "& .MuiMenuItem-root:hover": {
-                      backgroundColor: "#e7f5e8",
-                    },
-                  },
-                },
-              }}
-            >
-              <MenuItem value="todos" sx={{ fontFamily }}>Todos</MenuItem>
-              <MenuItem value="Padre" sx={{ fontFamily }}>Padre</MenuItem>
-              <MenuItem value="Madre" sx={{ fontFamily }}>Madre</MenuItem>
-              <MenuItem value="Tutor" sx={{ fontFamily }}>Tutor</MenuItem>
-              <MenuItem value="Tío" sx={{ fontFamily }}>Tío</MenuItem>
-              <MenuItem value="Abuelo" sx={{ fontFamily }}>Abuelo</MenuItem>
-              <MenuItem value="Hermano" sx={{ fontFamily }}>Hermano</MenuItem>
+            <Select labelId="parentesco-label" value={filters.parentesco || "todos"} label="Parentesco" onChange={(e) => handleInputChange("parentesco", e.target.value)}>
+              <MenuItem value="todos">Todos</MenuItem>
+              <MenuItem value="Padre">Padre</MenuItem>
+              <MenuItem value="Madre">Madre</MenuItem>
+              <MenuItem value="Tutor">Tutor</MenuItem>
+              <MenuItem value="Tío">Tío</MenuItem>
+              <MenuItem value="Abuelo">Abuelo</MenuItem>
+              <MenuItem value="Hermano">Hermano</MenuItem>
             </Select>
           </FormControl>
 
-          <Button
-            variant="contained"
-            onClick={clearFilters}
-            sx={secondaryButtonStyle}
-            startIcon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            }
-          >
-            Quitar filtros
-          </Button>
-
-          <Box
-            sx={{
-              display: "flex",
-              ml: "auto",
-              gap: 2,
-              flexWrap: "nowrap",
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={toggleZoom}
-              sx={zoomButtonStyle}
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {isZoomed ? (
-                    <>
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      <line x1="8" y1="11" x2="14" y2="11"></line>
-                      <line x1="11" y1="8" x2="11" y2="14"></line>
-                    </>
-                  ) : (
-                    <>
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      <line x1="8" y1="11" x2="14" y2="11"></line>
-                    </>
-                  )}
-                </svg>
-              }
-            >
-              {isZoomed ? "Vista Normal" : "Ver Tabla Completa"}
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={onNewApoderado}
-              sx={primaryButtonStyle}
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <line x1="19" y1="8" x2="19" y2="14"></line>
-                  <line x1="22" y1="11" x2="16" y2="11"></line>
-                </svg>
-              }
-            >
-              Nuevo Apoderado
-            </Button>
-          </Box>
+          <Button variant="contained" onClick={clearFilters} sx={{ bgcolor: "#F38223", color: "white" }}>Quitar filtros</Button>
+          <Button variant="contained" onClick={() => setIsZoomed(!isZoomed)} sx={{ bgcolor: "#1A1363", color: "white" }}>{isZoomed ? "Vista Normal" : "Ver Tabla Completa"}</Button>
+          <Button variant="contained" onClick={onNewApoderado} sx={{ bgcolor: "#538A3E", color: "white" }}>Nuevo Apoderado</Button>
         </Box>
       </Paper>
 
-      <div className="border border-[#f1e0a6] rounded-lg overflow-hidden">
+      <div className="border border-[#edad4c] rounded-lg overflow-hidden">
         <div style={{ overflowX: "auto", width: "100%" }}>
           <Table className="bg-[#fff9db]">
-            <TableHeader className="bg-[#f1e0a6] sticky top-0 z-10">
+            <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>ID</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Código Apoderado</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Nombre Completo</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Identidad</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Género</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Teléfono</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Correo</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Parentesco</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Principal</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Código Estudiante</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Estudiante</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Grado</TableHead>
-                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Acciones</TableHead>
+                {[
+                  "ID", "Código Apoderado", "Nombre Completo", "Identidad", "Género", "Teléfono", "Correo", "Parentesco", "Principal", "Código Estudiante", "Estudiante", "Grado", "Acciones"
+                ].map((h, i) => (
+                  <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>{h}</TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
-                <TableRow
-                  key={item.encargado_id}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-[#fffceb]"
-                  } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
-                >
-                  <TableCell className="font-medium text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.encargado_id}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.numero_encargado}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {getNombreCompleto(item)}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.identidad}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.genero}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.telefono_personal}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.correo_electronico}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.parentesco}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.es_encargado_principal ? "Sí" : "No"}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.numero_estudiante}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {getNombreEstudiante(item)}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.grado_estudiante}
-                  </TableCell>
+                <TableRow key={item.encargado_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer`}>
+                  <TableCell>{item.encargado_id}</TableCell>
+                  <TableCell>{item.numero_encargado}</TableCell>
+                  <TableCell>{getNombreCompleto(item)}</TableCell>
+                  <TableCell>{item.identidad}</TableCell>
+                  <TableCell>{item.genero}</TableCell>
+                  <TableCell>{item.telefono_personal}</TableCell>
+                  <TableCell>{item.correo_electronico}</TableCell>
+                  <TableCell>{item.parentesco}</TableCell>
+                  <TableCell>{item.es_encargado_principal ? "Sí" : "No"}</TableCell>
+                  <TableCell>{item.numero_estudiante}</TableCell>
+                  <TableCell>{getNombreEstudiante(item)}</TableCell>
+                  <TableCell>{item.grado_estudiante}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => handleEdit(item.encargado_id)}
-                        className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
-                        title="Editar"
-                        style={{
-                          transition: "all 0.2s ease, transform 0.2s ease",
-                        }}
-                      >
+                      <button onClick={() => handleEdit(item.encargado_id)} className="text-[#538A3E] hover:text-[#3e682e]">
                         <EditIcon fontSize="small" />
                       </button>
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            item.encargado_id,
-                            getNombreCompleto(item)
-                          )
-                        }
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
-                        title="Eliminar"
-                        style={{
-                          transition: "all 0.2s ease, transform 0.2s ease",
-                        }}
-                      >
+                      <button onClick={() => handleDelete(item.encargado_id, getNombreCompleto(item))} className="text-red-500 hover:text-red-700">
                         <DeleteIcon fontSize="small" />
                       </button>
                     </div>
@@ -625,153 +179,22 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
         </div>
       </div>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          mt: 2,
-          p: 2,
-          bgcolor: "white",
-          borderRadius: "12px",
-          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ fontFamily, display: "flex", alignItems: "center" }}
-        >
-          Mostrando {tableData.length} de {total} registros
-        </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, p: 2, bgcolor: "white", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
+        <Typography variant="body2" sx={{ fontFamily }}>Mostrando {tableData.length} de {total} registros</Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            disabled={page <= 1}
-            sx={{
-              ...paginationButtonStyle,
-              bgcolor: "#F38223",
-              color: "white",
-              "&:hover": {
-                backgroundColor: "#e67615",
-                transform: "translateY(-2px)",
-                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
-              },
-              "&:active": {
-                backgroundColor: "#d56a10",
-                transform: "translateY(1px)",
-              },
-              "&.Mui-disabled": {
-                bgcolor: "rgba(243, 130, 35, 0.4)",
-                color: "white",
-              },
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </Button>
+          <Button variant="contained" size="small" onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page <= 1}>Anterior</Button>
           {[...Array(Math.min(5, pageCount))].map((_, i) => {
             const pageNum = page <= 3 ? i + 1 : page - 2 + i;
-            if (pageNum <= pageCount) {
-              return (
-                <Button
-                  key={i}
-                  variant={pageNum === page ? "contained" : "outlined"}
-                  size="small"
-                  onClick={() => setPage(pageNum)}
-                  sx={
-                    pageNum === page
-                      ? {
-                          ...paginationButtonStyle,
-                          bgcolor: "#538A3E",
-                          color: "white",
-                          "&:hover": {
-                            bgcolor: "#3e682e",
-                            transform: "translateY(-2px)",
-                            boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
-                          },
-                        }
-                      : {
-                          ...paginationButtonStyle,
-                          bgcolor: "#f8f9fa",
-                          color: "#333",
-                          border: "1px solid #ddd",
-                          "&:hover": {
-                            bgcolor: "#e7f5e8",
-                            transform: "translateY(-2px)",
-                            boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.1)",
-                          },
-                        }
-                  }
-                >
-                  {pageNum}
-                </Button>
-              );
-            }
-            return null;
+            return pageNum <= pageCount ? (
+              <Button key={i} variant={pageNum === page ? "contained" : "outlined"} onClick={() => setPage(pageNum)}>{pageNum}</Button>
+            ) : null;
           })}
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => setPage((p) => Math.min(p + 1, pageCount))}
-            disabled={page >= pageCount}
-            sx={{
-              ...paginationButtonStyle,
-              bgcolor: "#F38223",
-              color: "white",
-              "&:hover": {
-                backgroundColor: "#e67615",
-                transform: "translateY(-2px)",
-                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
-              },
-              "&:active": {
-                backgroundColor: "#d56a10",
-                transform: "translateY(1px)",
-              },
-              "&.Mui-disabled": {
-                bgcolor: "rgba(243, 130, 35, 0.4)",
-                color: "white",
-              },
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </Button>
+          <Button variant="contained" size="small" onClick={() => setPage((p) => Math.min(p + 1, pageCount))} disabled={page >= pageCount}>Siguiente</Button>
         </Box>
       </Box>
 
       {!isLoading && !isFetching && tableData.length === 0 && (
-        <Paper
-          sx={{
-            p: 4,
-            textAlign: "center",
-            borderRadius: "12px",
-            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
-          }}
-        >
+        <Paper sx={{ p: 4, textAlign: "center", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
           <Typography color="text.secondary" sx={{ fontFamily }}>
             No se encontraron apoderados para los filtros actuales.
           </Typography>
