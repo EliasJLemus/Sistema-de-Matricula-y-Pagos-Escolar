@@ -52,8 +52,8 @@ const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudi
           alignItems: "center",
           borderTopLeftRadius: "16px",
           borderTopRightRadius: "16px",
-          borderBottomLeftRadius: "50px",
-          borderBottomRightRadius: "50px",
+          borderBottomLeftRadius: "0px",
+          borderBottomRightRadius: "0px",
           boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
           position: "relative",
         }}

@@ -1,7 +1,3 @@
-"use client";
-
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,20 +25,21 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-// import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
-import {useGetEstudiantes} from "@/lib/queries"
+import useGetApoderados, {
+  ApoderadoType,
+} from "@/lib/queries/useGetApoderados";
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
-interface TablaEstudiantesProps {
-  onNewStudent: () => void;
-  onEditStudent: (id: string) => void;
+interface TablaApoderadosProps {
+  onNewApoderado: () => void;
+  onEditApoderado: (id: number) => void;
 }
 
-export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
-  onNewStudent,
-  onEditStudent,
+export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
+  onNewApoderado,
+  onEditApoderado,
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -51,20 +48,17 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
   const [filters, setFilters] = useState({
     nombre: "",
-    grado: "",
-    estado: "",
+    estudiante: "",
+    parentesco: "",
   });
 
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  // Efecto para aplicar el zoom solo al contenido de la tabla, no al sidebar
+  // Efecto para aplicar el zoom solo al contenido de la tabla
   useEffect(() => {
-    const currentContainer = document.getElementById(
-      "tabla-estudiantes-container"
-    );
-
+    const currentContainer = document.getElementById("tabla-apoderados-container");
     if (currentContainer) {
       if (isZoomed) {
         currentContainer.style.zoom = "60%";
@@ -72,7 +66,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         currentContainer.style.zoom = "100%";
       }
     }
-
     return () => {
       if (currentContainer) {
         currentContainer.style.zoom = "100%";
@@ -82,7 +75,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
-      queryKey: ["getEstudiantes", page, limit, JSON.stringify(filters)],
+      queryKey: ["getApoderados", page, limit, JSON.stringify(filters)],
     });
   };
 
@@ -95,11 +88,11 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   };
 
   const clearFilters = () => {
-    setFilters({ nombre: "", grado: "", estado: "" });
+    setFilters({ nombre: "", estudiante: "", parentesco: "" });
     setPage(1);
   };
 
-  const { data, isLoading, isFetching, error } = useGetEstudiantes(
+  const { data, isLoading, isFetching, error } = useGetApoderados(
     page,
     limit,
     debouncedFilters
@@ -109,15 +102,23 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleEdit = (id: string) => {
-    onEditStudent(id);
+  // Función para concatenar el nombre completo
+  const getNombreCompleto = (apoderado: ApoderadoType) => {
+    return `${apoderado.primer_nombre || ''} ${apoderado.segundo_nombre || ''} ${apoderado.primer_apellido || ''} ${apoderado.segundo_apellido || ''}`.trim().replace(/\s+/g, ' ');
+  };
+
+  // Función para concatenar el nombre del estudiante
+  const getNombreEstudiante = (apoderado: ApoderadoType) => {
+    return `${apoderado.estudiante_primer_nombre || ''} ${apoderado.estudiante_primer_apellido || ''}`.trim().replace(/\s+/g, ' ');
+  };
+
+  const handleEdit = (id: number) => {
+    onEditApoderado(id);
   };
 
   const handleDelete = (id: number, nombre: string) => {
-    if (
-      window.confirm(`¿Está seguro que desea eliminar al estudiante ${nombre}?`)
-    ) {
-      console.log("Eliminar estudiante:", id);
+    if (window.confirm(`¿Está seguro que desea eliminar al apoderado ${nombre}?`)) {
+      console.log("Eliminar apoderado:", id);
       handleFreshReload();
     }
   };
@@ -284,7 +285,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   };
 
   return (
-    <Box id="tabla-estudiantes-container" sx={{ position: "relative" }}>
+    <Box id="tabla-apoderados-container" sx={{ position: "relative" }}>
       {(isLoading || isFetching) && (
         <Box
           sx={{
@@ -338,8 +339,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         >
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
         <Typography
           variant="h5"
@@ -349,7 +348,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             fontWeight: 700,
           }}
         >
-          Lista de Estudiantes
+          Lista de Apoderados
         </Typography>
       </Box>
 
@@ -370,7 +369,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           }}
         >
           <TextField
-            label="Nombre del estudiante"
+            label="Nombre del apoderado"
             variant="outlined"
             size="small"
             sx={{
@@ -382,62 +381,18 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             onChange={(e) => handleInputChange("nombre", e.target.value)}
           />
 
-          <FormControl
-            sx={{
-              minWidth: 120,
-              height: "40px",
-              ...formControlStyle,
-            }}
+          <TextField
+            label="Nombre del estudiante"
+            variant="outlined"
             size="small"
-          >
-            <InputLabel id="grado-label">Grado</InputLabel>
-            <Select
-              labelId="grado-label"
-              value={filters.grado || "todos"}
-              label="Grado"
-              onChange={(e) => handleInputChange("grado", e.target.value)}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    "& .MuiMenuItem-root:hover": {
-                      backgroundColor: "#e7f5e8",
-                    },
-                  },
-                },
-              }}
-            >
-              <MenuItem value="todos" sx={{ fontFamily }}>
-                Todos
-              </MenuItem>
-              <MenuItem value="Primero" sx={{ fontFamily }}>
-                Primero
-              </MenuItem>
-              <MenuItem value="Segundo" sx={{ fontFamily }}>
-                Segundo
-              </MenuItem>
-              <MenuItem value="Tercero" sx={{ fontFamily }}>
-                Tercero
-              </MenuItem>
-              <MenuItem value="Cuarto" sx={{ fontFamily }}>
-                Cuarto
-              </MenuItem>
-              <MenuItem value="Quinto" sx={{ fontFamily }}>
-                Quinto
-              </MenuItem>
-              <MenuItem value="Sexto" sx={{ fontFamily }}>
-                Sexto
-              </MenuItem>
-              <MenuItem value="Séptimo" sx={{ fontFamily }}>
-                Séptimo
-              </MenuItem>
-              <MenuItem value="Octavo" sx={{ fontFamily }}>
-                Octavo
-              </MenuItem>
-              <MenuItem value="Noveno" sx={{ fontFamily }}>
-                Noveno
-              </MenuItem>
-            </Select>
-          </FormControl>
+            sx={{
+              minWidth: 250,
+              height: "40px",
+              ...textFieldStyle,
+            }}
+            value={filters.estudiante}
+            onChange={(e) => handleInputChange("estudiante", e.target.value)}
+          />
 
           <FormControl
             sx={{
@@ -447,12 +402,12 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
             }}
             size="small"
           >
-            <InputLabel id="estado-label">Estado</InputLabel>
+            <InputLabel id="parentesco-label">Parentesco</InputLabel>
             <Select
-              labelId="estado-label"
-              value={filters.estado || "todos"}
-              label="Estado"
-              onChange={(e) => handleInputChange("estado", e.target.value)}
+              labelId="parentesco-label"
+              value={filters.parentesco || "todos"}
+              label="Parentesco"
+              onChange={(e) => handleInputChange("parentesco", e.target.value)}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -463,15 +418,13 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                 },
               }}
             >
-              <MenuItem value="todos" sx={{ fontFamily }}>
-                Todos
-              </MenuItem>
-              <MenuItem value="Activo" sx={{ fontFamily }}>
-                Activo
-              </MenuItem>
-              <MenuItem value="Inactivo" sx={{ fontFamily }}>
-                Inactivo
-              </MenuItem>
+              <MenuItem value="todos" sx={{ fontFamily }}>Todos</MenuItem>
+              <MenuItem value="Padre" sx={{ fontFamily }}>Padre</MenuItem>
+              <MenuItem value="Madre" sx={{ fontFamily }}>Madre</MenuItem>
+              <MenuItem value="Tutor" sx={{ fontFamily }}>Tutor</MenuItem>
+              <MenuItem value="Tío" sx={{ fontFamily }}>Tío</MenuItem>
+              <MenuItem value="Abuelo" sx={{ fontFamily }}>Abuelo</MenuItem>
+              <MenuItem value="Hermano" sx={{ fontFamily }}>Hermano</MenuItem>
             </Select>
           </FormControl>
 
@@ -545,7 +498,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
 
             <Button
               variant="contained"
-              onClick={onNewStudent}
+              onClick={onNewApoderado}
               sx={primaryButtonStyle}
               startIcon={
                 <svg
@@ -559,14 +512,14 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <line x1="19" y1="8" x2="19" y2="14"></line>
                   <line x1="22" y1="11" x2="16" y2="11"></line>
                 </svg>
               }
             >
-              Nuevo Estudiante
+              Nuevo Apoderado
             </Button>
           </Box>
         </Box>
@@ -577,198 +530,69 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           <Table className="bg-[#fff9db]">
             <TableHeader className="bg-[#f1e0a6] sticky top-0 z-10">
               <TableRow>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Codigo
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Nombre Completo
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Nacionalidad
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Identidad
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Género
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Fecha Nacimiento
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Edad
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Dirección
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Grado
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Sección
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Es Zurdo
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Dif. Educación
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Alergia
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Desc. Alergia
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Fecha Admisión
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Estado
-                </TableHead>
-                <TableHead
-                  className="[text-#202020] font-bold"
-                  style={{ fontFamily }}
-                >
-                  Acciones
-                </TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>ID</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Código Apoderado</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Nombre Completo</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Identidad</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Género</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Teléfono</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Correo</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Parentesco</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Principal</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Código Estudiante</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Estudiante</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Grado</TableHead>
+                <TableHead className="[text-#202020] font-bold" style={{ fontFamily }}>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
                 <TableRow
-                  key={item.uuid}
+                  key={item.encargado_id}
                   className={`${
                     index % 2 === 0 ? "bg-white" : "bg-[#fffceb]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
                 >
-                  <TableCell
-                    className="font-medium text-[#4D4D4D]"
-                    style={{ fontFamily }}
-                  >
-                    {item.codigo_estudiante}
+                  <TableCell className="font-medium text-[#4D4D4D]" style={{ fontFamily }}>
+                    {item.encargado_id}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.primer_nombre}
+                    {item.numero_encargado}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.segundo_nombre}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.primer_apellido}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.segundo_apellido}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.nacionalidad}
+                    {getNombreCompleto(item)}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.identidad}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {String(item.genero)}
+                    {item.genero}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.fecha_nacimiento}
+                    {item.telefono_personal}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.edad}
+                    {item.correo_electronico}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.direccion}
+                    {item.parentesco}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.grado}
+                    {item.es_encargado_principal ? "Sí" : "No"}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.seccion}
+                    {item.numero_estudiante}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.es_zurdo ? "Sí" : "No"}
+                    {getNombreEstudiante(item)}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.dif_educacion ? "Sí" : "No"}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.alergia ? "Sí" : "No"}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.desc_alergia || "N/A"}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.fecha_admision}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        item.estado === "Activo"
-                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-16 justify-center"
-                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-16 justify-center"
-                      }
-                      style={{
-                        fontFamily,
-                        padding: "4px 8px",
-                        borderRadius: "6px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {item.estado}
-                    </Badge>
+                    {item.grado_estudiante}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => {console.log(item?.uuid )
-                          handleEdit(item?.uuid as string)}}
+                        onClick={() => handleEdit(item.encargado_id)}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -777,7 +601,21 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       >
                         <EditIcon fontSize="small" />
                       </button>
-    
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            item.encargado_id,
+                            getNombreCompleto(item)
+                          )
+                        }
+                        className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
+                        title="Eliminar"
+                        style={{
+                          transition: "all 0.2s ease, transform 0.2s ease",
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -935,7 +773,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           }}
         >
           <Typography color="text.secondary" sx={{ fontFamily }}>
-            No se encontraron estudiantes para los filtros actuales.
+            No se encontraron apoderados para los filtros actuales.
           </Typography>
         </Paper>
       )}
@@ -943,4 +781,4 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
   );
 };
 
-export default TablaEstudiantes;
+export default TablaApoderados;

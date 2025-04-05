@@ -618,7 +618,10 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     "& .MuiInputLabel-root": {
       fontFamily,
       fontSize: "14px",
-      color: "#1A1363",
+      color: "#1A1363", // Color azul cuando está inactivo
+      "&.Mui-focused": {
+        color: "#1A1363", // Mismo color azul cuando está enfocado
+      },
     },
     "& .MuiInputBase-root": {
       fontFamily,
@@ -653,13 +656,16 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       color: "#f44336",
     },
   };
-
-  // Estilos comunes para FormControl
+  
+  // Estilos comunes para FormControl - Modificación para el label flotante
   const formControlStyle = {
     "& .MuiInputLabel-root": {
       fontFamily,
       fontSize: "14px",
-      color: "#1A1363",
+      color: "#1A1363", // Color azul cuando está inactivo
+      "&.Mui-focused": {
+        color: "#1A1363", // Mismo color azul cuando está enfocado
+      },
     },
     "& .MuiFormLabel-root": {
       fontFamily,
@@ -2195,7 +2201,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 } else if (activeSection === "academico") {
                   setActiveSection("adicional");
                 } else {
-                  // Only actually submit when on the final screen and clicking submit
                   setIsNavigating(false);
                   handleSubmit(e as React.FormEvent);
                 }
@@ -2232,7 +2237,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 },
                 transition: "all 0.2s ease-in-out",
               }}
-              endIcon={
+              startIcon={ // Cambiado de endIcon a startIcon
                 isSubmitting ? (
                   <CircularProgress size={20} sx={{ color: "white" }} />
                 ) : activeSection !== "adicional" ? (
@@ -2268,7 +2273,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                   </svg>
                 )
               }
-            >
+              >
               {isSubmitting
                 ? isEditing
                   ? "Actualizando..."
