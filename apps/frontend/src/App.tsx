@@ -16,6 +16,7 @@ import EditarEstudiantePage from "./pages/estudiantes/editar/EditarEstudiantePag
 import ApoderadoPage from "./pages/apoderados/ApoderadosPage";
 import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
+import SubirComprobante from "./components/Comprobante/subirComprobante";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -63,6 +64,7 @@ function App() {
                   path="/estudiantes/editar/:id"
                   element={<EditarEstudiantePage />}
                 />
+                <Route path="/subir-comprobante" element={<SubirComprobante />} />
 
                 {/* Rutas de apoderados */}
                 <Route path="/apoderados" element={<ApoderadoPage />} />
