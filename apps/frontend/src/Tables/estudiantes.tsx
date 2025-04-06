@@ -18,6 +18,10 @@ import {
 
 // Columnas de la tabla
 const structureColumns: StructureColumn<ReporteEstudianteType>[] = [
+  {
+    name: "codigo_estudiante",
+    label: "Codigo Estudiante"
+  },
   { 
     name : "nombre_estudiante", 
     label: "Nombre del Estudiante" 

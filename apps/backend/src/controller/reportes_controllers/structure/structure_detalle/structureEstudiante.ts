@@ -1,6 +1,10 @@
 import { StructureAndData, StructureColumn, ReporteEstudianteType } from "@shared/reportsType";
 
 const columnsEstudiante: StructureColumn<ReporteEstudianteType>[] = [
+  {
+    name: "codigo_estudiante",
+    label: "Codigo"
+  },
   { 
     name : "nombre_estudiante", 
     label: "Nombre del Estudiante" 

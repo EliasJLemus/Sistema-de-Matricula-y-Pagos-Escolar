@@ -44,6 +44,7 @@ export type ReporteMensualidadType = {
 }
 
 export type ReporteEstudianteType = {
+  codigo_estudiante?: string,
   nombre_estudiante: string,
   identidad: string,
   genero: string,
@@ -63,7 +64,7 @@ export type ReporteEstudianteType = {
 }
 
 export type ReporteBecaType = {
-  id_estudiante?: string;
+  codigo_beca?: string
   nombre_estudiante?: string;
   grado?: string;
   seccion?: string;

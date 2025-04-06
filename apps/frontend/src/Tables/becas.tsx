@@ -16,8 +16,8 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const structureColumns: StructureColumn<ReporteBecaType>[] = [
   { 
-    name : "id_estudiante", 
-    label: "ID Estudiante",
+    name : "codigo_beca", 
+    label: "Codigo Beca",
   },
   { 
     name : "nombre_estudiante", 

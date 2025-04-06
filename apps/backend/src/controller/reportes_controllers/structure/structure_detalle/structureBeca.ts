@@ -2,8 +2,8 @@ import { StructureAndData, StructureColumn, ReporteBecaType, PaginationType } fr
 
 const columnsBeca: StructureColumn<ReporteBecaType>[] = [
   { 
-    name : "id_estudiante", 
-    label: "ID Estudiante",
+    name : "codigo_beca", 
+    label: "Codigo Beca",
   },
   { 
     name : "nombre_estudiante", 
