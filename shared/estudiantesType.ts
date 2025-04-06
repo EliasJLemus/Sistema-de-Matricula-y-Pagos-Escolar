@@ -24,6 +24,6 @@ export type EstudiantesTablaType = {
     reaccion_alergica?: boolean;
     dif_educacion_fisica?: "Sí" | "No" | Boolean;
     descripcion_alergica?: string | null;
-    tipo_pago?: "Normal" | "Nivelado" | null;
+    plan_pago?: "Normal" | "Nivelado" | string;
   };
   

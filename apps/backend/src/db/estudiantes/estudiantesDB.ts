@@ -31,7 +31,7 @@ export class Estudiantes {
     descripcion_alergica,
     tipo_persona,
     fecha_admision,
-    tipo_pago?
+    plan_pago?
   ) {
     const client = await this.db.getClient();
     try {
@@ -58,7 +58,7 @@ export class Estudiantes {
   $18,                -- p_descripcion_alergica
   $19,      -- p_tipo_persona
   $20,      -- p_fecha_admision
-  'Normal'::tipo_pago -- p_tipo_plan
+  $21::tipo_pago -- p_tipo_plan
 );
 
       `;
@@ -84,6 +84,7 @@ export class Estudiantes {
         descripcion_alergica,
         tipo_persona,
         fecha_admision,
+        plan_pago
       ];
 
       const result = await client.query(query, values);

@@ -30,7 +30,7 @@ export const registrarEstudianteSchema = z.object({
 
   fecha_admision: z.coerce.date(),
 
-  tipo_pago: z.enum(["Normal", "Nivelado"]).optional().nullable(),
+  plan_pago: z.enum(["Normal", "Nivelado"]).optional().nullable(),
 });
 
 
