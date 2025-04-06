@@ -141,7 +141,6 @@ export const getReporteMensualidad = async (
   }
 };
 
-
 export const getReporteEstudiante = async ( 
   req: Request,
   res: Response

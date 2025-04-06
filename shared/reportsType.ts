@@ -44,6 +44,7 @@ export type ReporteMensualidadType = {
 }
 
 export type ReporteEstudianteType = {
+  codigo_estudiante?: string,
   nombre_estudiante: string,
   identidad: string,
   genero: string,
@@ -63,7 +64,7 @@ export type ReporteEstudianteType = {
 }
 
 export type ReporteBecaType = {
-  id_estudiante?: string;
+  codigo_beca?: string
   nombre_estudiante?: string;
   grado?: string;
   seccion?: string;
@@ -77,12 +78,12 @@ export type ReporteBecaType = {
 };
 
 export type ReportePagosPendientesType = {
-  grado: string;
-  estudiantes_morosos: number;
-  total_estudiantes: number;
-  porcentaje_morosidad: string;
-  deuda_total: number;
-  promedio_deuda_moroso: number;
+  grado?: string;
+  estudiantes_morosos?: number;
+  total_estudiantes?: number;
+  porcentaje_morosidad?: string;
+  deuda_total?: number;
+  promedio_deuda_moroso?: number;
 };
 
 export type ReporteFinancieroAnualType = {
@@ -99,7 +100,7 @@ export type ReporteRetiroEstudiantesType = {
 };
 
 export interface ReporteAntiguedadEstudiantes {
-  id_estudiante: string;          
+  codigo_estudiante: string;          
   nombre_estudiante: string;     
   grado: string;                 
   seccion: string;                

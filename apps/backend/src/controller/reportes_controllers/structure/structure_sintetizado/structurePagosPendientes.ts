@@ -29,4 +29,6 @@ export const pagosPendientesStructure: StructureAndData<ReportePagosPendientesTy
   title: "Reporte de Morosidad Por Grado",
   columns: columnsPagosPendientes,
   data: [] as ReportePagosPendientesType[],
+  pagination: { limit: 0, offset: 0, count: 0, total: 0 } // <-- Aquí inicializado
+
 };

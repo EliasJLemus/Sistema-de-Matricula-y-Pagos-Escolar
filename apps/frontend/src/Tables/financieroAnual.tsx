@@ -1,131 +1,116 @@
-"use client"
+"use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { ResponsiveContainer, CartesianGrid, LineChart as RechartsLineChart, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
+import { ReportTable } from "@/components/Tables/Table";
+import {
+  ResponsiveContainer,
+  CartesianGrid,
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+} from "recharts";
+import { useMemo } from "react";
 import { useChartData } from "../hooks/useChartData";
-import * as pdfUtils from "@/utils/pdfutils";
+import { StructureColumn, ReporteFinancieroAnualType } from "@shared/reportsType";
+
+const columns: StructureColumn<ReporteFinancieroAnualType>[] = [
+  { name: "tipo_pago", label: "Tipo de Pago" },
+  { name: "ingresos", label: "Ingresos" },
+  { name: "deudas_por_cobrar", label: "Deudas por Cobrar" },
+];
 
 export const FinancieroAnualTable: React.FC = () => {
   const { chartData, data, isLoading } = useChartData();
 
+  const formattedChartData = useMemo(() => {
+    return chartData.map((item) => ({
+      type: item.type,
+      income: Number(item.income),
+      debt: Number(item.debt),
+    }));
+  }, [chartData]);
+
   if (isLoading || !data || !data.columns || !data.data) {
-    return <div>Cargando...</div>;
+    return <div className="text-sm text-muted-foreground">Cargando reporte...</div>;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[#1A1363]">  
+          <h2 className="text-2xl font-bold tracking-tight text-[#1A1363]">
             {data.title}
           </h2>
           <p className="text-muted-foreground">No. Reporte 010107 | Fecha de emisión: {new Date().toLocaleDateString()}</p>
         </div>
-        <Button 
-          onClick={() => pdfUtils.generatePDF(data.title, data.columns, data.data)}
-          className="bg-[#1A1363] hover:bg-[#13104d] text-white font-medium rounded-lg px-4 py-2 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg active:bg-[#0c0a33] active:shadow-inner flex items-center gap-2 hover:-translate-y-1 hover:scale-[1.02] transform-gpu group"
-          style={{
-            boxShadow: '0px 4px 10px rgba(26, 19, 99, 0.3)',
-            willChange: 'transform'
-          }}
-        >
-          <Download className="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
-          <span className="transition-all duration-200">Descargar</span>
-        </Button>
-      </div>
+      </div> */}
 
-      {/* Tabla */}
-      <Card className="border-0 shadow-none">
-        <div className="overflow-hidden rounded-lg border border-[#edad4c]">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-[#edad4c]">
-                <TableRow>
-                  {data.columns.map((col) => (
-                    <TableHead
-                      key={col.name}
-                      className="text-white border-0 first:rounded-tl-lg last:rounded-tr-lg"
-                    >
-                      {col.label}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.data.map((row, index) => (
-                  <TableRow
-                    key={index}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
-                    } border-0`}
-                  >
-                    <TableCell className="text-[#4D4D4D] border-0">{row.tipo_pago}</TableCell>
-                    <TableCell className="text-[#4D4D4D] border-0">$ {row.ingresos}</TableCell>
-                    <TableCell className="text-[#4D4D4D] border-0">$ {row.deudas_por_cobrar}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </div>
+      <ReportTable<ReporteFinancieroAnualType>
+        title={data.title}
+        columns={columns}
+        data={data.data}
+      />
 
-        {!data.data.length && (
-          <div className="p-6 text-center text-muted-foreground rounded-b-lg border border-t-0 border-[#edad4c]">
-            No se encontraron registros para los filtros aplicados.
-          </div>
-        )}
-      </Card>
+      <div className="bg-white rounded-xl p-6 shadow-md border">
+        <h3 className="text-lg font-semibold text-[#1A1363] mb-4">
+          Reporte Financiero Anual de Ingresos vs Deudas por Cobrar
+        </h3>
 
-      {/* Gráfico */}
-      <div className="mt-8">
-        <h3 className="text-lg font-medium mb-4">Reporte Financiero Anual de Ingreso VS Deudas por cobrar - Gráfica</h3>
-        <div className="bg-white p-6 rounded-lg shadow-md"> {/* Contenedor con sombreado */}
-          <ResponsiveContainer width="100%" height={400}>
-            <RechartsLineChart 
-              data={chartData} 
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              style={{
-                filter: 'drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.1))' /* Sombreado suave */
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart
+            data={formattedChartData}
+            margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
+          >
+            <CartesianGrid stroke="#d1d5db" strokeDasharray="4 4" />
+            <XAxis
+              dataKey="type"
+              tick={{ fill: "#1f2937", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fill: "#4b5563", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                fontSize: "14px",
               }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="type" />
-              <YAxis />
-              <Tooltip 
-                wrapperStyle={{
-                  backgroundColor: '#fff',
-                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '6px',
-                  padding: '8px 12px'
-                }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="income"
-                name="Ingresos ($)"
-                stroke="hsl(var(--chart-1))"
-                strokeWidth={2}
-                activeDot={{ r: 8 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="debt" 
-                name="Deudas ($)" 
-                stroke="hsl(var(--chart-2))" 
-                strokeWidth={2}
-              />
-            </RechartsLineChart>
-          </ResponsiveContainer>
-        </div>
+            />
+            <Legend
+              verticalAlign="bottom"
+              formatter={(value) => (
+                <span style={{ fontWeight: 500, color: value === "Ingresos ($)" ? "#16a34a" : "#b91c1c" }}>
+                  {value}
+                </span>
+              )}
+            />
+            <Line
+              type="monotone"
+              dataKey="income"
+              name="Ingresos ($)"
+              stroke="#136632"
+              strokeWidth={3}
+              dot={{ r: 5 }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="debt"
+              name="Deudas ($)"
+              stroke="#812222ba"
+              strokeWidth={3}
+              dot={{ r: 5 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
-
-      <CardFooter>
-        <div className="text-sm text-muted-foreground">Total registros: {data.data.length}</div>
-      </CardFooter>
     </div>
   );
 };

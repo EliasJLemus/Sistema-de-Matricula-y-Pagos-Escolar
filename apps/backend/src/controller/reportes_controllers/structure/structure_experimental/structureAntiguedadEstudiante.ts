@@ -2,8 +2,8 @@ import { StructureAndData, StructureColumn, ReporteAntiguedadEstudiantes } from 
 
 const columnsAntiguedad: StructureColumn<ReporteAntiguedadEstudiantes>[] = [
   { 
-    name : "id_estudiante", 
-    label: "ID Estudiante" 
+    name : "codigo_estudiante", 
+    label: "Codigo Estudiante" 
   },
   { 
     name : "nombre_estudiante", 

@@ -236,22 +236,23 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-
+  
     if (filters.nombre_estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.nombre_estudiante}%`);
     }
+  
     if (filters.grado) {
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }
     if (filters.tipo_beneficio) {
-      where.push(`nombre_beca = $${paramIndex++}`);
-      values.push(filters.tipo_beneficio);
-    }
-
+      where.push(`nombre_beca ILIKE $${paramIndex++}`);
+      values.push(`%${filters.tipo_beneficio}%`);
+    }    
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT 
         codigo_beca,
@@ -270,7 +271,7 @@ export class ReporteDetalladoDB {
       ORDER BY porcentaje_beca DESC
       LIMIT $1 OFFSET $2
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return result.rows;
@@ -281,35 +282,39 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   public async countReporteBeca(filters: { nombre_estudiante?: string; grado?: string; tipo_beneficio?: string }): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-
+  
     if (filters.nombre_estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.nombre_estudiante}%`);
     }
+  
     if (filters.grado) {
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }
+  
     if (filters.tipo_beneficio) {
-      where.push(`nombre_beca = $${paramIndex++}`);
-      values.push(filters.tipo_beneficio);
+      where.push(`nombre_beca ILIKE $${paramIndex++}`);
+      values.push(`%${filters.tipo_beneficio}%`);
     }
-
+    
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT COUNT(*) FROM (
         SELECT * FROM "Pagos".reporte_becas_aplicadas(NULL, NULL, NULL)
       ) AS sub
       ${whereClause}
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return parseInt(result.rows[0].count, 10);
@@ -320,6 +325,7 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   // ======= ESTUDIANTE =======
   public async getReporteEstudiante(
@@ -331,29 +337,29 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-
+  
     if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.estudiante}%`);
     }
-
+  
     if (filters.grado) {
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }
-
+  
     if (filters.fecha) {
       where.push(`fecha_admision = $${paramIndex++}`);
       values.push(filters.fecha);
     }
-
+  
     if (filters.estado) {
       where.push(`estado = $${paramIndex++}`);
       values.push(filters.estado);
     }
-
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT
         codigo_estudiante,
@@ -378,7 +384,7 @@ export class ReporteDetalladoDB {
       ORDER BY nombre_estudiante ASC
       LIMIT $1 OFFSET $2
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return result.rows;
@@ -389,7 +395,7 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
-
+  
   public async countReporteEstudiante(
     filters: { estudiante?: string; grado?: string; fecha?: string; estado?: string } = {}
   ): Promise<number> {
@@ -397,36 +403,36 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-
+  
     if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.estudiante}%`);
     }
-
+  
     if (filters.grado) {
       where.push(`grado = $${paramIndex++}`);
       values.push(filters.grado);
     }
-
+  
     if (filters.fecha) {
       where.push(`fecha_admision = $${paramIndex++}`);
       values.push(filters.fecha);
     }
-
+  
     if (filters.estado) {
       where.push(`estado = $${paramIndex++}`);
       values.push(filters.estado);
     }
-
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT COUNT(*) FROM (
         SELECT * FROM "Estudiantes".reporte_estudiantes(NULL, NULL, NULL)
       ) t
       ${whereClause}
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return parseInt(result.rows[0].count, 10);
@@ -437,4 +443,5 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 }

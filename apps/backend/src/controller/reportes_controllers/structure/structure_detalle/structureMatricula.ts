@@ -20,7 +20,7 @@ const columnsMatricula: StructureColumn<ReporteMatriculaType>[] = [
   { name: "beneficioAplicado", 
     label: "Beneficio" },
     {
-      name: "pocentajeDescuento",
+      name: "descuento",
       label: "Porcentaje de Descuento"
     },
   { name: "totalPagar", 

@@ -5,27 +5,31 @@ import {
   financieroAnualStructure,
   retiroEstudiantesStructure,
 } from "@/controller/reportes_controllers/structure/structure_sintetizado";
+import {getPaginationParams} from "@/controller/utils/pagination";
 
 const reporteSintetizadoDB = new ReporteSintetizadoDB();
 
-export const getReportePagosPendientes = async (
-  req: Request,
-  res: Response
-) => {
+export const getReportePagosPendientes = async (req: Request, res: Response) => {
   try {
-    const result = await reporteSintetizadoDB.getReportePagosPendientes();
-    console.log("MENSAJEE: ", result)
-    if (Array.isArray(result) && result.length > 0) {
-      pagosPendientesStructure.data = result;
+    const { limit, offset, page } = getPaginationParams(req);
+    const result = await reporteSintetizadoDB.getReportePagosPendientes(limit, offset);
+
+    if (Array.isArray(result.data) && result.data.length > 0) {
+      pagosPendientesStructure.data = result.data;
+      pagosPendientesStructure.pagination = {
+        limit,
+        offset,
+        count: result.data.length,
+        total: result.total,
+      };
 
       res.status(200).json(pagosPendientesStructure);
       return;
     }
 
     res.status(404).json({ message: "No se encontraron datos" });
-    return;
   } catch (error) {
-    res.status(500).json({error: error.message})
+    res.status(500).json({ error: error.message });
   }
 };
 
