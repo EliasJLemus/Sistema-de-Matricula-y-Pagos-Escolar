@@ -1,83 +1,183 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColorModeContext, useMode } from "./theme";
-import { CssBaseline, ThemeProvider, Box } from "@mui/material";
-import Topbar from "./pages/global/Topbar";
-import DashboardPage from "../src/pages/dashboard/dashboard";
-import Sidebar from "./pages/global/Sidebar";
-import Home from "./pages/home/home";
-import { Route, Routes } from "react-router-dom";
+import {
+  CssBaseline,
+  ThemeProvider,
+  Box,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
-// Importación de componentes de estudiantes
+// Layout
+import Topbar from "./pages/global/Topbar";
+import Sidebar from "./pages/global/Sidebar";
+
+// Páginas
+import Home from "./pages/home/home";
+import DashboardPage from "./pages/dashboard/dashboard";
 import EstudiantesPage from "./pages/estudiantes/EstudiantesPage";
 import NuevoEstudiantePage from "./pages/estudiantes/nuevo/NuevoEstudiantePage";
 import EditarEstudiantePage from "./pages/estudiantes/editar/EditarEstudiantePage";
-
-// Importación de componentes de apoderados
 import ApoderadoPage from "./pages/apoderados/ApoderadosPage";
 import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
 import SubirComprobante from "./components/Comprobante/subirComprobante";
+import Login from "./pages/login/login";
 
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authLoaded, setAuthLoaded] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+    setAuthLoaded(true); // Ya cargó
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  if (!authLoaded) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: 2,
+          backgroundColor: "#f7f7f7",
+        }}
+      >
+        <CircularProgress size={40} thickness={4} />
+        <Typography
+          variant="body1"
+          sx={{ color: "#555", fontFamily: "'Nunito', sans-serif" }}
+        >
+          Verificando sesión...
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box display="flex">
-          {/* Sidebar - always visible, but can be collapsed */}
-          <Sidebar isSidebarVisible={isSidebarVisible} />
+          {isLoggedIn && (
+            <Sidebar
+              isSidebarVisible={isSidebarVisible}
+              onLogout={handleLogout}
+            />
+          )}
 
-          {/* Main content */}
           <Box
             flexGrow={1}
-            sx={{
-              marginLeft: isSidebarVisible ? "240px" : "70px",
-              padding: 0,
-              position: "relative",
-              width: `calc(100% - ${isSidebarVisible ? "240px" : "70px"})`,
-            }}
+            ml={isLoggedIn && isSidebarVisible ? "300px" : "0px"}
+            sx={{ transition: "margin 0.3s ease" }}
           >
-            <Topbar
-              onMenuClick={() => setIsSidebarVisible(!isSidebarVisible)}
-            />
-            <Box
-              sx={{
-                padding: "20px",
-                marginTop: "10px",
-                overflow: "auto",
-              }}
-            >
-              <Routes>
-                <Route path="/home" element={<Home />} />
-                <Route path="/reportes" element={<DashboardPage />} />
+            {isLoggedIn && (
+              <Topbar
+                onMenuClick={() => setIsSidebarVisible(!isSidebarVisible)}
+              />
+            )}
 
-                {/* Rutas de estudiantes */}
-                <Route path="/estudiantes" element={<EstudiantesPage />} />
+            <Box sx={{ padding: "20px", marginTop: "10px", overflow: "auto" }}>
+              <Routes>
+                {/* Rutas públicas */}
+                <Route
+                  path="/"
+                  element={
+                    !isLoggedIn ? (
+                      <Login onLogin={() => setIsLoggedIn(true)} />
+                    ) : (
+                      <Navigate to="/home" />
+                    )
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    !isLoggedIn ? (
+                      <Login onLogin={() => setIsLoggedIn(true)} />
+                    ) : (
+                      <Navigate to="/home" />
+                    )
+                  }
+                />
+
+                {/* Rutas protegidas */}
+                <Route
+                  path="/home"
+                  element={
+                    isLoggedIn ? <Home /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/reportes"
+                  element={
+                    isLoggedIn ? <DashboardPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/estudiantes"
+                  element={
+                    isLoggedIn ? <EstudiantesPage /> : <Navigate to="/login" />
+                  }
+                />
                 <Route
                   path="/estudiantes/nuevo"
-                  element={<NuevoEstudiantePage />}
+                  element={
+                    isLoggedIn ? (
+                      <NuevoEstudiantePage />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
                 />
                 <Route
                   path="/estudiantes/editar/:id"
-                  element={<EditarEstudiantePage />}
+                  element={
+                    isLoggedIn ? (
+                      <EditarEstudiantePage />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
                 />
-                <Route path="/subir-comprobante" element={<SubirComprobante />} />
-
-                {/* Rutas de apoderados */}
-                <Route path="/apoderados" element={<ApoderadoPage />} />
+                <Route
+                  path="/apoderados"
+                  element={
+                    isLoggedIn ? <ApoderadoPage /> : <Navigate to="/login" />
+                  }
+                />
                 <Route
                   path="/apoderados/nuevo"
-                  element={<NuevoApoderado />}
+                  element={
+                    isLoggedIn ? <NuevoApoderado /> : <Navigate to="/login" />
+                  }
                 />
                 <Route
                   path="/apoderados/editar/:id"
-                  element={<EditarApoderado />}
+                  element={
+                    isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />
+                  }
                 />
-
-                {/* Add other routes as needed */}
+                <Route
+                  path="/subir-comprobante"
+                  element={
+                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
+                  }
+                />
               </Routes>
             </Box>
           </Box>

@@ -20,9 +20,30 @@ const Login: React.FC<LoginProps> = ({
     formState: { errors },
   } = useForm<LoginForm>();
 
-  const onSubmit = (data: LoginForm) => {
-    console.log("Datos ingresados:", data);
-    onLogin()
+  const onSubmit = async (data: LoginForm) => {
+      try{
+        const response = await fetch("http://localhost:3000/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.username,
+            password: data.password
+          }),
+        });
+
+        const result = await response.json();
+
+        if(!response.ok){
+          throw new Error(result.message || "Error en la autenticación");
+        }
+        localStorage.setItem("token", result.token);
+        onLogin()
+      }catch(error){
+        console.error("Login fallido:", error);
+        alert("Error en la autenticación. Por favor, verifica tus credenciales.");
+      }
   };
 
   return (

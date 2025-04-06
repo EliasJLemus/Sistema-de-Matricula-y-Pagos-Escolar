@@ -1,4 +1,9 @@
-import { Box, ListItemButton, Typography, Avatar } from "@mui/material";
+import {
+  Box,
+  ListItemButton,
+  Typography,
+  Avatar
+} from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
@@ -7,9 +12,11 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useState, useEffect } from "react";
+import { getUsuarioFromToken } from "@/helpers/auth";
 
 interface SidebarProps {
   isSidebarVisible: boolean;
+  onLogout: () => void;
 }
 
 const fontFamily =
@@ -18,10 +25,14 @@ const fontFamily =
 const EXACT_PADDING = 24;
 const BUTTON_SIZE = 44;
 
-const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isSidebarVisible,
+  onLogout
+}) => {
   const location = useLocation();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [usuario, setUsuario] = useState<string>("");
 
   const navigationItems = [
     { icon: <HomeIcon />, text: "Home", path: "/home" },
@@ -37,6 +48,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
     );
     if (pathIndex !== -1) {
       setActiveIndex(pathIndex);
+    }
+
+    const user = getUsuarioFromToken();
+    if (user) {
+      setUsuario(user.usuario);
     }
   }, [location.pathname]);
 
@@ -70,7 +86,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
           justifyContent: "center",
           alignItems: "center",
           mb: isSidebarVisible ? 3 : 4,
-          transition: "filter 0.2s ease",
         }}
       >
         <Avatar
@@ -80,11 +95,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
             height: isSidebarVisible ? 80 : 40,
             border: "3px solid #FFFFFF",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-            transition: "width 0.3s ease, height 0.3s ease",
             fontSize: isSidebarVisible ? 32 : 18,
           }}
         >
-          U
+          {usuario ? usuario.charAt(0).toUpperCase() : "U"}
         </Avatar>
       </Box>
 
@@ -100,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
             mb: 3,
           }}
         >
-          Usuario
+          {usuario || "Usuario"}
         </Typography>
       )}
 
@@ -111,7 +125,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          position: "relative",
         }}
       >
         {isSidebarVisible && (
@@ -153,8 +166,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
                   my: 0.5,
                   display: "flex",
                   justifyContent: "center",
-                  position: "relative",
-                  zIndex: hoveredIndex === index || isActive ? 2 : 1,
                 }}
               >
                 <ListItemButton
@@ -171,24 +182,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
                     justifyContent: isSidebarVisible ? "flex-start" : "center",
                     alignItems: "center",
                     color: "#FFFFFF",
-                    transition:
-                      "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                    transition: "all 0.2s ease",
                     "&:hover": {
                       backgroundColor: "rgba(255, 255, 255, 0.2)",
-                      transform: "scale(1.05) translateZ(10px)",
+                      transform: "scale(1.05)",
                       boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
                       filter: "brightness(1.2)",
                     },
                     "&:active": {
-                      transform: "scale(0.98) translateZ(5px)",
+                      transform: "scale(0.98)",
                     },
                     backgroundColor: isActive
                       ? "rgba(255, 255, 255, 0.15)"
                       : "transparent",
                     fontWeight: isActive ? 700 : 500,
                     padding: isSidebarVisible ? "8px 16px" : 0,
-                    transformStyle: "preserve-3d",
-                    perspective: "1000px",
                   }}
                 >
                   <Box
@@ -198,20 +206,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
                       justifyContent: "center",
                       minWidth: isSidebarVisible ? "26px" : "auto",
                       marginRight: isSidebarVisible ? 2 : 0,
-                      width: isSidebarVisible ? "auto" : "100%",
-                      height: isSidebarVisible ? "auto" : "100%",
                     }}
                   >
                     {item.icon}
                   </Box>
-
                   {isSidebarVisible && (
                     <Typography
                       sx={{
                         fontSize: "16px",
                         fontWeight: "inherit",
                         fontFamily: fontFamily,
-                        letterSpacing: "-0.1px",
                       }}
                     >
                       {item.text}
@@ -224,6 +228,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
         </Box>
       </Box>
 
+      {/* Botón de Salir */}
       <Box
         sx={{
           width: "100%",
@@ -231,8 +236,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
           justifyContent: "center",
           px: isSidebarVisible ? 2 : 0,
           mt: 2,
-          position: "relative",
-          zIndex: hoveredIndex === 999 || activeIndex === 999 ? 2 : 1,
         }}
       >
         <Box
@@ -243,7 +246,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
           }}
         >
           <ListItemButton
-            onClick={() => handleClick(999)}
+            onClick={onLogout}
             onMouseEnter={() => setHoveredIndex(999)}
             onMouseLeave={() => setHoveredIndex(null)}
             sx={{
@@ -253,24 +256,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
               color: "#FFFFFF",
               borderRadius: "8px",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              transition:
-                "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "all 0.2s ease",
               "&:hover": {
                 backgroundColor: "#e67615",
-                transform: "scale(1.05) translateZ(10px)",
-                boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
-                filter: "brightness(1.2)",
+                transform: "scale(1.05)",
               },
               "&:active": {
                 backgroundColor: "#d56a10",
-                transform: "scale(0.98) translateZ(5px)",
+                transform: "scale(0.98)",
               },
               display: "flex",
               justifyContent: isSidebarVisible ? "flex-start" : "center",
               alignItems: "center",
               padding: isSidebarVisible ? "8px 16px" : 0,
-              transformStyle: "preserve-3d",
-              perspective: "1000px",
             }}
           >
             <Box
@@ -280,20 +278,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarVisible }) => {
                 justifyContent: "center",
                 minWidth: isSidebarVisible ? "26px" : "auto",
                 marginRight: isSidebarVisible ? 2 : 0,
-                width: isSidebarVisible ? "auto" : "100%",
-                height: isSidebarVisible ? "auto" : "100%",
               }}
             >
               <ExitToAppIcon sx={{ color: "#FFFFFF" }} />
             </Box>
-
             {isSidebarVisible && (
               <Typography
                 sx={{
                   fontSize: "16px",
                   fontWeight: 600,
                   fontFamily: fontFamily,
-                  letterSpacing: "-0.1px",
                 }}
               >
                 Salir
