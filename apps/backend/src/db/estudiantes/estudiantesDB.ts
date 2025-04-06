@@ -30,7 +30,8 @@ export class Estudiantes {
     reaccion_alergica,
     descripcion_alergica,
     tipo_persona,
-    fecha_admision
+    fecha_admision,
+    tipo_pago?
   ) {
     const client = await this.db.getClient();
     try {

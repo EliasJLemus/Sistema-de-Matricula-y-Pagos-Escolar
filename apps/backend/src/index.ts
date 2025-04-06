@@ -3,7 +3,7 @@ import {Keys} from "./keys";
 import reportsRoute from "./routes/reports"
 import studentRoute from "@/routes/estudiantes"
 import cors from "cors";
-import "../src/db/estudiantes/apoderadosDB"
+// import "../src/db/estudiantes/apoderadosDB"
 
 const app = express();
 

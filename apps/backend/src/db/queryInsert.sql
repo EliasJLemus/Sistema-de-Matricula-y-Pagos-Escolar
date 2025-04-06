@@ -184,70 +184,46 @@ INSERT INTO "Pagos"."Becas" (
 
 --Tabla: Plan Pago matricula
 INSERT INTO "Pagos"."PlanPagoMatricula" (
-    uuid, tipo, vencimiento, tarifa, estado, uuid_grado
+  uuid, tipo, vencimiento, tarifa, estado, nivel, year_academico, codigo_plan_matricula
 ) VALUES
-('ec981588-5db9-48d4-9dc1-5f95cd2f8860', 'Especial', '2025-03-28', 501.31, 'Pendiente', 'c97528f6-6102-4f11-aaea-4da30386b5fa'),
-('dc2b8dc4-94fc-42d7-a50d-5ac3382d4b60', 'Reingreso', '2025-02-27', 792.51, 'Pendiente', 'c97528f6-6102-4f11-aaea-4da30386b5fa'),
+-- Pre-Básica
+(gen_random_uuid(), 'Pago Único', '2025-02-15', 1000.00, 'Pendiente', 'Pre-Basica', 2025, 'PMAT-PREBASICA-2025-001'),
 
-('4d5ad726-5c47-4106-a041-2ea5306b5e6f', 'Ingreso nuevo', '2025-01-23', 836.01, 'Pendiente', 'cb4c396b-9e34-45a5-83a7-2d5184f36c16'),
-('34d9fa2e-8e76-40d0-bd71-90dade1787df', 'Ingreso nuevo', '2025-03-24', 819.22, 'Pagado', 'cb4c396b-9e34-45a5-83a7-2d5184f36c16'),
+-- Básica
+(gen_random_uuid(), 'Pago Único', '2025-02-15', 1200.00, 'Pendiente', 'Basica', 2025, 'PMAT-BASICA-2025-001'),
 
-('8cd4ee64-9db5-440c-9884-821ebe85e158', 'Reingreso', '2025-02-23', 567.10, 'Pagado', '30d8cb2d-68e0-4a48-a71b-86950d23b8ce'),
-('9ac2c026-4e79-4a9e-a23b-efebbe1040a0', 'Ingreso nuevo', '2025-02-19', 917.38, 'Pagado', '30d8cb2d-68e0-4a48-a71b-86950d23b8ce'),
+-- Secundaria
+(gen_random_uuid(), 'Pago Único', '2025-02-15', 1500.00, 'Pendiente', 'Secundaria', 2025, 'PMAT-SECUNDARIA-2025-001');
 
-('846eabf7-f2f2-4711-8366-b7bc5824cb9b', 'Reingreso', '2025-01-28', 944.55, 'Pendiente', '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf'),
-('2cd4b8e3-6807-40e4-b54c-798c5f1992a1', 'Ingreso nuevo', '2025-02-18', 938.61, 'Pendiente', '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf'),
-
-('c7a39133-2f9f-4209-9429-7bc52d44ef76', 'Especial', '2025-02-15', 942.52, 'Pagado', 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f'),
-('7381ec90-6a93-45a1-bc2d-fb5e7c1dc6b7', 'Ingreso nuevo', '2025-03-23', 845.67, 'Pagado', 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f'),
-
-('70c0615a-4a7f-4db5-a17d-28d5f3a799b3', 'Ingreso nuevo', '2025-03-17', 733.29, 'Pendiente', 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc'),
-('94e1d70e-65b7-4cc2-b3fc-0b326c77a6e9', 'Ingreso nuevo', '2025-03-18', 680.22, 'Pagado', 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc');
 
 --Tabla: Plan Pago Mensualidad
+INSERT INTO "Pagos"."PlanPagoMensualidad" (uuid, tarifa, periodo, nivel, estado)
+VALUES
 INSERT INTO "Pagos"."PlanPagoMensualidad" (
-    uuid, tarifa, periodo, uuid_grado, estado
+  uuid, tarifa, periodo, nivel, estado, year_academico, codigo_plan_mensualidad
 ) VALUES
-('ee04cce4-01a1-4006-9315-91199b4e72f0', 1465.44, 6, 'c97528f6-6102-4f11-aaea-4da30386b5fa', 'Pagado'),
-('c3c51107-e5f4-491b-b590-6514c152685a', 1331.10, 7, 'c97528f6-6102-4f11-aaea-4da30386b5fa', 'Pendiente'),
+-- Pre-Básica
+(gen_random_uuid(), 400.00, 10, 'Pre-Basica', 'Pendiente', 2025, 'PMEN-PREBASICA-2025-001'),
 
-('d221a3ec-2634-4309-9f28-3eb818827fd5', 1180.44, 12, 'cb4c396b-9e34-45a5-83a7-2d5184f36c16', 'Pendiente'),
-('25ddc6a5-b268-4e89-b645-a5777a16925f', 1472.20, 9, 'cb4c396b-9e34-45a5-83a7-2d5184f36c16', 'Pendiente'),
+-- Básica
+(gen_random_uuid(), 500.00, 10, 'Basica', 'Pendiente', 2025, 'PMEN-BASICA-2025-001'),
 
-('2d86badd-26b1-4f60-bc67-caca0c8862bf', 1311.06, 7, '30d8cb2d-68e0-4a48-a71b-86950d23b8ce', 'Pagado'),
-('edf50f8e-254c-4bb4-b6a5-1d2d3259ed5b', 1146.73, 9, '30d8cb2d-68e0-4a48-a71b-86950d23b8ce', 'Pendiente'),
-
-('cf8a0b61-7b76-4523-98a3-4bd72c3e987c', 1131.28, 8, '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf', 'Pagado'),
-('addca6c2-5d5f-4876-8255-4cf86f527a89', 1051.68, 2, '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf', 'Pendiente'),
-
-('e20efac4-c28a-4373-a09f-961881e3f89b', 1236.24, 3, 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f', 'Pendiente'),
-('82be4a96-7fdf-4a0e-819d-dc479113c73e', 1499.35, 6, 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f', 'Pendiente'),
-
-('1a49a7b1-95e2-4f48-8668-859df4fd22f8', 1010.67, 11, 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc', 'Pagado'),
-('68a8d5fc-3382-4d77-a90e-b2c8b0c980f0', 1481.91, 10, 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc', 'Pendiente');
-
-
---Tabla: Nivelado
+-- Secundaria
+(gen_random_uuid(), 600.00, 10, 'Secundaria', 'Pendiente', 2025, 'PMEN-SECUNDARIA-2025-001');
+ 
+--Tabla Plan Pao Nivelado
 INSERT INTO "Pagos"."PlanPagoNivelado" (
-    uuid, uuid_grado, monto_total, cuotas, fecha_inicio, fecha_fin, estado
+  uuid, nivel, monto_total, cuotas, fecha_inicio, fecha_fin, estado, year_academico, codigo_plan_nivelado
 ) VALUES
-('695dc039-29b5-45ca-8742-e1a3d94faaca', 'c97528f6-6102-4f11-aaea-4da30386b5fa', 5734.30, 924.49, '2025-01-08', '2025-05-08', 'Pendiente'),
-('0e488c62-540f-48e0-aed5-b01689d8d4ad', 'c97528f6-6102-4f11-aaea-4da30386b5fa', 4154.58, 712.95, '2025-01-01', '2025-05-01', 'Pendiente'),
+-- Pre-Básica
+(gen_random_uuid(), 'Pre-Basica', 5000.00, 500.00, '2025-02-01', '2025-11-30', 'Pendiente', 2025, 'PNIV-PREBASICA-2025-001'),
 
-('da19524b-a176-400a-98f4-4877d132f2ce', 'cb4c396b-9e34-45a5-83a7-2d5184f36c16', 4649.40, 660.98, '2025-01-02', '2025-05-02', 'Pagado'),
-('3d7ea58e-b4e7-4e81-8895-614211106124', 'cb4c396b-9e34-45a5-83a7-2d5184f36c16', 5251.30, 968.12, '2025-01-02', '2025-05-02', 'Pendiente'),
+-- Básica
+(gen_random_uuid(), 'Basica', 6000.00, 600.00, '2025-02-01', '2025-11-30', 'Pendiente', 2025, 'PNIV-BASICA-2025-001'),
 
-('80cbfd65-83d4-43e5-b79a-341a2b8f4978', '30d8cb2d-68e0-4a48-a71b-86950d23b8ce', 4356.92, 969.87, '2025-01-09', '2025-05-09', 'Pagado'),
-('c994f9a1-93c4-4b9f-b12e-84fc94716b93', '30d8cb2d-68e0-4a48-a71b-86950d23b8ce', 4727.29, 805.55, '2025-01-01', '2025-05-01', 'Pagado'),
+-- Secundaria
+(gen_random_uuid(), 'Secundaria', 7000.00, 700.00, '2025-02-01', '2025-11-30', 'Pendiente', 2025, 'PNIV-SECUNDARIA-2025-001');
 
-('91e0c7da-f924-4d8e-97d4-78b7a1fd6e93', '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf', 5156.61, 693.13, '2025-01-03', '2025-05-03', 'Pagado'),
-('09f3db3f-c8bb-4a6c-9e66-fb79cc43e168', '208fdf3e-b9b7-4872-bdf8-4a63ddaa3ddf', 4837.32, 520.76, '2025-02-02', '2025-06-02', 'Pagado'),
-
-('5fceec32-338e-4d5f-8bfc-b1a6d54eb822', 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f', 4889.27, 915.61, '2025-02-01', '2025-06-01', 'Pendiente'),
-('327553db-9ab3-4ea7-98c6-7a785c9fbc76', 'a4b1cc2d-c92a-4e9e-a01a-c3ed800ec62f', 4371.60, 705.47, '2025-01-10', '2025-05-10', 'Pendiente'),
-
-('6ee6aeac-030c-4372-8780-bd748b7990c1', 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc', 5568.92, 878.99, '2025-01-06', '2025-05-06', 'Pendiente'),
-('b87819fc-b0ef-4a87-a772-11cb6bc6e9b3', 'a27a58e1-0f33-4ea3-8667-c95d29fcf4cc', 5457.67, 725.31, '2025-02-08', '2025-06-08', 'Pendiente');
 
 --Plan Pago detallado
 INSERT INTO "Pagos"."PlanPagoDetallado" (

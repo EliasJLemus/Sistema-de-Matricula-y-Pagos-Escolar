@@ -129,29 +129,36 @@ CREATE TABLE "Pagos"."PlanPagoMatricula" (
 	vencimiento DATE,
 	tarifa DECIMAL(10,2),
 	estado estado_pagos,
-	uuid_grado UUID,
-	FOREIGN KEY (uuid_grado) REFERENCES "Administracion"."Grados"(uuid)
+	nivel VARCHAR(30),
+	year_academico INT
 );
+ALTER TABLE "Pagos"."PlanPagoMatricula"
+  ADD CONSTRAINT fk_plan_matricula_nivel FOREIGN KEY (nivel) REFERENCES "Administracion"."Niveles"(nivel) ON UPDATE CASCADE;
+
 
 CREATE TABLE "Pagos"."PlanPagoMensualidad" (
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	tarifa DECIMAL(7,2),
 	periodo INT,
-	uuid_grado UUID,
+	nivel VARCHAR(30),
 	estado estado_pagos,
-	FOREIGN KEY (uuid_grado) REFERENCES "Administracion"."Grados"(uuid)
+	year_academico INT
 );
+ALTER TABLE "Pagos"."PlanPagoMensualidad"
+  ADD CONSTRAINT fk_plan_mensualidad_nivel FOREIGN KEY (nivel) REFERENCES "Administracion"."Niveles"(nivel) ON UPDATE CASCADE;
 
 CREATE TABLE "Pagos"."PlanPagoNivelado" (
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	uuid_grado UUID,
+	nivel VARCHAR(30),
 	monto_total DECIMAL(10,2),
 	cuotas DECIMAL(10,2),
 	fecha_inicio DATE,
 	fecha_fin DATE,
 	estado estado_pagos,
-	FOREIGN KEY (uuid_grado) REFERENCES "Administracion"."Grados"(uuid)
+    year_academico INT
 );
+ALTER TABLE "Pagos"."PlanPagoNivelado"
+  ADD CONSTRAINT fk_plan_nivelado_nivel FOREIGN KEY (nivel) REFERENCES "Administracion"."Niveles"(nivel) ON UPDATE CASCADE;
 
 CREATE TABLE "Pagos"."Matricula" (
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -186,6 +193,8 @@ CREATE TABLE "Pagos"."Nivelado" (
 	uuid_plan_nivelado UUID,
 	monto_pagado DECIMAL(10,2),
 	fecha_pago DATE,
+    fecha_inicio DATE,
+    feca_fin Date,
 	recargo DECIMAL(5,2),
 	saldo_restante DECIMAL(10,2),
 	uuid_beca UUID,
@@ -272,6 +281,13 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+CREATE TABLE "Administracion"."Niveles" (
+  nivel VARCHAR(30) PRIMARY KEY
+);
+INSERT INTO "Administracion"."Niveles" (nivel) VALUES
+('Pre-Basica'), ('Basica'), ('Secundaria');
+ALTER TABLE "Administracion"."Grados"
+  ADD CONSTRAINT fk_nivel FOREIGN KEY (nivel) REFERENCES "Administracion"."Niveles"(nivel) ON UPDATE CASCADE;
 
 
 CREATE TRIGGER trg_generar_codigo_grado
@@ -555,3 +571,47 @@ CREATE TRIGGER trg_generar_codigo_plan_nivelado
 BEFORE INSERT ON "Pagos"."PlanPagoNivelado"
 FOR EACH ROW
 EXECUTE FUNCTION generar_codigo_plan_nivelado();
+
+/**
+COMPROBANTE
+*/
+CREATE TYPE comprobante_estado AS ENUM ('Pendiente', 'Enviado', 'Rechazado', 'Aceptado');
+
+CREATE TABLE "Pagos"."ComprobantePago" (
+  uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  url_imagen TEXT, -- ahora puede ser NULL
+  estado comprobante_estado DEFAULT 'Pendiente',
+  fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  observaciones TEXT
+);
+
+ALTER TABLE "Pagos"."Matricula"
+ADD COLUMN uuid_comprobante UUID REFERENCES "Pagos"."ComprobantePago"(uuid);
+
+ALTER TABLE "Pagos"."Mensualidad"
+ADD COLUMN uuid_comprobante UUID REFERENCES "Pagos"."ComprobantePago"(uuid);
+
+ALTER TABLE "Pagos"."Nivelado"
+ADD COLUMN uuid_comprobante UUID REFERENCES "Pagos"."ComprobantePago"(uuid);
+
+
+//*SE REPITE PARA LAS DEMAS*/
+CREATE OR REPLACE FUNCTION crear_comprobante_para_matricula()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_uuid_comprobante UUID;
+BEGIN
+  INSERT INTO "Pagos"."ComprobantePago"(estado) VALUES ('Pendiente')
+  RETURNING uuid INTO v_uuid_comprobante;
+
+  NEW.uuid_comprobante := v_uuid_comprobante;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_crear_comprobante_matricula
+BEFORE INSERT ON "Pagos"."Matricula"
+FOR EACH ROW
+EXECUTE FUNCTION crear_comprobante_para_matricula();
+
