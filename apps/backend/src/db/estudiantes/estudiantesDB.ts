@@ -30,17 +30,37 @@ export class Estudiantes {
     reaccion_alergica,
     descripcion_alergica,
     tipo_persona,
-    fecha_admision
+    fecha_admision,
+    plan_pago?
   ) {
     const client = await this.db.getClient();
     try {
       const query = `
+
         SELECT * FROM "Estudiantes".registrar_estudiante(
-          $1, $2, $3, $4, $5,
-          $6, $7, $8, $9, $10,
-          $11, $12, $13, $14, $15,
-          $16, $17, $18, $19, $20
-        );
+  $1, -- p_uuid (Estudiante)
+  $2, -- p_uuid_info_general
+  $3,          -- p_primer_nombre
+  $4,          -- p_segundo_nombre
+  $5,         -- p_primer_apellido
+  $6,           -- p_segundo_apellido
+  $7,   -- p_identidad
+  $8,       -- p_nacionalidad
+  $9::genero, -- p_genero
+  $10,      -- p_fecha_nacimiento
+  $11,                -- p_edad
+  $12, -- p_direccion
+  $13,          -- p_nombre_grado
+  $14,               -- p_seccion
+  $15,             -- p_es_zurdo
+  $16,             -- p_dif_educacion_fisica
+  $17,             -- p_reaccion_alergica
+  $18,                -- p_descripcion_alergica
+  $19,      -- p_tipo_persona
+  $20,      -- p_fecha_admision
+  $21::tipo_pago -- p_tipo_plan
+);
+
       `;
 
       const values = [
@@ -64,6 +84,7 @@ export class Estudiantes {
         descripcion_alergica,
         tipo_persona,
         fecha_admision,
+        plan_pago
       ];
 
       const result = await client.query(query, values);

@@ -30,7 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 // import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
-import {useGetEstudiantes} from "@/lib/queries"
+import { useGetEstudiantes } from "@/lib/queries";
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -115,17 +115,20 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
     onEditStudent(id);
   };
 
-  const handleDelete = (id: number, nombre: string) => {
-    if (
-      window.confirm(`¿Está seguro que desea eliminar al estudiante ${nombre}?`)
-    ) {
-      console.log("Eliminar estudiante:", id);
-      handleFreshReload();
-    }
-  };
-
   const toggleZoom = () => {
     setIsZoomed((prev) => !prev);
+  };
+
+  // Función para obtener el nombre completo del estudiante
+  const getNombreCompleto = (estudiante: any) => {
+    const primerNombre = estudiante.primer_nombre || "";
+    const segundoNombre = estudiante.segundo_nombre || "";
+    const primerApellido = estudiante.primer_apellido || "";
+    const segundoApellido = estudiante.segundo_apellido || "";
+
+    return `${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}`
+      .trim()
+      .replace(/\s+/g, " ");
   };
 
   // Estilos comunes para TextField
@@ -580,6 +583,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           <Table className="bg-[#fff9db]">
             <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
+               
                 <TableHead
                   className="text-white font-bold"
                   style={{ fontFamily }}
@@ -590,25 +594,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   className="text-white font-bold"
                   style={{ fontFamily }}
                 >
-                  Primer Nombre
-                </TableHead>
-                <TableHead
-                  className="text-white font-bold"
-                  style={{ fontFamily }}
-                >
-                  Segundo Nombre
-                </TableHead>
-                <TableHead
-                  className="text-white font-bold"
-                  style={{ fontFamily }}
-                >
-                  Primer Apellido
-                </TableHead>
-                <TableHead
-                  className="text-white font-bold"
-                  style={{ fontFamily }}
-                >
-                  Segundo Apellido
+                  Nombre Completo
                 </TableHead>
                 <TableHead
                   className="text-white font-bold"
@@ -698,7 +684,13 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   className="text-white font-bold"
                   style={{ fontFamily }}
                 >
-                  Acciones
+                  Plan Pago
+                </TableHead>
+                <TableHead
+                  className="text-white font-bold"
+                  style={{ fontFamily }}
+                >
+                  Editar
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -710,23 +702,14 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
                 >
-                  <TableCell
-                    className="font-medium text-[#4D4D4D]"
-                    style={{ fontFamily }}
-                  >
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.codigo_estudiante}
                   </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.primer_nombre}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.segundo_nombre}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.primer_apellido}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.segundo_apellido}
+                  <TableCell
+                    className="text-[#4D4D4D] font-medium"
+                    style={{ fontFamily }}
+                  >
+                    {getNombreCompleto(item)}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.nacionalidad}
@@ -785,11 +768,14 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       {item.estado}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                    {/* Asignamos aleatoriamente "Normal" o "Nivelado" basado en el ID */}
+                    {item.plan_pago}
+                  </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center justify-center">
                       <button
-                        onClick={() => {console.log(item?.uuid )
-                          handleEdit(item?.uuid as string)}}
+                        onClick={() => handleEdit(item.uuid as string)}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -798,7 +784,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                       >
                         <EditIcon fontSize="small" />
                       </button>
-    
                     </div>
                   </TableCell>
                 </TableRow>

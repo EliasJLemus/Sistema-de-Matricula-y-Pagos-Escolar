@@ -32,6 +32,8 @@ import {
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
 import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
+import { useQueryClient } from "@tanstack/react-query";
+
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -76,7 +78,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     return `${año}-${mes}-${dia}`;
   };
 
-
   const [formData, setFormData] = useState<Partial<EstudiantesTablaType>>({
     primer_nombre: "",
     segundo_nombre: "",
@@ -97,13 +98,16 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     fecha_admision: "",
     estado: "Activo",
     tipo_persona: "Estudiante",
+    plan_pago: "",
   });
 
   const [estudianteUUID, setEstudianteUUID] = useState<string | null>(null);
 
-  const {data} = useGetEstudianteByUuid(actualId?.toString() || "")
+  const queryClient = useQueryClient();
 
-  const datos = data?.data
+  const { data } = useGetEstudianteByUuid(actualId?.toString() || "");
+
+  const datos = data?.data;
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -134,12 +138,13 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           descripcion_alergica: "Mariscos",
           fecha_admision: "02-01-2025",
           estado: "Activo" as "Activo" | "Inactivo",
+          plan_pago: "Normal" as "Normal" | "Nivelado",
         };
         // Formatear las fechas para que funcionen correctamente con el input type="date"
         setFormData({
           primer_nombre: datos?.primer_nombre || "",
           segundo_nombre: datos?.segundo_nombre || "",
-          primer_apellido:datos?.primer_apellido || "",
+          primer_apellido: datos?.primer_apellido || "",
           segundo_apellido: datos?.segundo_apellido || "",
           nacionalidad: datos?.nacionalidad || "",
           identidad: datos?.identidad,
@@ -149,15 +154,16 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           direccion: datos?.direccion,
           nombre_grado: datos?.grado,
           seccion: datos?.seccion,
-          dif_educacion_fisica: datos?.dif_educacion === 'Sí',
-          reaccion_alergica: datos?.alergia === 'Sí',
+          dif_educacion_fisica: datos?.dif_educacion === "Sí",
+          reaccion_alergica: datos?.alergia === "Sí",
           descripcion_alergica: datos?.desc_alergia,
           desc_alergia: datos?.desc_alergia,
           fecha_admision: formatearFechaParaInput(datos?.fecha_admision),
           estado: datos?.estado || "Activo",
           tipo_persona: "Estudiante",
+          plan_pago: datos?.plan_pago || "Normal",
         });
-        
+
         setIsLoading(false);
       }, 1000);
     }
@@ -498,6 +504,10 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       newErrors.fecha_admision = "La fecha de admisión es requerida";
       sectionWithErrors = sectionWithErrors || "academico";
     }
+    if (!formData.plan_pago) {
+      newErrors.plan_pago = "El plan de pago es requerido";
+      sectionWithErrors = sectionWithErrors || "academico";
+    }
 
     // Validar descripción alérgica si tiene reacción alérgica
     if (formData.reaccion_alergica) {
@@ -528,19 +538,19 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   };
 
   const { mutate: registrarEstudiante } = useRegistrarEstudiante();
-  const {mutate: actualizarEstudiante} = useUpdateEstudiante();
+  const { mutate: actualizarEstudiante } = useUpdateEstudiante();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (isNavigating) {
       setIsNavigating(false);
       return;
     }
-  
+
     if (validateForm()) {
       setIsSubmitting(true);
-  
+
       const payload = {
         primer_nombre: formData.primer_nombre,
         segundo_nombre: formData.segundo_nombre,
@@ -560,15 +570,21 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         descripcion_alergica: formData.descripcion_alergica, // ✅
         tipo_persona: formData.tipo_persona,
         fecha_admision: formData.fecha_admision,
-        estado: formData.estado
+        estado: formData.estado,
+        plan_pago: formData.plan_pago,
       };
-      
-  
+
       if (!isEditing) {
         registrarEstudiante(payload, {
           onSuccess: () => {
             setAlertMessage("🎉 Estudiante registrado exitosamente");
-            setAlertOpen(true);
+
+            queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
+
+            setAlertOpen(true); 
             setIsSubmitting(false);
             if (isModal && onClose) onClose();
             else navigate("/estudiantes");
@@ -578,7 +594,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
             setAlertOpen(true);
             setIsSubmitting(false);
           },
-          
         });
       } else{
         actualizarEstudiante({
@@ -586,7 +601,10 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           data: payload,
         }, {
           onSuccess: () => {
-            
+              queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
             setAlertMessage("🎉 Estudiante actualizado exitosamente");
             setAlertOpen(true);
             setIsSubmitting(false);
@@ -602,7 +620,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       }
     }
   };
-  
 
   const handleSectionChange = (section: string) => {
     setIsNavigating(true);
@@ -656,7 +673,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       color: "#f44336",
     },
   };
-  
+
   // Estilos comunes para FormControl - Modificación para el label flotante
   const formControlStyle = {
     "& .MuiInputLabel-root": {
@@ -825,7 +842,12 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         errors.direccion
       );
     } else if (section === "academico") {
-      return !!(errors.nombre_grado || errors.seccion || errors.fecha_admision);
+      return !!(
+        errors.nombre_grado ||
+        errors.seccion ||
+        errors.fecha_admision ||
+        errors.plan_pago
+      );
     } else if (section === "adicional") {
       return !!(formData.reaccion_alergica && errors.descripcion_alergica);
     }
@@ -1658,7 +1680,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                   </Typography>
 
                   <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                       <FormControl
                         fullWidth
                         error={!!errors.nombre_grado}
@@ -1730,7 +1752,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                         )}
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                       <FormControl
                         fullWidth
                         error={!!errors.seccion}
@@ -1781,7 +1803,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                         )}
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
                         label="Fecha de Admisión"
@@ -1803,8 +1825,60 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                       />
                     </Grid>
 
+                    <Grid item xs={12} md={3}>
+                      <FormControl
+                        fullWidth
+                        error={!!errors.plan_pago}
+                        required
+                        sx={formControlStyle}
+                      >
+                        <InputLabel
+                          id="plan-pago-label"
+                          error={!!errors.plan_pago}
+                        >
+                          Plan de Pago
+                        </InputLabel>
+                        <Select
+                          labelId="plan-pago-label"
+                          name="plan_pago"
+                          value={formData.plan_pago || ""}
+                          label="Plan de Pago"
+                          onChange={handleSelectChange}
+                          error={!!errors.plan_pago}
+                          MenuProps={{
+                            PaperProps: {
+                              sx: {
+                                "& .MuiMenuItem-root:hover": {
+                                  backgroundColor: "#e7f5e8",
+                                },
+                                borderRadius: "12px",
+                                mt: 1,
+                                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                              },
+                            },
+                          }}
+                        >
+                          <MenuItem value="Normal" sx={{ fontFamily }}>
+                            Normal
+                          </MenuItem>
+                          <MenuItem value="Nivelado" sx={{ fontFamily }}>
+                            Nivelado
+                          </MenuItem>
+                        </Select>
+                        {errors.plan_pago && (
+                          <Typography
+                            variant="caption"
+                            color="error"
+                            sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
+                          >
+                            {errors.plan_pago}
+                          </Typography>
+                        )}
+                      </FormControl>
+                    </Grid>
+
                     {isEditing && (
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <FormControl fullWidth sx={formControlStyle}>
                           <InputLabel id="estado-label">Estado</InputLabel>
                           <Select
@@ -1989,7 +2063,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                           <RadioGroup
                             row
                             name="dif_educacion_fisica"
-                            value={formData.dif_educacion?.toString()}
+                            value={formData.dif_educacion_fisica?.toString()}
                             onChange={handleRadioChange}
                           >
                             <FormControlLabel
@@ -2151,7 +2225,6 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 }, 100);
 
                 setEstudianteUUID(formData?.uuid ?? null);
-
               }}
               sx={secondaryButtonStyle}
               startIcon={
@@ -2237,7 +2310,8 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                 },
                 transition: "all 0.2s ease-in-out",
               }}
-              startIcon={ // Cambiado de endIcon a startIcon
+              startIcon={
+                // Cambiado de endIcon a startIcon
                 isSubmitting ? (
                   <CircularProgress size={20} sx={{ color: "white" }} />
                 ) : activeSection !== "adicional" ? (
@@ -2273,7 +2347,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                   </svg>
                 )
               }
-              >
+            >
               {isSubmitting
                 ? isEditing
                   ? "Actualizando..."

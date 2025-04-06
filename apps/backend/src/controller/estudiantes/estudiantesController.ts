@@ -52,7 +52,8 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
       parsed.reaccion_alergica,
       parsed.descripcion_alergica,
       parsed.tipo_persona,
-      parsed.fecha_admision
+      parsed.fecha_admision,
+      parsed.plan_pago,
     );
 
     res.status(201).json({

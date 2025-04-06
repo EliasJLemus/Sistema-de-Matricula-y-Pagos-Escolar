@@ -17,15 +17,15 @@ export class ReporteDetalladoDB {
   public async getReporteMatricula(
     limit: number,
     offset: number,
-    filters: { nombre?: string; grado?: string; estado?: string }
+    filters: { nombre?: string; grado?: string; estado?: string; year?: string } = {}
   ): Promise<ReporteMatriculaDBType[]> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [limit, offset];
     let paramIndex = 3;
-
+  
     if (filters.nombre) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.nombre}%`);
     }
     if (filters.grado) {
@@ -36,19 +36,19 @@ export class ReporteDetalladoDB {
       where.push(`estado = $${paramIndex++}`);
       values.push(filters.estado);
     }
-
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT codigo_matricula, nombre_estudiante, grado, seccion, tarifa_matricula,
              beneficio_aplicado, porcentaje_descuento, total_a_pagar,
              estado, fecha_matricula, tipo_plan
-      FROM "Pagos".reporte_matricula_por_anio(2025)
+      FROM "Pagos".reporte_matricula_por_anio(${filters.year || 2025})
       ${whereClause}
       ORDER BY fecha_matricula DESC
       LIMIT $1 OFFSET $2
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return result.rows as ReporteMatriculaDBType[];
@@ -59,17 +59,18 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   public async countReporteMatricula(
-    filters: { nombre?: string; grado?: string; estado?: string }
+    filters: { nombre?: string; grado?: string; estado?: string; year?: string } = {}
   ): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-
+  
     if (filters.nombre) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.nombre}%`);
     }
     if (filters.grado) {
@@ -80,16 +81,17 @@ export class ReporteDetalladoDB {
       where.push(`estado = $${paramIndex++}`);
       values.push(filters.estado);
     }
+  
 
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT COUNT(*) FROM (
-        SELECT * FROM "Pagos".reporte_matricula_por_anio(2025)
+        SELECT * FROM "Pagos".reporte_matricula_por_anio(${filters.year || 2025})
       ) AS reporte
       ${whereClause}
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return parseInt(result.rows[0].count, 10);
@@ -100,93 +102,118 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
-
+  
   // ======= MENSUALIDAD =======
   public async getReporteMensualidad(
-    limit: number,
+    limite: number,
     offset: number,
-    filters: { estudiante?: string; grado?: string; fecha?: string }
+    filters: {
+      estudiante?: string;
+      grado?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+      estado?: string;
+    }
   ): Promise<ReporteMensualidadType[]> {
     const client = await this.db.getClient();
-    const where: string[] = [];
-    const values: any[] = [limit, offset];
-    let paramIndex = 3;
-
-    if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.estudiante}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
-    const query = `
-      SELECT 
-        codigo_mensualidad,
-        nombre_estudiante,
-        grado,
-        beneficio_aplicado,
-        porcentaje_descuento,
-        fecha_inicio,
-        fecha_vencimiento,
-        subtotal,
-        saldo_pendiente,
-        saldo_pagado,
-        recargo,
-        estado
-      FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31')
-      ${whereClause}
-      ORDER BY fecha_vencimiento DESC
-      LIMIT $1 OFFSET $2;
-    `;
-
+  
     try {
-      const result = await client.query(query, values);
+      // Validar fechas, usar NULL si no vienen
+      const fechaInicio = filters.fechaInicio ? `'${filters.fechaInicio}'` : 'NULL';
+      const fechaFin = filters.fechaFin ? `'${filters.fechaFin}'` : 'NULL';
+  
+      let baseQuery = `
+        SELECT 
+          codigo_mensualidad,
+          nombre_estudiante,
+          grado,
+          beneficio_aplicado,
+          porcentaje_descuento,
+          fecha_inicio,
+          fecha_vencimiento,
+          subtotal,
+          saldo_pendiente,
+          saldo_pagado,
+          recargo,
+          estado
+        FROM "Pagos".reporte_mensualidades(NULL, NULL, ${fechaInicio}, ${fechaFin})
+      `;
+  
+      const conditions: string[] = [];
+      const values: any[] = [];
+      let idx = 1;
+  
+      if (filters.estudiante) {
+        conditions.push(`nombre_estudiante ILIKE $${idx}`);
+        values.push(`%${filters.estudiante}%`);
+        idx++;
+      }
+  
+      if (filters.grado) {
+        conditions.push(`grado ILIKE $${idx}`);
+        values.push(`%${filters.grado}%`);
+        idx++;
+      }
+  
+      if (filters.estado) {
+        conditions.push(`estado ILIKE $${idx}`);
+        values.push(`%${filters.estado}%`);
+        idx++;
+      }
+  
+      if (conditions.length > 0) {
+        baseQuery += " WHERE " + conditions.join(" AND ");
+      }
+  
+      baseQuery += ` ORDER BY fecha_vencimiento DESC LIMIT $${idx} OFFSET $${idx + 1}`;
+      values.push(limite, offset);
+  
+      const result = await client.query(baseQuery, values);
       return result.rows;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en getReporteMensualidad:", error);
       throw new Error("No se pudo obtener el reporte de mensualidades.");
     } finally {
       client.release();
     }
   }
-
+  
+  
   public async countReporteMensualidad(
-    filters: { estudiante?: string; grado?: string; fecha?: string }
+    filters: { estudiante?: string; grado?: string; fechaInicio?: string; fechaFin?: string }
   ): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-
+  
+    // Prepara los valores de fecha para la función SQL
+    const fechaInicio = filters.fechaInicio ? `'${filters.fechaInicio}'` : 'NULL';
+    const fechaFin = filters.fechaFin ? `'${filters.fechaFin}'` : 'NULL';
+  
     if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.estudiante}%`);
     }
+  
     if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
+      where.push(`grado ILIKE $${paramIndex++}`);
+      values.push(`%${filters.grado}%`);
     }
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
       SELECT COUNT(*) 
-      FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31') 
+      FROM "Pagos".reporte_mensualidades(
+        NULL::uuid, 
+        NULL::estado_pagos, 
+        ${fechaInicio}::date, 
+        ${fechaFin}::date
+      )
       ${whereClause};
     `;
-
+  
     try {
       const result = await client.query(query, values);
       return parseInt(result.rows[0].count, 10);
@@ -197,6 +224,7 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   // ======= BECA =======
   public async getReporteBeca(

@@ -5,12 +5,12 @@ export type ReporteMatriculaDBType = {
   tarifa_matricula: number;
   beneficio_aplicado: string;
   descuento?: string;
-  total_pagar: number;
+  total_a_pagar: number;
   estado: string;
   fecha_matricula: string; 
   porcentaje_descuento?: string;
-  tipo_plan
-
+  tipo_plan?: string;
+  codigo_matricula?: string
 };
 
 export type ReporteMatriculaType = {
@@ -25,9 +25,11 @@ export type ReporteMatriculaType = {
   fechaMatricula: string | Date;
   pocentajeDescuento?:string;
   tipoPlan: string;
+  codigo_matricula?: string
 };
 
 export type ReporteMensualidadType = {
+  codigo_mensualidad: string,
   nombre_estudiante: string,
   grado: string,
   beneficio_aplicado: string
@@ -110,6 +112,7 @@ export type StructureColumn<T> = {
   name: keyof T;
   label: string;
   type?: string;
+  render?: (value: any) => string | number 
 };
 
 export type PaginationType = {
