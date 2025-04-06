@@ -214,15 +214,21 @@ export const useGetReporteRetiroEstudiantes = (): UseQueryResult<StructureAndDat
 };
 
 // Hook para antigüedad de estudiantes
-export const useGetAntiguedadEstudiante = (): UseQueryResult<StructureAndData<ReporteAntiguedadEstudiantes>, Error> => {
+export const useGetAntiguedadEstudiante = (
+  page: number,
+  limit: number
+): UseQueryResult<StructureAndData<ReporteAntiguedadEstudiantes>, Error> => {
   return useQuery({
-    queryKey: ["getReporteAntiguedadEstudiante"],
+    queryKey: ["getReporteAntiguedadEstudiante", page, limit],
     queryFn: async () => {
       try {
-        const response = await client.get(`/reportes/antiguedad-estudiante`);
+        const response = await client.get(`/reportes/antiguedad-estudiante?page=${page}&limit=${limit}`);
+        console.log(response)
         return response.data;
       } catch (error: any) {
-        throw new Error(error?.response?.data?.message || "Error al obtener reporte de antigüedad de estudiantes");
+        throw new Error(
+          error?.response?.data?.message || "Error al obtener reporte de antigüedad de estudiantes"
+        );
       }
     },
     staleTime: 1000,

@@ -100,7 +100,7 @@ export type ReporteRetiroEstudiantesType = {
 };
 
 export interface ReporteAntiguedadEstudiantes {
-  id_estudiante: string;          
+  codigo_estudiante: string;          
   nombre_estudiante: string;     
   grado: string;                 
   seccion: string;                
