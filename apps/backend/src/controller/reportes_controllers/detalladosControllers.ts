@@ -22,14 +22,15 @@ export const getReporteMatricula = async (
 ): Promise<void> => {
   try {
     const { limit, offset } = getPaginationParams(req);
-    const { nombre, grado, estado } = req.query;
+    const { nombre, grado, estado, year } = req.query;
 
     const filters = {
       nombre: nombre as string,
       grado: grado as string,
       estado: estado as string,
+      year: year as string,
     };
-
+ console.log("filters", filters)
     const result = await reporteDetalladoDB.getReporteMatricula(
       limit,
       offset,

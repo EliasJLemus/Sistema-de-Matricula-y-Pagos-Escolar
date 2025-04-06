@@ -19,6 +19,7 @@ type FiltrosMatricula = {
   nombre?: string;
   grado?: string;
   estado?: string;
+  year?:  number;
 };
 
 export const useGetReportsMatricula = (
@@ -38,6 +39,7 @@ export const useGetReportsMatricula = (
         if (filters.nombre) params.append("nombre", filters.nombre);
         if (filters.grado) params.append("grado", filters.grado);
         if (filters.estado) params.append("estado", filters.estado);
+        if (filters.year) params.append("year", filters.year.toString());
 
         const response = await axios.get<StructureAndData<ReporteMatriculaType>>(`${baseUrl}?${params.toString()}`);
         return response.data;
