@@ -70,12 +70,13 @@ export const getReporteMensualidad = async (
 ): Promise<void> => {
   try {
     const { limit, offset } = getPaginationParams(req);
-    const { estudiante = "", grado = "", fecha = "" } = req.query;
+    const { estudiante = "", grado = "", fechaInicio = "", fechaFin = "" } = req.query;
 
     const filters = {
       estudiante: String(estudiante).trim(),
       grado: String(grado).trim(),
-      fecha: String(fecha).trim(), 
+      fechaInicio: String(fechaInicio).trim(), 
+      fechaFin: String(fechaFin).trim()
     };
 
     const result = await reporteDetalladoDB.getReporteMensualidad(

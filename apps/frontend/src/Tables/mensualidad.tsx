@@ -128,9 +128,7 @@ export const MensualidadTable: React.FC = () => {
   const pageCount = Math.ceil(total / limit);
 
   useEffect(() => {
-    console.log("Mensualidad page:", page);
-    console.log("Pagination total:", total);
-    console.log("Debounced filters:", debouncedFilters);
+
   }, [page, total, debouncedFilters]);
 
   return (

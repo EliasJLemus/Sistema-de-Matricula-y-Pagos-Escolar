@@ -54,6 +54,8 @@ type FiltrosMensualidad = {
   estudiante?: string;
   grado?: string;
   fecha?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
 };
 
 export const useGetReporteMensualidad = (
@@ -71,7 +73,8 @@ export const useGetReporteMensualidad = (
 
         if (filters.estudiante) params.append("estudiante", filters.estudiante);
         if (filters.grado) params.append("grado", filters.grado);
-        if (filters.fecha) params.append("fecha", filters.fecha);
+        if (filters.fechaInicio) params.append("fecha", filters.fechaInicio);
+        if(filters.fechaFin) params.append("fechaFin", filters.fechaFin)
 
         const response = await axios.get<StructureAndData<ReporteMensualidadType>>(
           `http://localhost:3000/reportes/mensualidad?${params.toString()}`

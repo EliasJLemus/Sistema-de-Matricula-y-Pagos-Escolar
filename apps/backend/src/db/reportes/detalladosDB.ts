@@ -105,11 +105,21 @@ export class ReporteDetalladoDB {
   public async getReporteMensualidad(
     limite: number,
     offset: number,
-    filters: { estudiante?: string; grado?: string; estado?: string }
+    filters: {
+      estudiante?: string;
+      grado?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+      estado?: string;
+    }
   ): Promise<ReporteMensualidadType[]> {
     const client = await this.db.getClient();
   
     try {
+      // Validar fechas, usar NULL si no vienen
+      const fechaInicio = filters.fechaInicio ? `'${filters.fechaInicio}'` : 'NULL';
+      const fechaFin = filters.fechaFin ? `'${filters.fechaFin}'` : 'NULL';
+  
       let baseQuery = `
         SELECT 
           codigo_mensualidad,
@@ -124,7 +134,7 @@ export class ReporteDetalladoDB {
           saldo_pagado,
           recargo,
           estado
-        FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31')
+        FROM "Pagos".reporte_mensualidades(NULL, NULL, ${fechaInicio}, ${fechaFin})
       `;
   
       const conditions: string[] = [];
@@ -169,13 +179,18 @@ export class ReporteDetalladoDB {
     }
   }
   
+  
   public async countReporteMensualidad(
-    filters: { estudiante?: string; grado?: string; fecha?: string }
+    filters: { estudiante?: string; grado?: string; fechaInicio?: string; fechaFin?: string }
   ): Promise<number> {
     const client = await this.db.getClient();
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
+  
+    // Prepara los valores de fecha para la función SQL
+    const fechaInicio = filters.fechaInicio ? `'${filters.fechaInicio}'` : 'NULL';
+    const fechaFin = filters.fechaFin ? `'${filters.fechaFin}'` : 'NULL';
   
     if (filters.estudiante) {
       where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
@@ -187,24 +202,18 @@ export class ReporteDetalladoDB {
       values.push(`%${filters.grado}%`);
     }
   
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   
     const query = `
-  SELECT COUNT(*) 
-  FROM "Pagos".reporte_mensualidades(
-    NULL::uuid, 
-    NULL::estado_pagos, 
-    '2025-01-01'::date, 
-    '2025-12-31'::date
-  )
-  ${whereClause};
-`;
-
+      SELECT COUNT(*) 
+      FROM "Pagos".reporte_mensualidades(
+        NULL::uuid, 
+        NULL::estado_pagos, 
+        ${fechaInicio}::date, 
+        ${fechaFin}::date
+      )
+      ${whereClause};
+    `;
   
     try {
       const result = await client.query(query, values);
