@@ -1,6 +1,6 @@
 import { ChevronLeft, Download } from "lucide-react";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardFooter } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ type Column<T> = {
   name: keyof T;
   label: string;
   type?: string;
+  render?: (value: any, row?: T) => React.ReactNode;
 };
 
 interface ReportTableProps<T> {
@@ -40,10 +41,10 @@ export function ReportTable<T>({
   pagination,
 }: ReportTableProps<T>) {
   const getStatusBadgeStyle = (status: string) => {
-    const isPositiveStatus = status === "Pagado" || status === "Activo"  || status === "Activa";
-    return isPositiveStatus
-      ? "bg-[#E7F5E8] text-[#538A3E] hover:bg-[#E7F5E8] hover:text-[#538A3E] border-[#538A3E]" // Verde
-      : "bg-[#FFF3E8] text-[#F38223] hover:bg-[#FFF3E8] hover:text-[#F38223] border-[#F38223]"; // Naranja/Rojo
+    const isPositive = ["Pagado", "Activo", "Activa"].includes(status);
+    return isPositive
+      ? "bg-[#E7F5E8] text-[#538A3E] hover:bg-[#E7F5E8] hover:text-[#538A3E] border-[#538A3E]"
+      : "bg-[#FFF3E8] text-[#F38223] hover:bg-[#FFF3E8] hover:text-[#F38223] border-[#F38223]";
   };
 
   return (
@@ -73,7 +74,7 @@ export function ReportTable<T>({
       {/* Filtros */}
       {filters && <div className="flex flex-wrap gap-4">{filters}</div>}
 
-      {/* Tabla con borde redondeado completo */}
+      {/* Tabla */}
       <Card className="border-0 shadow-none">
         <div className="overflow-hidden rounded-lg border border-[#edad4c]">
           <CardContent className="p-0">
@@ -90,6 +91,7 @@ export function ReportTable<T>({
                   ))}
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {data.map((item, index) => (
                   <TableRow
@@ -103,7 +105,9 @@ export function ReportTable<T>({
                         key={String(col.name)}
                         className="text-[#4D4D4D] border-0"
                       >
-                        {col.name === "estado" ? (
+                        {col.render ? (
+                          col.render(item[col.name], item)
+                        ) : col.name === "estado" ? (
                           <Badge
                             variant="outline"
                             className={`${getStatusBadgeStyle(
@@ -126,7 +130,7 @@ export function ReportTable<T>({
           </CardContent>
         </div>
 
-        {/* Mensaje cuando no hay datos */}
+        {/* No hay datos */}
         {!data.length && (
           <div className="p-6 text-center text-muted-foreground rounded-b-lg border border-t-0 border-[#edad4c]">
             No se encontraron registros para los filtros aplicados.
@@ -134,7 +138,7 @@ export function ReportTable<T>({
         )}
       </Card>
 
-      {/* Paginación - separada de la tabla */}
+      {/* Paginación */}
       {pagination && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
@@ -157,10 +161,7 @@ export function ReportTable<T>({
               const maxVisible = 5;
               const half = Math.floor(maxVisible / 2);
               let start = Math.max(1, pagination.page - half);
-              let end = Math.min(
-                pagination.pageCount,
-                start + maxVisible - 1
-              );
+              let end = Math.min(pagination.pageCount, start + maxVisible - 1);
 
               if (end - start < maxVisible - 1) {
                 start = Math.max(1, end - maxVisible + 1);

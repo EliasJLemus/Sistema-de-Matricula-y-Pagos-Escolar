@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGetReporteMensualidad } from "@/lib/queries";
 import { ReportTable } from "@/components/Tables/Table";
 import { Input } from "@/components/ui/input";
@@ -15,8 +16,8 @@ import {
   ReporteMensualidadType,
   StructureColumn,
 } from "@shared/reportsType";
-import { useQueryClient } from "@tanstack/react-query";
 
+// ✅ Formato de fecha
 const formatoFecha = (fechaISO: string): string => {
   const opciones: Intl.DateTimeFormatOptions = {
     day: "2-digit",
@@ -26,27 +27,13 @@ const formatoFecha = (fechaISO: string): string => {
   return new Date(fechaISO).toLocaleDateString("es-HN", opciones);
 };
 
+// ✅ Columnas de la tabla
 const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
-  {
-    name: "codigo_mensualidad",
-    label: "Código",
-  },
-  {
-    name: "nombre_estudiante",
-    label: "Estudiante",
-  },
-  {
-    name: "grado",
-    label: "Grado",
-  },
-  {
-    name: "beneficio_aplicado",
-    label: "Beneficio Aplicado",
-  },
-  {
-    name: "porcentaje_descuento",
-    label: "Porcentaje de Descuento",
-  },
+  { name: "codigo_mensualidad", label: "Código" },
+  { name: "nombre_estudiante", label: "Estudiante" },
+  { name: "grado", label: "Grado" },
+  { name: "beneficio_aplicado", label: "Beneficio Aplicado" },
+  { name: "porcentaje_descuento", label: "Porcentaje de Descuento" },
   {
     name: "fecha_inicio",
     label: "Fecha Inicio",
@@ -59,35 +46,17 @@ const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
     type: "date",
     render: (valor) => formatoFecha(valor),
   },
-  {
-    name: "subtotal",
-    label: "Saldo Total",
-    type: "number",
-  },
-  {
-    name: "saldo_pagado",
-    label: "Saldo Pagado",
-    type: "number",
-  },
-  {
-    name: "saldo_pendiente",
-    label: "Saldo Pendiente",
-    type: "number",
-  },
-  {
-    name: "recargo",
-    label: "Recargo",
-    type: "number",
-  },
-  {
-    name: "estado",
-    label: "Estado",
-  },
+  { name: "subtotal", label: "Saldo Total", type: "number" },
+  { name: "saldo_pagado", label: "Saldo Pagado", type: "number" },
+  { name: "saldo_pendiente", label: "Saldo Pendiente", type: "number" },
+  { name: "recargo", label: "Recargo", type: "number" },
+  { name: "estado", label: "Estado" },
 ];
 
 export const MensualidadTable: React.FC = () => {
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState(1);
   const limit = 5;
+  const queryClient = useQueryClient();
 
   const [filters, setFilters] = useState({
     estudiante: "",
@@ -95,7 +64,6 @@ export const MensualidadTable: React.FC = () => {
     fechaInicio: "",
     fechaFin: "",
   });
-
 
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({
@@ -113,6 +81,7 @@ export const MensualidadTable: React.FC = () => {
       fechaFin: "",
     });
     setPage(1);
+    queryClient.invalidateQueries({ queryKey: ["getReporteMensualidad"] });
   };
 
   const debouncedFilters = useDebounce(filters, 400);
@@ -126,10 +95,6 @@ export const MensualidadTable: React.FC = () => {
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
-
-  useEffect(() => {
-
-  }, [page, total, debouncedFilters]);
 
   return (
     <div className="relative space-y-4">
@@ -189,7 +154,7 @@ export const MensualidadTable: React.FC = () => {
               </Select>
             </div>
 
-            {/* Desde */}
+            {/* Fecha Inicio */}
             <div className="flex flex-col space-y-1">
               <label className="text-sm text-muted-foreground">Desde</label>
               <Input
@@ -202,7 +167,7 @@ export const MensualidadTable: React.FC = () => {
               />
             </div>
 
-            {/* Hasta */}
+            {/* Fecha Fin */}
             <div className="flex flex-col space-y-1">
               <label className="text-sm text-muted-foreground">Hasta</label>
               <Input
@@ -215,13 +180,14 @@ export const MensualidadTable: React.FC = () => {
               />
             </div>
 
+            {/* Botón para limpiar */}
             <Button 
               variant="default"
               onClick={clearFilters}
               className="bg-[#F38223] hover:bg-[#e67615] text-white font-medium rounded-lg px-4 py-2 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg active:bg-[#d56a10] active:shadow-inner flex items-center gap-2 hover:-translate-y-1 hover:scale-[1.02] transform-gpu"
               style={{
                 boxShadow: '0px 4px 10px rgba(243, 130, 35, 0.3)',
-                willChange: 'transform' // Optimización para animaciones
+                willChange: 'transform'
               }}
             >
               <svg
@@ -234,7 +200,7 @@ export const MensualidadTable: React.FC = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" // Efecto adicional en el icono
+                className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90"
               >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -250,7 +216,6 @@ export const MensualidadTable: React.FC = () => {
           onPrev: () => setPage((p) => Math.max(p - 1, 1)),
           onPageChange: (newPage) => setPage(newPage),
         }}
-        
       />
 
       {!isLoading && !isFetching && tableData.length === 0 && (

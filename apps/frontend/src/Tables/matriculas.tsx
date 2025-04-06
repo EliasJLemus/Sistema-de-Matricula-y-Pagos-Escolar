@@ -15,20 +15,34 @@ import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
 
+// ✅ Formato de fecha para la columna
+const formatoFecha = (fechaISO: string): string => {
+  const opciones: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+  return new Date(fechaISO).toLocaleDateString("es-HN", opciones);
+};
+
 const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
-  { name: "codigo_matricula", label: "Codigo" },
+  { name: "codigo_matricula", label: "Código" },
   { name: "nombreEstudiante", label: "Nombre del Estudiante" },
   { name: "grado", label: "Grado" },
   { name: "seccion", label: "Sección" },
   { name: "tipoPlan", label: "Plan de matrícula" },
   { name: "tarifaMatricula", label: "Tarifa Matrícula", type: "number" },
   { name: "beneficioAplicado", label: "Beneficio" },
-  { name: "descuento", label: "Porcentaje de Descuento" }, // ← Corregido aquí
+  { name: "descuento", label: "Porcentaje de Descuento" },
   { name: "totalPagar", label: "Total a Pagar", type: "number" },
   { name: "estado", label: "Estado" },
-  { name: "fechaMatricula", label: "Fecha Matrícula", type: "date" },
+  {
+    name: "fechaMatricula",
+    label: "Fecha Matrícula",
+    type: "date",
+    render: (valor) => formatoFecha(valor),
+  },
 ];
-
 
 export const MatriculaTable: React.FC = () => {
   const queryClient = useQueryClient();
@@ -50,7 +64,7 @@ export const MatriculaTable: React.FC = () => {
     limit,
     debouncedFilters
   );
-  console.log(data)
+
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
@@ -72,6 +86,7 @@ export const MatriculaTable: React.FC = () => {
       year: new Date().getFullYear(),
     });
     setPage(1);
+    handleFreshReload();
   };
 
   const handleFreshReload = () => {
@@ -151,7 +166,9 @@ export const MatriculaTable: React.FC = () => {
                 id="anio-filter"
                 type="number"
                 value={filters.year}
-                onChange={(e) => handleInputChange("year", parseInt(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange("year", parseInt(e.target.value))
+                }
                 min={2000}
                 max={2100}
               />
@@ -162,7 +179,7 @@ export const MatriculaTable: React.FC = () => {
               className="bg-[#F38223] hover:bg-[#e67615] text-white font-medium rounded-lg px-4 py-2 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg active:bg-[#d56a10] active:shadow-inner flex items-center gap-2 hover:-translate-y-1 hover:scale-[1.02] transform-gpu"
               style={{
                 boxShadow: '0px 4px 10px rgba(243, 130, 35, 0.3)',
-                willChange: 'transform' // Optimización para animaciones
+                willChange: 'transform'
               }}
             >
               <svg
@@ -175,7 +192,7 @@ export const MatriculaTable: React.FC = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" // Efecto adicional en el icono
+                className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90"
               >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -189,7 +206,10 @@ export const MatriculaTable: React.FC = () => {
           pageCount,
           onNext: () => setPage((p) => Math.min(p + 1, pageCount)),
           onPrev: () => setPage((p) => Math.max(p - 1, 1)),
-          onPageChange: handleFreshReload,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+            handleFreshReload();
+          },
         }}
       />
 
