@@ -583,17 +583,12 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           <Table className="bg-[#fff9db]">
             <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
+               
                 <TableHead
                   className="text-white font-bold"
                   style={{ fontFamily }}
                 >
-                  ID
-                </TableHead>
-                <TableHead
-                  className="text-white font-bold"
-                  style={{ fontFamily }}
-                >
-                  Número
+                  Codigo
                 </TableHead>
                 <TableHead
                   className="text-white font-bold"
@@ -707,12 +702,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                     index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
                 >
-                  <TableCell
-                    className="font-medium text-[#4D4D4D]"
-                    style={{ fontFamily }}
-                  >
-                    {item.uuid}
-                  </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.codigo_estudiante}
                   </TableCell>
@@ -781,9 +770,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {/* Asignamos aleatoriamente "Normal" o "Nivelado" basado en el ID */}
-                    {item.uuid && item.uuid.charCodeAt(0) % 2 === 0
-                      ? "Normal"
-                      : "Nivelado"}
+                    {item.plan_pago}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center">

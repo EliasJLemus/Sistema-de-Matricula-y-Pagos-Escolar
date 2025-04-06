@@ -16,15 +16,17 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
 
 const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
-  { name: "nombreEstudiante", label: "Nombre Estudiante" },
+  { name: "codigo_matricula", label: "Código" },
+  { name: "nombreEstudiante", label: "Nombre del Estudiante" },
   { name: "grado", label: "Grado" },
   { name: "seccion", label: "Sección" },
+  { name: "tipoPlan", label: "Plan de matrícula" },
   { name: "tarifaMatricula", label: "Tarifa Matrícula", type: "number" },
-  { name: "beneficioAplicado", label: "Beneficio Aplicado" },
-  { name: "descuento", label: "Descuento", type: "string" },
+  { name: "beneficioAplicado", label: "Beneficio" },
+  { name: "pocentajeDescuento", label: "Porcentaje de Descuento" },
   { name: "totalPagar", label: "Total a Pagar", type: "number" },
   { name: "estado", label: "Estado" },
-  { name: "fechaMatricula", label: "Fecha Matrícula" },
+  { name: "fechaMatricula", label: "Fecha Matrícula", type: "date" },
 ];
 
 export const MatriculaTable: React.FC = () => {
@@ -37,6 +39,7 @@ export const MatriculaTable: React.FC = () => {
     nombre: "",
     grado: "",
     estado: "",
+    year: new Date().getFullYear(),
   });
 
   const debouncedFilters = useDebounce(filters, 400);
@@ -51,22 +54,33 @@ export const MatriculaTable: React.FC = () => {
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleInputChange = (key: string, value: string) => {
+  const handleInputChange = (key: string, value: string | number) => {
     setFilters((prev) => ({
       ...prev,
       [key]: value === "todos" ? "" : value,
     }));
     setPage(1);
+    handleFreshReload();
   };
 
   const clearFilters = () => {
-    setFilters({ nombre: "", grado: "", estado: "" });
+    setFilters({
+      nombre: "",
+      grado: "",
+      estado: "",
+      year: new Date().getFullYear(),
+    });
     setPage(1);
   };
 
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
-      queryKey: ["getReportsMatricula", page, limit, JSON.stringify(filters)],
+      queryKey: [
+        "getReportsMatricula",
+        page,
+        limit,
+        JSON.stringify(filters),
+      ],
     });
   };
 
@@ -89,7 +103,7 @@ export const MatriculaTable: React.FC = () => {
       )}
 
       <ReportTable<ReporteMatriculaType>
-        title={data?.title || "Reporte de Matrícula"}
+        title={`Reporte de Matrícula ${filters.year}`}
         columns={structureColumns}
         data={tableData}
         filters={
@@ -98,15 +112,11 @@ export const MatriculaTable: React.FC = () => {
               placeholder="Nombre del estudiante"
               className="w-64"
               value={filters.nombre}
-              onChange={(e) =>
-                handleInputChange("nombre", e.target.value)
-              }
+              onChange={(e) => handleInputChange("nombre", e.target.value)}
             />
             <Select
               value={filters.grado || "todos"}
-              onValueChange={(value) =>
-                handleInputChange("grado", value)
-              }
+              onValueChange={(value) => handleInputChange("grado", value)}
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Grado" />
@@ -121,9 +131,7 @@ export const MatriculaTable: React.FC = () => {
             </Select>
             <Select
               value={filters.estado || "todos"}
-              onValueChange={(value) =>
-                handleInputChange("estado", value)
-              }
+              onValueChange={(value) => handleInputChange("estado", value)}
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Estado" />
@@ -134,6 +142,19 @@ export const MatriculaTable: React.FC = () => {
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex flex-col w-24">
+              <label className="text-sm text-muted-foreground mb-1" htmlFor="anio-filter">
+                Año
+              </label>
+              <Input
+                id="anio-filter"
+                type="number"
+                value={filters.year}
+                onChange={(e) => handleInputChange("year", parseInt(e.target.value))}
+                min={2000}
+                max={2100}
+              />
+            </div>
             <Button variant="outline" onClick={clearFilters}>
               Quitar filtros
             </Button>

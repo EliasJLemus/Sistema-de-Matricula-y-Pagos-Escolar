@@ -29,6 +29,8 @@ export const registrarEstudianteSchema = z.object({
   tipo_persona: z.enum(["Estudiante", "Encargado"]),
 
   fecha_admision: z.coerce.date(),
+
+  plan_pago: z.enum(["Normal", "Nivelado"]).optional().nullable(),
 });
 
 

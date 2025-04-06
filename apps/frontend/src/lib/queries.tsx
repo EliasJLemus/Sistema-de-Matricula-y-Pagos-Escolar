@@ -19,6 +19,7 @@ type FiltrosMatricula = {
   nombre?: string;
   grado?: string;
   estado?: string;
+  year?:  number;
 };
 
 export const useGetReportsMatricula = (
@@ -38,6 +39,7 @@ export const useGetReportsMatricula = (
         if (filters.nombre) params.append("nombre", filters.nombre);
         if (filters.grado) params.append("grado", filters.grado);
         if (filters.estado) params.append("estado", filters.estado);
+        if (filters.year) params.append("year", filters.year.toString());
 
         const response = await axios.get<StructureAndData<ReporteMatriculaType>>(`${baseUrl}?${params.toString()}`);
         return response.data;
@@ -54,6 +56,8 @@ type FiltrosMensualidad = {
   estudiante?: string;
   grado?: string;
   fecha?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
 };
 
 export const useGetReporteMensualidad = (
@@ -71,7 +75,8 @@ export const useGetReporteMensualidad = (
 
         if (filters.estudiante) params.append("estudiante", filters.estudiante);
         if (filters.grado) params.append("grado", filters.grado);
-        if (filters.fecha) params.append("fecha", filters.fecha);
+        if (filters.fechaInicio) params.append("fechaInicio", filters.fechaInicio);
+        if(filters.fechaFin) params.append("fechaFin", filters.fechaFin)
 
         const response = await axios.get<StructureAndData<ReporteMensualidadType>>(
           `http://localhost:3000/reportes/mensualidad?${params.toString()}`
@@ -273,7 +278,7 @@ export const useRegistrarEstudiante = () => {
 // ======================
 export const useGetEstudiantes = (
   page: number = 1,
-  limit: number = 10,
+  limit: number = 5,
   filters: FiltrosEstudiantes = {}
 ): UseQueryResult<StructureAndDataResult<EstudiantesTablaType>, Error> => {
   return useQuery({

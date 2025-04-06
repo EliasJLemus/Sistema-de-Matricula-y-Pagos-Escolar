@@ -1,46 +1,102 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// Agregar logo de la escuela (asegúrate de tener el logo en base64 o como imagen pública)
-const schoolLogo = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sunny%20Path-baCvL17UVIOWy2lkb1I5T8lqOm7wDX.png'; // Reemplaza con el logo en base64
+const schoolLogo =
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sunny%20Path-baCvL17UVIOWy2lkb1I5T8lqOm7wDX.png";
 
-const generatePDF = <T,>(title: string, columns: { name: keyof T; label: string }[], data: T[]) => {
+export const generatePDF = <T,>(
+  title: string,
+  columns: { name: keyof T; label: string }[],
+  data: T[]
+) => {
   if (!data || data.length === 0) {
     alert("No hay datos para exportar");
     return;
   }
 
-  const doc = new jsPDF();
+  const doc = new jsPDF("landscape", "pt", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
-  doc.addImage(schoolLogo, 'PNG', 10, 10, 30, 30); // Ajusta la posición y tamaño según sea necesario
+  // 📌 Header con diseño mejorado
+  doc.addImage(schoolLogo, "PNG", 40, 30, 60, 60); // Más grande y balanceado
 
-  // Nombre de la escuela y nombre del reporte
-  doc.setFontSize(18);
-  doc.text("Sunny Path School", 50, 20); // Ajusta la posición
-  doc.setFontSize(12);
-  doc.text(title, 50, 30); // Ajusta la posición
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(26);
+  doc.setTextColor(26, 19, 99); // Azul oscuro institucional
+  doc.text("Sunny Path Bilingual School", pageWidth / 2, 50, { align: "center" });
 
-  // Fecha de emisión
-  const currentDate = new Date().toLocaleDateString();
+  doc.setFontSize(16);
+  doc.setTextColor(0, 0, 0);
+  doc.text(title, pageWidth / 2, 75, { align: "center" });
+
+  doc.setDrawColor(237, 173, 76);
+  doc.setLineWidth(1.5);
+  doc.line(30, 85, pageWidth - 30, 85);
+
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Fecha de emisión: ${currentDate}`, 50, 40); // Ajusta la posición
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Fecha de emisión: ${new Date().toLocaleDateString("es-HN")}`, pageWidth / 2, 100, {
+    align: "center",
+  });
 
-  // Espacio antes de la tabla
-  const startY = 50;
+  // 📊 Tabla (sin cambios como pediste)
+  const tableColumn = columns.map((col) => col.label);
+  const tableRows = data.map((row) =>
+    columns.map((col) => {
+      const value = row[col.name];
+      if (value instanceof Date) {
+        return value.toLocaleDateString("es-HN");
+      }
+      if (typeof value === "number") {
+        return value.toLocaleString("es-HN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+      return String(value ?? "");
+    })
+  );
 
-  const tableColumn = columns.map(col => col.label);
-  const tableRows = data.map(row => columns.map(col => String(row[col.name] || "")));
+  autoTable(doc, {
+    startY: 110,
+    head: [tableColumn],
+    body: tableRows,
+    styles: {
+      fontSize: 8,
+      halign: "center",
+      valign: "middle",
+      overflow: "linebreak",
+      cellPadding: 4,
+      lineColor: [255, 255, 255],
+      lineWidth: 0.5,
+      minCellHeight: 18,
+      textColor: [55, 55, 55],
+    },
+    headStyles: {
+      fillColor: [237, 173, 76],
+      textColor: "#ffffff",
+      fontStyle: "bold",
+    },
+    alternateRowStyles: {
+      fillColor: [255, 251, 235],
+    },
+    margin: { top: 100, left: 30, right: 30 },
+    theme: "striped",
+    didDrawPage: (data) => {
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      const pageNumber = doc.getCurrentPageInfo().pageNumber;
+      doc.setFontSize(10);
+      doc.setTextColor(80);
+      doc.text(
+        `Página ${pageNumber} de ${pageCount}`,
+        pageWidth - 40,
+        pageHeight - 15
+      );
+    },
+  });
 
-  autoTable(doc, { startY: startY, head: [tableColumn], body: tableRows });
-
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: "center" });
-  }
-  // Guardar el PDF con el título
+  // 💾 Guardar
   doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
 };
-
-export { generatePDF };

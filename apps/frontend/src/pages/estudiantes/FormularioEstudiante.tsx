@@ -30,12 +30,10 @@ import {
   useTheme,
 } from "@mui/material";
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
-import { EstudiantesTablaType } from "@shared/estudiantesType";
-import {
-  useGetEstudianteByUuid,
-  useRegistrarEstudiante,
-  useUpdateEstudiante,
-} from "@/lib/queries";
+import {EstudiantesTablaType} from "@shared/estudiantesType"
+import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
+import { useQueryClient } from "@tanstack/react-query";
+
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -104,6 +102,8 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   });
 
   const [estudianteUUID, setEstudianteUUID] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
 
   const { data } = useGetEstudianteByUuid(actualId?.toString() || "");
 
@@ -578,7 +578,13 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         registrarEstudiante(payload, {
           onSuccess: () => {
             setAlertMessage("🎉 Estudiante registrado exitosamente");
-            setAlertOpen(true);
+
+            queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
+
+            setAlertOpen(true); 
             setIsSubmitting(false);
             if (isModal && onClose) onClose();
             else navigate("/estudiantes");
@@ -589,29 +595,28 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
             setIsSubmitting(false);
           },
         });
-      } else {
-        actualizarEstudiante(
-          {
-            uuid: actualId?.toString() || "",
-            data: payload,
+      } else{
+        actualizarEstudiante({
+          uuid: actualId?.toString() || "",
+          data: payload,
+        }, {
+          onSuccess: () => {
+              queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
+            setAlertMessage("🎉 Estudiante actualizado exitosamente");
+            setAlertOpen(true);
+            setIsSubmitting(false);
+            if (isModal && onClose) onClose();
+            else navigate("/estudiantes");
           },
-          {
-            onSuccess: () => {
-              setAlertMessage("🎉 Estudiante actualizado exitosamente");
-              setAlertOpen(true);
-              setIsSubmitting(false);
-              if (isModal && onClose) onClose();
-              else navigate("/estudiantes");
-            },
-            onError: () => {
-              setAlertMessage(
-                "❌ Ocurrió un error al actualizar al estudiante"
-              );
-              setAlertOpen(true);
-              setIsSubmitting(false);
-            },
-          }
-        );
+          onError: () => {
+            setAlertMessage("❌ Ocurrió un error al actualizar al estudiante");
+            setAlertOpen(true);
+            setIsSubmitting(false);
+          },
+        })
       }
     }
   };
