@@ -15,7 +15,7 @@ import * as pdfUtils from "@/utils/pdfutils";
 type Column<T> = {
   name: keyof T;
   label: string;
-  type?: string;
+  type?: string; // "number" | "date" | "text"
 };
 
 interface ReportTableProps<T> {
@@ -39,14 +39,14 @@ export function ReportTable<T>({
   filters,
   pagination,
 }: ReportTableProps<T>) {
-  return ( 
+  return (
     <div className="space-y-4">
       {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           <p className="text-muted-foreground">
-            Fecha de emisión: {new Date().toLocaleDateString()}
+            Fecha de emisión: {new Date().toLocaleDateString("es-HN")}
           </p>
         </div>
 
@@ -73,26 +73,51 @@ export function ReportTable<T>({
             <TableBody>
               {data.map((item, index) => (
                 <TableRow key={index}>
-                  {columns.map((col) => (
-                    <TableCell key={String(col.name)}>
-                      {col.name === "estado" ? (
-                        <Badge
-                          variant="outline"
-                          className={
-                            item[col.name] === "Pagado"
-                              ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
-                              : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
-                          }
-                        >
-                          {String(item[col.name])}
-                        </Badge>
-                      ) : col.type === "number" ? (
-                        <>L. {item[col.name]}</>
-                      ) : (
-                        String(item[col.name])
-                      )}
-                    </TableCell>
-                  ))}
+                  {columns.map((col) => {
+                    const value = item[col.name];
+                    const renderValue = () => {
+                      if (col.name === "estado") {
+                        return (
+                          <Badge
+                            variant="outline"
+                            className={
+                              value === "Pagado"
+                                ? "bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
+                                : "bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700"
+                            }
+                          >
+                            {String(value)}
+                          </Badge>
+                        );
+                      }
+
+                      if (col.type === "number") {
+                        return `L. ${Number(value).toLocaleString("es-HN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}`;
+                      }
+
+                      if (col.type === "date") {
+                        try {
+                          const parsedDate = new Date(value as string | number | Date);
+                          return parsedDate.toLocaleDateString("es-HN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          });
+                        } catch {
+                          return String(value);
+                        }
+                      }
+
+                      return String(value);
+                    };
+
+                    return (
+                      <TableCell key={String(col.name)}>{renderValue()}</TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableBody>
@@ -122,10 +147,7 @@ export function ReportTable<T>({
                 const maxVisible = 5;
                 const half = Math.floor(maxVisible / 2);
                 let start = Math.max(1, pagination.page - half);
-                let end = Math.min(
-                  pagination.pageCount,
-                  start + maxVisible - 1
-                );
+                let end = Math.min(pagination.pageCount, start + maxVisible - 1);
 
                 if (end - start < maxVisible - 1) {
                   start = Math.max(1, end - maxVisible + 1);

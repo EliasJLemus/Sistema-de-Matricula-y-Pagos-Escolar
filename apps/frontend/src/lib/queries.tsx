@@ -273,7 +273,7 @@ export const useRegistrarEstudiante = () => {
 // ======================
 export const useGetEstudiantes = (
   page: number = 1,
-  limit: number = 10,
+  limit: number = 5,
   filters: FiltrosEstudiantes = {}
 ): UseQueryResult<StructureAndDataResult<EstudiantesTablaType>, Error> => {
   return useQuery({

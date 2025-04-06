@@ -14,7 +14,20 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ReporteMensualidadType, StructureColumn } from "@shared/reportsType";
 import { useQueryClient } from "@tanstack/react-query";
 
+const formatoFecha = (fechaISO: string): string => {
+  const opciones: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  };
+  return new Date(fechaISO).toLocaleDateString('es-HN', opciones);
+};
+
 const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
+  {
+    name: "codigo_mensualidad",
+    label: "Código",
+  },
   { 
     name : "nombre_estudiante", 
     label: "Estudiante" 
@@ -34,12 +47,14 @@ const structureColumns: StructureColumn<ReporteMensualidadType>[] = [
   { 
     name : "fecha_inicio", 
     label: "Fecha Inicio", 
-    type : "date" 
+    type: "date",
+    render: (valor) => formatoFecha(valor)
   },
   { 
     name : "fecha_vencimiento", 
     label: "Fecha Vencimiento", 
-    type : "date" 
+    type: "date",
+    render: (valor) => formatoFecha(valor)
   },
   { 
     name : "subtotal", 

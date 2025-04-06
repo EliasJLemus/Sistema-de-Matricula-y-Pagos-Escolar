@@ -32,6 +32,8 @@ import {
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
 import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
+import { useQueryClient } from "@tanstack/react-query";
+
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -100,6 +102,8 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   });
 
   const [estudianteUUID, setEstudianteUUID] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
 
   const {data} = useGetEstudianteByUuid(actualId?.toString() || "")
 
@@ -568,7 +572,13 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         registrarEstudiante(payload, {
           onSuccess: () => {
             setAlertMessage("🎉 Estudiante registrado exitosamente");
-            setAlertOpen(true);
+
+            queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
+
+            setAlertOpen(true); 
             setIsSubmitting(false);
             if (isModal && onClose) onClose();
             else navigate("/estudiantes");
@@ -586,7 +596,10 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           data: payload,
         }, {
           onSuccess: () => {
-            
+              queryClient.invalidateQueries({
+              queryKey: ['getEstudiantes'],
+              exact: false,
+            });
             setAlertMessage("🎉 Estudiante actualizado exitosamente");
             setAlertOpen(true);
             setIsSubmitting(false);

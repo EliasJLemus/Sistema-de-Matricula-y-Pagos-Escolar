@@ -28,6 +28,7 @@ export type ReporteMatriculaType = {
 };
 
 export type ReporteMensualidadType = {
+  codigo_mensualidad: string,
   nombre_estudiante: string,
   grado: string,
   beneficio_aplicado: string
@@ -110,6 +111,7 @@ export type StructureColumn<T> = {
   name: keyof T;
   label: string;
   type?: string;
+  render?: (value: any) => string | number 
 };
 
 export type PaginationType = {

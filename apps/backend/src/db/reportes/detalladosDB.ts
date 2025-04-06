@@ -103,52 +103,60 @@ export class ReporteDetalladoDB {
 
   // ======= MENSUALIDAD =======
   public async getReporteMensualidad(
-    limit: number,
+    limite: number,
     offset: number,
-    filters: { estudiante?: string; grado?: string; fecha?: string }
+    filters: { estudiante?: string; grado?: string; estado?: string }
   ): Promise<ReporteMensualidadType[]> {
     const client = await this.db.getClient();
-    const where: string[] = [];
-    const values: any[] = [limit, offset];
-    let paramIndex = 3;
-
-    if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
-      values.push(`%${filters.estudiante}%`);
-    }
-    if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
-    }
-    if (filters.fecha) {
-      where.push(`fecha_inicio = $${paramIndex++}`);
-      values.push(filters.fecha);
-    }
-
-    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
-    const query = `
-      SELECT 
-        codigo_mensualidad,
-        nombre_estudiante,
-        grado,
-        beneficio_aplicado,
-        porcentaje_descuento,
-        fecha_inicio,
-        fecha_vencimiento,
-        subtotal,
-        saldo_pendiente,
-        saldo_pagado,
-        recargo,
-        estado
-      FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31')
-      ${whereClause}
-      ORDER BY fecha_vencimiento DESC
-      LIMIT $1 OFFSET $2;
-    `;
-
     try {
-      const result = await client.query(query, values);
+      let baseQuery = `
+        SELECT 
+          codigo_mensualidad,
+          nombre_estudiante,
+          grado,
+          beneficio_aplicado,
+          porcentaje_descuento,
+          fecha_inicio,
+          fecha_vencimiento,
+          subtotal,
+          saldo_pendiente,
+          saldo_pagado,
+          recargo,
+          estado
+        FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31')
+      `;
+  
+      const conditions: string[] = [];
+      const values: any[] = [];
+      let idx = 1;
+  
+      if (filters.estudiante) {
+        conditions.push(`unaccent(nombre_estudiante) ILIKE unaccent($${idx})`);
+        values.push(`%${filters.estudiante}%`);
+        idx++;
+      }
+  
+      if (filters.grado) {
+        conditions.push(`grado ILIKE $${idx}`);
+        values.push(`%${filters.grado}%`);
+        idx++;
+      }
+  
+      if (filters.estado) {
+        conditions.push(`estado ILIKE $${idx}`);
+        values.push(`%${filters.estado}%`);
+        idx++;
+      }
+  
+      if (conditions.length > 0) {
+        baseQuery += " WHERE " + conditions.join(" AND ");
+      }
+  
+      baseQuery += " ORDER BY fecha_vencimiento DESC";
+      baseQuery += ` LIMIT $${idx} OFFSET $${idx + 1}`;
+      values.push(limite, offset);
+  
+      const result = await client.query(baseQuery, values);
       return result.rows;
     } catch (error) {
       console.error("Error en getReporteMensualidad:", error);
@@ -157,6 +165,7 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   public async countReporteMensualidad(
     filters: { estudiante?: string; grado?: string; fecha?: string }
