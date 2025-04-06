@@ -17,6 +17,17 @@ import ApoderadoPage from "./pages/apoderados/ApoderadosPage";
 import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
 
+//Importacion de componentes de Pagos
+import Pagos from "./pages/pagos/Pagos";
+import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
+import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
+import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
+
+import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
+import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
+import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
+
+
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -52,6 +63,9 @@ function App() {
               <Routes>
                 <Route path="/home" element={<Home />} />
                 <Route path="/reportes" element={<DashboardPage />} />
+              
+  {/* Nueva ruta para Pagos */}
+  <Route path="/pagos" element={<Pagos />} />
 
                 {/* Rutas de estudiantes */}
                 <Route path="/estudiantes" element={<EstudiantesPage />} />
@@ -76,6 +90,29 @@ function App() {
                 />
 
                 {/* Add other routes as needed */}
+
+                {/* Rutas de matricula*/}
+                <Route path="/pagos/matricula" element={<MatriculaPage />} />
+                <Route
+                  path="/pagos/matricula/nuevo"
+                  element={<NuevoMatricula />}
+                />
+                <Route
+                  path="/pagos/matricula/editar/:id"
+                  element={<EditarMatricula />}
+                />
+
+ {/* Rutas de matricula*/}
+ <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
+                <Route
+                  path="/pagos/mensualidad/nuevo"
+                  element={<NuevoMensualidad />}
+                />
+                <Route
+                  path="/pagos/mensualidad/editar/:id"
+                  element={<EditarMensualidad />}
+                />
+
               </Routes>
             </Box>
           </Box>
