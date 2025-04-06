@@ -70,12 +70,12 @@ export const getReporteMensualidad = async (
 ): Promise<void> => {
   try {
     const { limit, offset } = getPaginationParams(req);
-    const { estudiante, grado, fecha } = req.query;
+    const { estudiante = "", grado = "", fecha = "" } = req.query;
 
     const filters = {
-      estudiante: estudiante as string,
-      grado: grado as string,
-      fecha: fecha as string,
+      estudiante: String(estudiante).trim(),
+      grado: String(grado).trim(),
+      fecha: String(fecha).trim(), 
     };
 
     const result = await reporteDetalladoDB.getReporteMensualidad(
@@ -83,28 +83,49 @@ export const getReporteMensualidad = async (
       offset,
       filters
     );
+
     const total = await reporteDetalladoDB.countReporteMensualidad(filters);
 
     if (Array.isArray(result) && result.length > 0) {
-      mensualidadStructure.data = result;
-      mensualidadStructure.pagination = {
-        limit,
-        offset,
-        count: result.length,
-        total,
+      const responseData = {
+        ...mensualidadStructure,
+        data: result,
+        pagination: {
+          limit,
+          offset,
+          count: result.length,
+          total,
+        },
       };
-      console.log(mensualidadStructure);
-      res.status(200).json(mensualidadStructure);
-      return;
-    }
 
-    res.status(404).json({ message: "No se encontraron datos." });
+      if (process.env.NODE_ENV !== "production") {
+        console.log("🔍 Reporte Mensualidad:", responseData);
+      }
+
+      res.status(200).json(responseData);
+    } else {
+      res.status(200).json({
+        ...mensualidadStructure,
+        data: [],
+        pagination: {
+          limit,
+          offset,
+          count: 0,
+          total: 0,
+        },
+        message: "No se encontraron datos.",
+      });
+    }
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor.", error:error});
+    console.error("❌ Error en getReporteMensualidad:", error);
+    res.status(500).json({
+      message: "Error interno del servidor.",
+      error: (error as Error).message,
+    });
   }
 };
 
-export const getReporteEstudiante = async (
+export const getReporteEstudiante = async ( 
   req: Request,
   res: Response
 ): Promise<void> => {

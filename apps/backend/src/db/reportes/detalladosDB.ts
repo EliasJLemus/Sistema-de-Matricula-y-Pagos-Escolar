@@ -108,6 +108,7 @@ export class ReporteDetalladoDB {
     filters: { estudiante?: string; grado?: string; estado?: string }
   ): Promise<ReporteMensualidadType[]> {
     const client = await this.db.getClient();
+  
     try {
       let baseQuery = `
         SELECT 
@@ -131,7 +132,7 @@ export class ReporteDetalladoDB {
       let idx = 1;
   
       if (filters.estudiante) {
-        conditions.push(`unaccent(nombre_estudiante) ILIKE unaccent($${idx})`);
+        conditions.push(`nombre_estudiante ILIKE $${idx}`);
         values.push(`%${filters.estudiante}%`);
         idx++;
       }
@@ -152,13 +153,15 @@ export class ReporteDetalladoDB {
         baseQuery += " WHERE " + conditions.join(" AND ");
       }
   
-      baseQuery += " ORDER BY fecha_vencimiento DESC";
-      baseQuery += ` LIMIT $${idx} OFFSET $${idx + 1}`;
+      baseQuery += ` ORDER BY fecha_vencimiento DESC LIMIT $${idx} OFFSET $${idx + 1}`;
       values.push(limite, offset);
+  
+      console.log("Query ejecutada:", baseQuery);
+      console.log("Valores:", values);
   
       const result = await client.query(baseQuery, values);
       return result.rows;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en getReporteMensualidad:", error);
       throw new Error("No se pudo obtener el reporte de mensualidades.");
     } finally {
@@ -166,7 +169,6 @@ export class ReporteDetalladoDB {
     }
   }
   
-
   public async countReporteMensualidad(
     filters: { estudiante?: string; grado?: string; fecha?: string }
   ): Promise<number> {
@@ -174,28 +176,36 @@ export class ReporteDetalladoDB {
     const where: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-
+  
     if (filters.estudiante) {
-      where.push(`unaccent(nombre_estudiante) ILIKE unaccent($${paramIndex++})`);
+      where.push(`nombre_estudiante ILIKE $${paramIndex++}`);
       values.push(`%${filters.estudiante}%`);
     }
+  
     if (filters.grado) {
-      where.push(`grado = $${paramIndex++}`);
-      values.push(filters.grado);
+      where.push(`grado ILIKE $${paramIndex++}`);
+      values.push(`%${filters.grado}%`);
     }
+  
     if (filters.fecha) {
       where.push(`fecha_inicio = $${paramIndex++}`);
       values.push(filters.fecha);
     }
-
+  
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+  
     const query = `
-      SELECT COUNT(*) 
-      FROM "Pagos".reporte_mensualidades(NULL, NULL, '2025-01-01', '2025-12-31') 
-      ${whereClause};
-    `;
+  SELECT COUNT(*) 
+  FROM "Pagos".reporte_mensualidades(
+    NULL::uuid, 
+    NULL::estado_pagos, 
+    '2025-01-01'::date, 
+    '2025-12-31'::date
+  )
+  ${whereClause};
+`;
 
+  
     try {
       const result = await client.query(query, values);
       return parseInt(result.rows[0].count, 10);
@@ -206,6 +216,7 @@ export class ReporteDetalladoDB {
       client.release();
     }
   }
+  
 
   // ======= BECA =======
   public async getReporteBeca(
