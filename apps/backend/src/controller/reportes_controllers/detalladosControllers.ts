@@ -39,13 +39,14 @@ export const getReporteMatricula = async (
     
     if (Array.isArray(result) && result.length > 0) {
       const report = result.map((row) => ({
+        codigo_matricula: row.codigo_matricula,
         nombreEstudiante: row.nombre_estudiante,
         grado: row.grado,
         seccion: row.seccion,
         tarifaMatricula: row.tarifa_matricula,
         beneficioAplicado: row.beneficio_aplicado,
         descuento: row.porcentaje_descuento,
-        totalPagar: row.total_pagar,
+        totalPagar: row.total_a_pagar,
         estado: row.estado,
         fechaMatricula: row.fecha_matricula,
         tipoPlan: row.tipo_plan

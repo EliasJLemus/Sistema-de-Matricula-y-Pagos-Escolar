@@ -16,15 +16,37 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
 
 const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
-  { name: "nombreEstudiante", label: "Nombre Estudiante" },
-  { name: "grado", label: "Grado" },
-  { name: "seccion", label: "Sección" },
-  { name: "tarifaMatricula", label: "Tarifa Matrícula", type: "number" },
-  { name: "beneficioAplicado", label: "Beneficio Aplicado" },
-  { name: "descuento", label: "Descuento", type: "string" },
-  { name: "totalPagar", label: "Total a Pagar", type: "number" },
-  { name: "estado", label: "Estado" },
-  { name: "fechaMatricula", label: "Fecha Matrícula" },
+  {
+    name: "codigo_matricula",
+    label: "Codigo"
+  },
+  { name: "nombreEstudiante", 
+    label: "Nombre del Estudiante" },
+  { name: "grado", 
+    label: "Grado" },
+  { name: "seccion", 
+    label: "Sección" },
+    {
+      name: "tipoPlan",
+      label: "Plan de matricula"
+    },
+  { name: "tarifaMatricula", 
+    label: "Tarifa Matrícula", type: "number" },
+  { name: "beneficioAplicado", 
+    label: "Beneficio" },
+    {
+      name: "pocentajeDescuento",
+      label: "Porcentaje de Descuento"
+    },
+  { name: "totalPagar", 
+    label: "Total a Pagar", 
+    type: "number" },
+  { name: "estado", 
+    label: "Estado" },
+  { name: "fechaMatricula", 
+    label: "Fecha Matrícula", 
+    type: "date" },
+    
 ];
 
 export const MatriculaTable: React.FC = () => {

@@ -166,9 +166,6 @@ export class ReporteDetalladoDB {
       baseQuery += ` ORDER BY fecha_vencimiento DESC LIMIT $${idx} OFFSET $${idx + 1}`;
       values.push(limite, offset);
   
-      console.log("Query ejecutada:", baseQuery);
-      console.log("Valores:", values);
-  
       const result = await client.query(baseQuery, values);
       return result.rows;
     } catch (error: any) {
