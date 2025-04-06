@@ -18,7 +18,7 @@ export const useChartData = () => {
 };
 
 export const usePagosPendientesChartData = () => {
-  const { data, isLoading } = useGetReportePagosPendientes();
+  const { data, isLoading } = useGetReportePagosPendientes(1, 10); // Example: page = 1, limit = 10
 
   const chartData = useMemo(() => {
     if (!data || !data.data) return [];
@@ -35,7 +35,7 @@ export const usePagosPendientesChartData = () => {
 
 export const useRetirosChartData = () => {
   const { data, isLoading } = useGetReporteRetiroEstudiantes();
-
+  console.log("data", data);
   const chartDataRetiro = useMemo(() => {
     if (!data || !data.data) return [];
 
@@ -43,7 +43,9 @@ export const useRetirosChartData = () => {
       grado: item.nivel,
       estudiantesActivos: Number(item.estudiantes_activos),
       estudiantesRetirados: Number(item.estudiantes_retirados),
-      tasaRetiro: item.tasa_retiro ? parseFloat(item.tasa_retiro.replace("%", "")): "0%", // Convertir porcentaje string a número
+      tasaRetiro: item.tasa_retiro
+        ? parseFloat(item.tasa_retiro.toString().replace("%", ""))
+        : 0,
     }));
   }, [data]);
 

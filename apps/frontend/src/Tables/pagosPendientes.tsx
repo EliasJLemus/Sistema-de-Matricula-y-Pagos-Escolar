@@ -2,7 +2,19 @@
 
 import { useGetReportePagosPendientes } from "../lib/queries";
 import { ReportTable } from "@/components/Tables/Table";
-import { ResponsiveContainer, CartesianGrid, Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
+import {
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Bar,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltipContent,
+  ChartTooltip,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 import { useMemo, useState } from "react";
 import { StructureColumn, ReportePagosPendientesType } from "@shared/reportsType";
 
@@ -24,15 +36,21 @@ export const PagosPendientesTable: React.FC = () => {
   const pageCount = Math.ceil(total / limit);
 
   const chartData = useMemo(() => {
-    return data?.data.map((item) => ({
-      grado: item.grado,
-      porcentaje: parseFloat(item.porcentaje_morosidad ?? "0"),
-    })) ?? [];
+    return (
+      data?.data.map((item) => {
+        const porcentajeMorosos = parseFloat(item.porcentaje_morosidad ?? "0");
+        return {
+          grado: item.grado,
+          morosos: porcentajeMorosos,
+          noMorosos: 100 - porcentajeMorosos,
+        };
+      }) ?? []
+    );
   }, [data]);
 
   return data ? (
     <div className="space-y-6">
-      {/* Tabla primero */}
+      {/* Tabla */}
       <ReportTable<ReportePagosPendientesType>
         title={data.title}
         columns={columns}
@@ -46,54 +64,60 @@ export const PagosPendientesTable: React.FC = () => {
         }}
       />
 
-      {/* Luego la gráfica */}
+      {/* Gráfica */}
       <div className="bg-white rounded-xl p-6 shadow-md border">
         <h3 className="text-lg font-semibold text-[#1A1363] mb-4">
           Porcentaje de Morosidad por Grado
         </h3>
 
-        <ResponsiveContainer width="100%" height={400}>
+        <ChartContainer
+          className="h-[500px]"
+          config={{
+            morosos: { label: "Morosos", color: "#fbbf24",  },
+            noMorosos: { label: "No morosos", color: "#a7f3d0" },
+          }}
+        >
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 10, right: 30, left: 60, bottom: 10 }}
-            barCategoryGap="10%"
+            margin={{ top: 20, right: 40, left: 70, bottom: 20 }}
+            barCategoryGap="15%"
           >
-            <CartesianGrid strokeDasharray="2 2" stroke="#e5e7eb" />
+            <CartesianGrid stroke="#87898b76" strokeWidth={1.5} />
             <XAxis
               type="number"
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
-              tick={{ fill: "#6b7280", fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
+              tick={{ fill: "#4b5563", fontSize: 12 }}
+              axisLine={{ stroke: "#9ca3af", strokeWidth: 1.5 }}
+              tickLine={{ stroke: "#9ca3af", strokeWidth: 1.5 }}
             />
             <YAxis
               dataKey="grado"
               type="category"
-              tick={{ fill: "#6b7280", fontSize: 13 }}
-              width={100}
+              tick={{ fill: "#1f2937", fontSize: 13 }}
+              width={110}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip
-              cursor={{ fill: "hsl(var(--muted))" }}
-              contentStyle={{
-                backgroundColor: "white",
-                border: "1px solid #e5e7eb",
-                fontSize: "14px",
-              }}
-              formatter={(value: number) => [`${value.toFixed(2)}%`, "Porcentaje"]}
-              labelStyle={{ fontWeight: 500 }}
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartLegendContent />
+            <Bar
+              dataKey="morosos"
+              name="Morosos"
+              fill="#fbbf24"
+              barSize={42}
+              radius={[4, 4, 4, 4]}
             />
             <Bar
-              dataKey="porcentaje"
-              fill="hsl(var(--chart-1))"
-              barSize={24}
+              dataKey="noMorosos"
+              name="No morosos"
+              fill="#a7f3d0"
+              barSize={42}
               radius={[4, 4, 4, 4]}
             />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </div>
     </div>
   ) : (
