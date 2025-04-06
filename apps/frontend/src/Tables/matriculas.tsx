@@ -16,18 +16,19 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteMatriculaType } from "@shared/reportsType";
 
 const structureColumns: StructureColumn<ReporteMatriculaType>[] = [
-  { name: "codigo_matricula", label: "Código" },
+  { name: "codigo_matricula", label: "Codigo" },
   { name: "nombreEstudiante", label: "Nombre del Estudiante" },
   { name: "grado", label: "Grado" },
   { name: "seccion", label: "Sección" },
   { name: "tipoPlan", label: "Plan de matrícula" },
   { name: "tarifaMatricula", label: "Tarifa Matrícula", type: "number" },
   { name: "beneficioAplicado", label: "Beneficio" },
-  { name: "pocentajeDescuento", label: "Porcentaje de Descuento" },
+  { name: "descuento", label: "Porcentaje de Descuento" }, // ← Corregido aquí
   { name: "totalPagar", label: "Total a Pagar", type: "number" },
   { name: "estado", label: "Estado" },
   { name: "fechaMatricula", label: "Fecha Matrícula", type: "date" },
 ];
+
 
 export const MatriculaTable: React.FC = () => {
   const queryClient = useQueryClient();
@@ -49,7 +50,7 @@ export const MatriculaTable: React.FC = () => {
     limit,
     debouncedFilters
   );
-
+  console.log(data)
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);

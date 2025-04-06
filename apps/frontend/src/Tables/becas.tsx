@@ -7,55 +7,45 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { StructureColumn, ReporteBecaType } from "@shared/reportsType";
 import { useQueryClient } from "@tanstack/react-query";
 
+// 🔁 Formateador de fechas reutilizable
+const formatoFecha = (fechaISO: string): string => {
+  const opciones: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+  return new Date(fechaISO).toLocaleDateString("es-HN", opciones);
+};
+
+// 🧱 Columnas del reporte con fechas formateadas
 const structureColumns: StructureColumn<ReporteBecaType>[] = [
-  { 
-    name : "codigo_beca", 
-    label: "Codigo Beca",
-  },
-  { 
-    name : "nombre_estudiante", 
-    label: "Nombre del Estudiante"
-  },
-  { 
-    name : "grado", 
-    label: "Grado"
-  },
-  { 
-    name : "seccion", 
-    label: "Sección"
-  },
-  { 
-    name : "fecha_admision", 
+  { name: "codigo_beca", label: "Codigo Beca" },
+  { name: "nombre_estudiante", label: "Nombre del Estudiante" },
+  { name: "grado", label: "Grado" },
+  { name: "seccion", label: "Sección" },
+  {
+    name: "fecha_admision",
     label: "Fecha de Admisión",
-    type : "date"
+    type: "date",
+    render: (valor) => formatoFecha(valor),
   },
-  {
-    name: "nombre_beca",
-    label: "Nombre de la Beca"
-  },
-  {
-    name: "porcentaje_beca",
-    label: "Porcentaje"
-  },
-  {
-    name : "tipo_aplicacion",
-    label: "Tipo Aplicacion"
-  },
+  { name: "nombre_beca", label: "Nombre de la Beca" },
+  { name: "porcentaje_beca", label: "Porcentaje" },
+  { name: "tipo_aplicacion", label: "Tipo Aplicacion" },
   {
     name: "fecha_aplicacion",
-    label: "Fecha Aplicada a la Beca"
+    label: "Fecha Aplicada a la Beca",
+    type: "date",
+    render: (valor) => formatoFecha(valor),
   },
-  { 
-    name : "estado", 
-    label: "Estado"
-  }
+  { name: "estado", label: "Estado" },
 ];
 
 export const BecaTable: React.FC = () => {
@@ -65,32 +55,23 @@ export const BecaTable: React.FC = () => {
   const [filters, setFilters] = useState({
     nombre_estudiante: "",
     grado: "",
-    tipo_beneficio: ""
+    tipo_beneficio: "",
   });
 
-  
-    
-    const queryClient = useQueryClient(); 
-  
-    const handleFreshReload = () => {
-  
-      setPage;
-  
-      queryClient.invalidateQueries({
-        queryKey:["getReporteBeca", page, limit, filters],
-      });
-    }
+  const queryClient = useQueryClient();
+
+  const handleFreshReload = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["getReporteBeca", page, limit, filters],
+    });
+  };
 
   const debouncedFilters = useDebounce(filters, 400);
-
-  useEffect(() => {
-    console.log("Debounced Beca Filters:", debouncedFilters);
-  }, [debouncedFilters]);
 
   const handleInputChange = (key: string, value: string) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: value === "todos" ? "" : value
+      [key]: value === "todos" ? "" : value,
     }));
     setPage(1);
   };
@@ -99,12 +80,17 @@ export const BecaTable: React.FC = () => {
     setFilters({
       nombre_estudiante: "",
       grado: "",
-      tipo_beneficio: ""
+      tipo_beneficio: "",
     });
     setPage(1);
   };
 
-  const { data, isFetching, isLoading, error } = useGetReporteBeca(page, limit, debouncedFilters);
+  const { data, isFetching, isLoading, error } = useGetReporteBeca(
+    page,
+    limit,
+    debouncedFilters
+  );
+
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
@@ -128,7 +114,9 @@ export const BecaTable: React.FC = () => {
               placeholder="Nombre del estudiante"
               className="w-64"
               value={filters.nombre_estudiante}
-              onChange={(e) => handleInputChange("nombre_estudiante", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("nombre_estudiante", e.target.value)
+              }
             />
             <Select
               value={filters.grado || "todos"}
@@ -142,14 +130,22 @@ export const BecaTable: React.FC = () => {
                 <SelectItem value="Kinder">Kinder</SelectItem>
                 <SelectItem value="Primero">Primero</SelectItem>
                 <SelectItem value="Segundo">Segundo</SelectItem>
-                {/* Agrega más grados si los necesitas */}
+                <SelectItem value="Tercero">Tercero</SelectItem>
+                <SelectItem value="Cuarto">Cuarto</SelectItem>
+                <SelectItem value="Quinto">Quinto</SelectItem>
+                <SelectItem value="Sexto">Sexto</SelectItem>
+                <SelectItem value="Séptimo">Séptimo</SelectItem>
+                <SelectItem value="Octavo">Octavo</SelectItem>
+                <SelectItem value="Noveno">Noveno</SelectItem>
               </SelectContent>
             </Select>
             <Input
               placeholder="Tipo de beneficio"
               className="w-64"
               value={filters.tipo_beneficio}
-              onChange={(e) => handleInputChange("tipo_beneficio", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("tipo_beneficio", e.target.value)
+              }
             />
             <Button variant="outline" onClick={clearFilters}>
               Quitar filtros

@@ -1,103 +1,102 @@
-"use client"
+"use client";
 
 import { useGetReportePagosPendientes } from "../lib/queries";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { ResponsiveContainer, CartesianGrid, Bar, BarChart as RechartsBarChart, XAxis, YAxis } from "recharts";
-import { useMemo } from "react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ReportTable } from "@/components/Tables/Table";
+import { ResponsiveContainer, CartesianGrid, Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
+import { useMemo, useState } from "react";
+import { StructureColumn, ReportePagosPendientesType } from "@shared/reportsType";
+
+const columns: StructureColumn<ReportePagosPendientesType>[] = [
+  { name: "grado", label: "Grado" },
+  { name: "estudiantes_morosos", label: "Cantidad Morosos" },
+  { name: "total_estudiantes", label: "Total Estudiantes en el Grado" },
+  { name: "porcentaje_morosidad", label: "Porcentaje Morosidad" },
+  { name: "deuda_total", label: "Deuda Total" },
+  { name: "promedio_deuda_moroso", label: "Promedio Deuda Moroso" },
+];
 
 export const PagosPendientesTable: React.FC = () => {
-  const { data } = useGetReportePagosPendientes();
+  const [page, setPage] = useState(1);
+  const limit = 5;
 
-  
+  const { data } = useGetReportePagosPendientes(page, limit);
+  const total = data?.pagination?.total ?? 0;
+  const pageCount = Math.ceil(total / limit);
+
   const chartData = useMemo(() => {
-    if (!data || !data.data) return [];
-
-    return data.data.map((item) => ({
+    return data?.data.map((item) => ({
       grado: item.grado,
-      totalDeudas: item.deuda_total,
-      promedioDeuda: item.promedio_deuda_moroso,
-      deudaTotal: item.porcentaje_morosidad,
-    }));
+      porcentaje: parseFloat(item.porcentaje_morosidad ?? "0"),
+    })) ?? [];
   }, [data]);
 
-  return data && data.columns && data.data ? (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {data.title}
-          </h2>
-          <p className="text-muted-foreground">No. Reporte 010107 | Fecha de emisión: 03/09/2025</p>
-        </div>
-        <Button>
-          <Download className="mr-2 h-4 w-4" />
-          Descargar
-        </Button>
-      </div>
+  return data ? (
+    <div className="space-y-6">
+      {/* Tabla primero */}
+      <ReportTable<ReportePagosPendientesType>
+        title={data.title}
+        columns={columns}
+        data={data.data}
+        pagination={{
+          page,
+          pageCount,
+          onNext: () => setPage((p) => Math.min(p + 1, pageCount)),
+          onPrev: () => setPage((p) => Math.max(p - 1, 1)),
+          onPageChange: (newPage) => setPage(newPage),
+        }}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{data.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {data.columns.map((col) => (
-                  <TableHead key={col.name}>{col.label}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.data.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row.grado}</TableCell>
-                  <TableCell>{row.deuda_total}</TableCell>
-                  <TableCell>$ {row.promedio_deuda_moroso}</TableCell>
-                  <TableCell>$ {row.porcentaje_morosidad}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {/* Luego la gráfica */}
+      <div className="bg-white rounded-xl p-6 shadow-md border">
+        <h3 className="text-lg font-semibold text-[#1A1363] mb-4">
+          Porcentaje de Morosidad por Grado
+        </h3>
 
-          <div className="mt-8">
-            <h3 className="text-lg font-medium mb-4">Promedio y Total de Deuda por Grado</h3>
-            <ChartContainer
-              config={{
-                promedioDeuda: {
-                  label: "Promedio de Deuda por Estudiante",
-                  color: "hsl(var(--chart-1))",
-                },
-                deudaTotal: {
-                  label: "Deuda Total del Grado",
-                  color: "hsl(var(--chart-2))",
-                },
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 10, right: 30, left: 60, bottom: 10 }}
+            barCategoryGap="10%"
+          >
+            <CartesianGrid strokeDasharray="2 2" stroke="#e5e7eb" />
+            <XAxis
+              type="number"
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+              tick={{ fill: "#6b7280", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              dataKey="grado"
+              type="category"
+              tick={{ fill: "#6b7280", fontSize: 13 }}
+              width={100}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              cursor={{ fill: "hsl(var(--muted))" }}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                fontSize: "14px",
               }}
-              className="h-[400px]"
-            >
-              <ResponsiveContainer width="100%" height={400}>
-                <RechartsBarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="grado" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="promedioDeuda" fill="var(--color-promedioDeuda)" name="Promedio" />
-                  <Bar dataKey="deudaTotal" fill="var(--color-deudaTotal)" name="Total" />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <div className="text-sm text-muted-foreground">Total registros: {data.data.length}</div>
-        </CardFooter>
-      </Card>
+              formatter={(value: number) => [`${value.toFixed(2)}%`, "Porcentaje"]}
+              labelStyle={{ fontWeight: 500 }}
+            />
+            <Bar
+              dataKey="porcentaje"
+              fill="hsl(var(--chart-1))"
+              barSize={24}
+              radius={[4, 4, 4, 4]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   ) : (
-    <div>Cargando...</div>
+    <div className="text-sm text-muted-foreground">Cargando reporte...</div>
   );
 };

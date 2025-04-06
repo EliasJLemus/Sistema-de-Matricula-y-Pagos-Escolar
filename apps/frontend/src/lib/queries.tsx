@@ -178,12 +178,15 @@ export const useGetReporteFinancieroAnual = (): UseQueryResult<StructureAndData<
 };
 
 // Hook para pagos pendientes
-export const useGetReportePagosPendientes = (): UseQueryResult<StructureAndData<ReportePagosPendientesType>, Error> => {
+export const useGetReportePagosPendientes = (
+  page: number,
+  limit: number
+): UseQueryResult<StructureAndData<ReportePagosPendientesType>, Error> => {
   return useQuery({
-    queryKey: ["getReportePagosPendientes"],
+    queryKey: ["getReportePagosPendientes", page, limit],
     queryFn: async () => {
       try {
-        const response = await client.get(`/reportes/pagos-pendientes`);
+        const response = await client.get(`/reportes/pagos-pendientes?page=${page}&limit=${limit}`);
         return response.data;
       } catch (error: any) {
         throw new Error(error?.response?.data?.message || "Error al obtener reporte de pagos pendientes");
@@ -192,6 +195,7 @@ export const useGetReportePagosPendientes = (): UseQueryResult<StructureAndData<
     staleTime: 1000,
   });
 };
+
 
 // Hook para retiro de estudiantes
 export const useGetReporteRetiroEstudiantes = (): UseQueryResult<StructureAndData<ReporteRetiroEstudiantesType>, Error> => {

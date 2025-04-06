@@ -78,12 +78,12 @@ export type ReporteBecaType = {
 };
 
 export type ReportePagosPendientesType = {
-  grado: string;
-  estudiantes_morosos: number;
-  total_estudiantes: number;
-  porcentaje_morosidad: string;
-  deuda_total: number;
-  promedio_deuda_moroso: number;
+  grado?: string;
+  estudiantes_morosos?: number;
+  total_estudiantes?: number;
+  porcentaje_morosidad?: string;
+  deuda_total?: number;
+  promedio_deuda_moroso?: number;
 };
 
 export type ReporteFinancieroAnualType = {

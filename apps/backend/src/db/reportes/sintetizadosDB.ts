@@ -12,7 +12,7 @@ class ReporteSintetizadoDB {
     this.db = new Database();
   }
 
-  public async getReportePagosPendientes(): Promise<ReportePagosPendientesType[]> {
+  public async getReportePagosPendientes(limit: number, offset: number): Promise<{ data: ReportePagosPendientesType[]; total: number }> {
     const client = await this.db.getClient();
     try {
       const query = `
@@ -24,22 +24,28 @@ class ReporteSintetizadoDB {
           deuda_total,
           promedio_deuda_moroso
         FROM "Pagos".reporte_morosidad_por_grado(2025)
+        ORDER BY grado
+        LIMIT $1 OFFSET $2;
       `;
-
-      const result = await client.query(query);
-
-      if (result.rows.length === 0) {
-        throw new Error("No se encontraron datos");
-      }
-
-      return result.rows as ReportePagosPendientesType[];
+  
+      const countQuery = `SELECT COUNT(*) FROM "Pagos".reporte_morosidad_por_grado(2025);`;
+  
+      const [dataResult, countResult] = await Promise.all([
+        client.query(query, [limit, offset]),
+        client.query(countQuery),
+      ]);
+  
+      return {
+        data: dataResult.rows,
+        total: parseInt(countResult.rows[0].count, 10),
+      };
     } catch (error) {
-      console.error("Error en getReportePagosPendientes:", error);
       throw error;
     } finally {
       client.release();
     }
   }
+  
 
   public async getReporteFinancieroAnual(): Promise<ReporteFinancieroAnualType[]> {
     const client = await this.db.getClient();
