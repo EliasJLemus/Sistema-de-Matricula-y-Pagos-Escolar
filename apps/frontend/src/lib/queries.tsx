@@ -73,7 +73,7 @@ export const useGetReporteMensualidad = (
 
         if (filters.estudiante) params.append("estudiante", filters.estudiante);
         if (filters.grado) params.append("grado", filters.grado);
-        if (filters.fechaInicio) params.append("fecha", filters.fechaInicio);
+        if (filters.fechaInicio) params.append("fechaInicio", filters.fechaInicio);
         if(filters.fechaFin) params.append("fechaFin", filters.fechaFin)
 
         const response = await axios.get<StructureAndData<ReporteMensualidadType>>(

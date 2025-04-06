@@ -75,9 +75,20 @@ export const getReporteMensualidad = async (
     const filters = {
       estudiante: String(estudiante).trim(),
       grado: String(grado).trim(),
-      fechaInicio: String(fechaInicio).trim(), 
-      fechaFin: String(fechaFin).trim()
+      fechaInicio: String(fechaInicio).trim(),
+      fechaFin: String(fechaFin).trim(),
     };
+
+    // Construir el título dinámico
+    let dynamicTitle = "Reporte de Mensualidad";
+
+    if (filters.fechaInicio && filters.fechaFin) {
+      dynamicTitle += ` del ${filters.fechaInicio} al ${filters.fechaFin}`;
+    } else if (filters.fechaInicio) {
+      dynamicTitle += ` desde ${filters.fechaInicio}`;
+    } else if (filters.fechaFin) {
+      dynamicTitle += ` hasta ${filters.fechaFin}`;
+    }
 
     const result = await reporteDetalladoDB.getReporteMensualidad(
       limit,
@@ -90,6 +101,7 @@ export const getReporteMensualidad = async (
     if (Array.isArray(result) && result.length > 0) {
       const responseData = {
         ...mensualidadStructure,
+        title: dynamicTitle,
         data: result,
         pagination: {
           limit,
@@ -107,6 +119,7 @@ export const getReporteMensualidad = async (
     } else {
       res.status(200).json({
         ...mensualidadStructure,
+        title: dynamicTitle,
         data: [],
         pagination: {
           limit,
@@ -125,6 +138,7 @@ export const getReporteMensualidad = async (
     });
   }
 };
+
 
 export const getReporteEstudiante = async ( 
   req: Request,
