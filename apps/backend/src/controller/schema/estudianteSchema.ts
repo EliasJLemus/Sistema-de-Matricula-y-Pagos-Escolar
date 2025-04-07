@@ -9,7 +9,7 @@ export const registrarEstudianteSchema = z.object({
   primer_apellido: z.string().min(1),
   segundo_apellido: z.string().optional().nullable(),
 
-  identidad: z.string().min(13).max(20),
+  identidad: z.string().min(5).max(30),
   nacionalidad: z.string().min(3),
   genero: z.enum(["Masculino", "Femenino"]),
 

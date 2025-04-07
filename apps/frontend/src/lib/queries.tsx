@@ -273,6 +273,7 @@ export const useRegistrarEstudiante = () => {
             "Content-Type": "application/json",
           },
         });
+        console.log("Respuesta del servidor:", response.data);
         return response.data;
       } catch (error: any) {
         throw new Error(error?.response?.data?.message || "Error al registrar estudiante");

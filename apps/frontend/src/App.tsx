@@ -183,7 +183,7 @@ function App() {
   <Route path="/pagos" element={<Pagos />} />
 
 {/* Rutas de matricula*/}
-<Route path="/pagos/matricula" element={<MatriculaPage />} />
+{/* <Route path="/pagos/matricula" element={<MatriculaPage />} />
                  <Route
                    path="/pagos/matricula/nuevo"
                    element={<NuevoMatricula />}
@@ -191,7 +191,7 @@ function App() {
                  <Route
                    path="/pagos/matricula/editar/:id"
                    element={<EditarMatricula />}
-                 />
+                 /> */}
  
   {/* Rutas de matricula*/}
   <Route path="/pagos/mensualidad" element={<MensualidadPage />} />

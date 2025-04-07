@@ -33,9 +33,12 @@ import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
 import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
 import { useQueryClient } from "@tanstack/react-query";
+import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
+import {getErrorMessage, validateInput} from "@/utils/validacionesEstudiantes"
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
 
 interface FormularioEstudianteProps {
   estudianteId?: string | number;
@@ -60,6 +63,10 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const theme = useTheme();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState<FeedbackStatus>("loading");
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalDescription, setModalDescription] = useState("");
 
   const formatearFechaParaInput = (fechaString: string | undefined): string => {
     if (!fechaString) return "";
@@ -116,30 +123,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       setIsLoading(true);
 
       setTimeout(() => {
-        // Datos de ejemplo para el modo edición
-        const mockStudent = {
-          id: Number(actualId),
-          numero_estudiante: 1001,
-          primer_nombre: "Abigail",
-          segundo_nombre: "",
-          primer_apellido: "Fajardo",
-          segundo_apellido: "",
-          nacionalidad: "Hondureña",
-          identidad: "0801199912345",
-          genero: "F" as "M" | "F",
-          fecha_nacimiento: "15-05-1999",
-          edad: 25,
-          direccion: "Col. Kennedy",
-          nombre_grado: "Sexto",
-          seccion: "A",
-          es_zurdo: true,
-          dif_educacion: false,
-          reaccion_alergica: true,
-          descripcion_alergica: "Mariscos",
-          fecha_admision: "02-01-2025",
-          estado: "Activo" as "Activo" | "Inactivo",
-          plan_pago: "Normal" as "Normal" | "Nivelado",
-        };
+      
         // Formatear las fechas para que funcionen correctamente con el input type="date"
         setFormData({
           primer_nombre: datos?.primer_nombre || "",
@@ -169,46 +153,17 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     }
   }, [isEditing, actualId, datos]);
 
-  const validateInput = (name: string, value: string): boolean => {
-    // Solo letras con acentos y diéresis para nombres y apellidos (sin espacios al inicio)
-    if (
-      [
-        "primer_nombre",
-        "segundo_nombre",
-        "primer_apellido",
-        "segundo_apellido",
-      ].includes(name)
-    ) {
-      if (value.startsWith(" ")) return false;
-      return /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s]*$/.test(value);
+  const handleCloseFeedback = () => {
+    if (modalStatus === "success") {
+      setModalOpen(false);
+      if (isModal && onClose) {
+        onClose();
+      }
+    } else {
+      setModalOpen(false);
     }
-
-    // Solo letras con acentos y diéresis para nacionalidad (sin espacios en ninguna parte)
-    if (name === "nacionalidad") {
-      return /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ]*$/.test(value);
-    }
-
-    // Solo números para identidad
-    if (name === "identidad") {
-      return /^\d*$/.test(value);
-    }
-
-    // Descripción sin caracteres especiales excepto puntuación básica y sin espacios al inicio
-    if (name === "descripcion_alergica") {
-      // Allow empty value for descripcion_alergica
-      if (value === "") return true;
-      if (value.startsWith(" ")) return false;
-      return /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s.,;:¿?¡!()]+$/.test(value);
-    }
-
-    // No espacios al inicio para dirección
-    if (name === "direccion") {
-      if (value.startsWith(" ")) return false;
-      return true;
-    }
-
-    return true;
   };
+  
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -216,12 +171,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
     // Validar la entrada según el campo
     if (validateInput(name, value)) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-
-      // Limpiar errores si existen
+      setFormData((prev) => ({ ...prev, [name]: value }));
       if (errors[name]) {
         setErrors((prev) => {
           const newErrors = { ...prev };
@@ -230,42 +180,12 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         });
       }
     } else {
-      // Si la entrada no es válida, establecer un mensaje de error específico
-      let errorMessage = "";
-
-      if (
-        [
-          "primer_nombre",
-          "segundo_nombre",
-          "primer_apellido",
-          "segundo_apellido",
-        ].includes(name)
-      ) {
-        if (value.startsWith(" ")) {
-          errorMessage = "No se permiten espacios al inicio";
-        } else {
-          errorMessage = "Solo se permiten letras, acentos y diéresis";
-        }
-      } else if (name === "nacionalidad") {
-        errorMessage =
-          "Solo se permiten letras, acentos y diéresis, sin espacios";
-      } else if (name === "identidad") {
-        errorMessage = "Solo se permiten números";
-      } else if (name === "descripcion_alergica") {
-        if (value.startsWith(" ")) {
-          errorMessage = "No se permiten espacios al inicio";
-        } else {
-          errorMessage = "Caracteres no permitidos";
-        }
-      } else if (name === "direccion" && value.startsWith(" ")) {
-        errorMessage = "No se permiten espacios al inicio";
-      }
-
       setErrors((prev) => ({
         ...prev,
-        [name]: errorMessage,
+        [name]: getErrorMessage(name, value),
       }));
     }
+    
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
@@ -345,6 +265,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       } else if (name === "direccion" && newValue.startsWith(" ")) {
         errorMessage = "No se permiten espacios al inicio";
       }
+      
 
       if (errorMessage) {
         setErrors((prev) => ({
@@ -537,7 +458,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const { mutate: registrarEstudiante } = useRegistrarEstudiante();
+  const { mutate: registrarEstudiante, data: dataEstudiante } = useRegistrarEstudiante();
   const { mutate: actualizarEstudiante } = useUpdateEstudiante();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -574,10 +495,23 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
         plan_pago: formData.plan_pago,
       };
 
+      interface RegisterType {
+        success: boolean;
+        message?: string;
+        data?: EstudiantesTablaType;
+      }
+      
+      setModalOpen(true);
+      setModalStatus("loading");
+      setModalTitle("Enviando...");
+      setModalDescription("Guardando datos del estudiante...");
       if (!isEditing) {
         registrarEstudiante(payload, {
-          onSuccess: () => {
-            setAlertMessage("🎉 Estudiante registrado exitosamente");
+          onSuccess: (response: RegisterType) => {
+            setModalStatus("success");
+            setModalTitle("Éxito");
+            setModalDescription(`${response.data}
+              `);
 
             queryClient.invalidateQueries({
               queryKey: ['getEstudiantes'],
@@ -586,12 +520,13 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
 
             setAlertOpen(true); 
             setIsSubmitting(false);
-            if (isModal && onClose) onClose();
-            else navigate("/estudiantes");
+             navigate("/estudiantes");
           },
           onError: () => {
-            setAlertMessage("❌ Ocurrió un error al registrar al estudiante");
-            setAlertOpen(true);
+            setModalStatus("error");
+            setModalTitle("Error");
+            setModalDescription("Hubo un problema al guardar el estudiante.");
+            setTimeout(() => setModalOpen(false), 2500);
             setIsSubmitting(false);
           },
         });
@@ -601,19 +536,24 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           data: payload,
         }, {
           onSuccess: () => {
+            
               queryClient.invalidateQueries({
               queryKey: ['getEstudiantes'],
               exact: false,
             });
-            setAlertMessage("🎉 Estudiante actualizado exitosamente");
-            setAlertOpen(true);
+            setModalStatus("success");
+            setModalTitle("Éxito");
+            setModalDescription(`Se actualizo el estudiante exitosamente.
+              `);
+            
             setIsSubmitting(false);
-            if (isModal && onClose) onClose();
-            else navigate("/estudiantes");
+             navigate("/estudiantes");
           },
           onError: () => {
-            setAlertMessage("❌ Ocurrió un error al actualizar al estudiante");
-            setAlertOpen(true);
+            setModalStatus("error");
+            setModalTitle("Error");
+            setModalDescription("Hubo un problema al guardar el estudiante.");
+            setTimeout(() => setModalOpen(false), 2500);
             setIsSubmitting(false);
           },
         })
@@ -2360,7 +2300,15 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
             </Button>
           </Box>
         </form>
+       
       </Paper>
+      <FeedbackModal
+        open={modalOpen}
+        status={modalStatus}
+        title={modalTitle}
+        description={modalDescription}
+        onClose={handleCloseFeedback}
+      />
     </Box>
   );
 };
