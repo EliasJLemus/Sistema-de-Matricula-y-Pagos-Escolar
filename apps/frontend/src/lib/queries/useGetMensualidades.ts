@@ -17,6 +17,7 @@ export interface MensualidadType {
   saldo_pendiente: number;
   recargo: number;
   estado: string;
+  comprobante: string;
 }
 
 // Función para obtener las mensualidades
@@ -58,7 +59,8 @@ const fetchMensualidades = async (
       saldo_pagado: 0,
       saldo_pendiente: 0,
       recargo: 0,
-      estado: 'Pagado'
+      estado: 'Pagado',
+      comprobante: 'Enviado'
     },
     {
       mensualidad_id: 2,
@@ -75,7 +77,8 @@ const fetchMensualidades = async (
       saldo_pagado: 3750,
       saldo_pendiente: 0,
       recargo: 0,
-      estado: 'Pagado'
+      estado: 'Pagado',
+      comprobante: 'Pendiente'
     },
     {
       mensualidad_id: 3,
@@ -92,7 +95,8 @@ const fetchMensualidades = async (
       saldo_pagado: 2500,
       saldo_pendiente: 0,
       recargo: 0,
-      estado: 'Pendiente'
+      estado: 'Pendiente',
+      comprobante: 'Pendiente'
     },
     {
       mensualidad_id: 4,
@@ -109,7 +113,8 @@ const fetchMensualidades = async (
       saldo_pagado: 3000,
       saldo_pendiente: 2000,
       recargo: 100,
-      estado: 'Parcial'
+      estado: 'Parcial',
+      comprobante: 'Enviado'
     },
     {
       mensualidad_id: 5,
@@ -126,7 +131,9 @@ const fetchMensualidades = async (
       saldo_pagado: 1500,
       saldo_pendiente: 3500,
       recargo: 200,
-      estado: 'Pendiente'
+      estado: 'Pendiente',
+      comprobante: 'Pendiente'
+
     }
   ];
 
