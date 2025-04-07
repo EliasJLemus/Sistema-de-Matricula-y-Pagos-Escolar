@@ -91,7 +91,7 @@ const MensualidadModal: React.FC<MensualidadModalProps> = ({
               m: 0,
             }}
           >
-            {isEditing ? "Editar Mensualidad" : "Registrar Mensualidad"}
+            {isEditing ? "Efectuar Pago de Mensualidad" : "Registrar Mensualidad"}
           </Typography>
         </Box>
 
