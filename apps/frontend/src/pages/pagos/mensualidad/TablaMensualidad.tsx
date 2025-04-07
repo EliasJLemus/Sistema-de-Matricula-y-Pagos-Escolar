@@ -170,9 +170,6 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
             {isZoomed ? "Vista Normal" : "🔍 Ver Tabla Completa"}
           </Button>
           
-          <Button variant="contained" onClick={onNewMensualidad} sx={{ bgcolor: "#538A3E", color: "white" }}>
-            📝 Nueva Mensualidad
-          </Button>
         </Box>
       </Paper>
 
@@ -184,7 +181,7 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
                 {[
                   "ID", "N° Estudiante", "Estudiante", "Grado", "Sección", 
                   "Fecha Inicio", "Fecha Vencimiento", "Monto Total", "Beneficio", 
-                  "Descuento", "Saldo Pagado", "Saldo Pendiente", "Recargo", "Estado", "Acciones"
+                  "Descuento", "Saldo Pagado", "Saldo Pendiente", "Recargo", "Estado","Comprobante", "Acciones"
                 ].map((h, i) => (
                   <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>{h}</TableHead>
                 ))}
@@ -221,6 +218,21 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
                       {item.estado}
                     </Badge>
                   </TableCell>
+
+                  <TableCell>
+                                    <Badge
+                                      variant="outline"
+                                      className={
+                                        item.comprobante === "Enviado"
+                                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-20 justify-center"
+                                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-20 justify-center"
+                                      }
+                                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
+                                    >
+                                      {item.comprobante}
+                                    </Badge>
+                                  </TableCell>
+
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button 

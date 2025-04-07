@@ -185,29 +185,41 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         ) : (
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Sección Información Básica */}
-              <Grid item xs={12}>
-                <Card sx={{ 
-                  p: 2, 
-                  borderRadius: 2, 
-                  border: '1px solid #e0e0e0',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
+              {/* Columna izquierda: Formulario principal */}
+              <Grid item xs={12} md={isEditing ? 8 : 12}>
+                <Card
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: "1px solid #e0e0e0",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" sx={{ 
-                      mb: 3, 
-                      color: '#1A1363',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1
-                    }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#1A1363">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mb: 3,
+                        color: "#1A1363",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#1A1363"
+                      >
+                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z" />
                       </svg>
                       Información de Matrícula
                     </Typography>
 
                     <Grid container spacing={2}>
+                      {/* Campos del formulario */}
                       <Grid item xs={12} md={6}>
                         <FormControl fullWidth error={!!errors.numero_estudiante}>
                           <InputLabel>Seleccionar Estudiante</InputLabel>
@@ -290,6 +302,80 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                   </CardContent>
                 </Card>
               </Grid>
+
+              {/* Columna derecha: Imagen del comprobante (solo en modo edición) */}
+              {isEditing && (
+                <Grid item xs={12} md={4}>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: "1px solid #e0e0e0",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ mb: 2, color: "#1A1363", fontFamily }}
+                    >
+                      Comprobante de Pago
+                    </Typography>
+
+                    {/* Espacio para cargar la imagen */}
+                    {formData.comprobante ? (
+                      <Box
+                        component="img"
+                        src={formData.comprobante}
+                        alt="Comprobante de Pago"
+                        sx={{
+                          maxWidth: "100%",
+                          maxHeight: 300,
+                          borderRadius: 2,
+                          border: "1px solid #e0e0e0",
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No se ha cargado ningún comprobante.
+                      </Typography>
+                    )}
+
+                    {/* Botón para cargar la imagen */}
+                    <Button
+                      variant="contained"
+                      component="label"
+                      sx={{
+                        mt: 2,
+                        fontFamily,
+                        bgcolor: "#1A1363",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "#0f0c4f" },
+                      }}
+                    >
+                      Cargar Comprobante
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                comprobante: reader.result as string,
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </Button>
+                  </Paper>
+                </Grid>
+              )}
 
               {/* Sección Detalles de Pago */}
               <Grid item xs={12}>
@@ -430,48 +516,85 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
 
               {/* Botones de Acción */}
               <Grid item xs={12} sx={{ mt: 3 }}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mt: 2,
+                  }}
+                >
+                  {/* Botón Cancelar */}
                   <Button
                     variant="outlined"
-                    onClick={onClose || (() => navigate('/matriculas'))}
+                    onClick={onClose || (() => navigate("/matriculas"))}
                     sx={{
                       fontFamily,
                       px: 4,
                       py: 1.5,
-                      borderRadius: '8px',
-                      borderColor: '#1A1363',
-                      color: '#1A1363',
-                      '&:hover': {
-                        bgcolor: '#1A136310',
-                        borderColor: '#1A1363'
-                      }
+                      borderRadius: "12px",
+                      borderColor: "#1A1363",
+                      color: "#1A1363",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      "&:hover": {
+                        bgcolor: "#1A136310",
+                        borderColor: "#1A1363",
+                      },
                     }}
                   >
                     Cancelar
                   </Button>
-                  
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isSubmitting}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      bgcolor: '#538A3E',
-                      '&:hover': { bgcolor: '#3e682e' },
-                      '&.Mui-disabled': { bgcolor: '#538A3E80' }
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <CircularProgress size={24} sx={{ color: 'white' }} />
-                    ) : isEditing ? (
-                      'Actualizar Matrícula'
-                    ) : (
-                      'Guardar Matrícula'
-                    )}
-                  </Button>
+
+                  {/* Botón Registrar y Generar Factura */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#F38223",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#d96d1c" },
+                      }}
+                      onClick={() => {
+                        console.log("Registrar y Generar Factura");
+                        // Aquí puedes agregar la lógica para registrar y generar factura
+                      }}
+                    >
+                      Registrar y Generar Factura
+                    </Button>
+                  )}
+
+                  {/* Botón Efectuar Pago */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#538A3E",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#3e682e" },
+                      }}
+                      onClick={() => {
+                        console.log("Efectuar Pago");
+                        // Aquí puedes agregar la lógica para efectuar el pago
+                      }}
+                    >
+                      Efectuar Pago
+                    </Button>
+                  )}
                 </Box>
               </Grid>
             </Grid>
