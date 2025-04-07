@@ -170,9 +170,6 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
             {isZoomed ? "Vista Normal" : "🔍 Ver Tabla Completa"}
           </Button>
           
-          <Button variant="contained" onClick={onNewMensualidad} sx={{ bgcolor: "#538A3E", color: "white" }}>
-            📝 Nueva Mensualidad
-          </Button>
         </Box>
       </Paper>
 
