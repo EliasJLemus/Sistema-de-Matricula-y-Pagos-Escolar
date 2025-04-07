@@ -75,7 +75,7 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col px-6 py-8 space-y-10">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 bg-[#FFFBE6] hover:bg-[#F5F0D1]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Estudiantes</CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
@@ -85,7 +85,7 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">+85 desde el año pasado</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 bg-[#FFFBE6] hover:bg-[#F5F0D1]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
             <DollarSign className="h-5 w-5 text-muted-foreground" />
@@ -95,7 +95,7 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">+12% desde el mes pasado</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 bg-[#FFFBE6] hover:bg-[#F5F0D1]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Pagos Pendientes</CardTitle>
             <LineChart className="h-5 w-5 text-muted-foreground" />
@@ -105,7 +105,7 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">-5% desde el mes pasado</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 bg-[#FFFBE6] hover:bg-[#F5F0D1]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Tasa de Completación</CardTitle>
             <PieChart className="h-5 w-5 text-muted-foreground" />
@@ -119,9 +119,24 @@ export default function Dashboard() {
 
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-8">
         <TabsList className="bg-gray-100 border border-gray-300 rounded-md p-1 w-fit">
-          <TabsTrigger value="overview" className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">Vista General</TabsTrigger>
-          <TabsTrigger value="financial" className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">Financiero</TabsTrigger>
-          <TabsTrigger value="students" className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">Estudiantes</TabsTrigger>
+          <TabsTrigger 
+            value="overview" 
+            className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-[#1A1363] data-[state=active]:text-white"
+          >
+            Vista General
+          </TabsTrigger>
+          <TabsTrigger 
+            value="financial" 
+            className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-[#1A1363] data-[state=active]:text-white"
+          >
+            Financiero
+          </TabsTrigger>
+          <TabsTrigger 
+            value="students" 
+            className="px-4 py-1 text-sm font-medium rounded-md data-[state=active]:bg-[#1A1363] data-[state=active]:text-white"
+          >
+            Estudiantes
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
