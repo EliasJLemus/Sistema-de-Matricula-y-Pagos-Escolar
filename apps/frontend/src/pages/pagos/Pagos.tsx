@@ -35,13 +35,13 @@ const Pagos = () => {
           </div>
  {/* Tarjeta Matrícula */}
  <div 
-            onClick={() => handleNavigation('/pagos')}
+            onClick={() => handleNavigation('/pagos/nivelados')}
             className="bg-white p-8 rounded-xl shadow-md border-t-8 border-[#1B1263] 
                      cursor-pointer hover:shadow-lg transition-all h-64 flex flex-col 
                      justify-center items-center hover:bg-gray-50">
             <div className="text-5xl mb-4">🏧</div>
-            <div className="text-2xl font-semibold text-gray-700">Pagos</div>
-            <p className="text-gray-500 mt-2">Gestionar Pagos</p>
+            <div className="text-2xl font-semibold text-gray-700">Plan Nivelado</div>
+            <p className="text-gray-500 mt-2">Gestionar Plan nivelado</p>
           </div>
 
         </div>
