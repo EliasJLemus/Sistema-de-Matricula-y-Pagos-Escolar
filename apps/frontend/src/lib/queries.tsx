@@ -287,10 +287,7 @@ export const useRegistrarEstudiante = () => {
 // Obtener lista de estudiantes
 // ======================
 export const useGetEstudiantes = (
-  page: number = 1,
-  limit: number = 5,
-  filters: FiltrosEstudiantes = {}
-): UseQueryResult<StructureAndDataResult<EstudiantesTablaType>, Error> => {
+page: number = 1, limit: number = 5,filters: FiltrosEstudiantes = {}): UseQueryResult<StructureAndDataResult<EstudiantesTablaType>, Error> => {
   return useQuery({
     queryKey: ["getEstudiantes", page, limit, JSON.stringify(filters)],
     queryFn: async () => {

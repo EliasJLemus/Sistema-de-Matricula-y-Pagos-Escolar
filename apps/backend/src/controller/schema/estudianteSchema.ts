@@ -16,7 +16,7 @@ export const registrarEstudianteSchema = z.object({
   fecha_nacimiento: z.coerce.date(),
   edad: z.number().int().min(0),
 
-  direccion: z.string().min(5),
+  direccion: z.string().optional(),
 
   nombre_grado: z.string().min(1),
   seccion: z.string().min(1).max(10),
