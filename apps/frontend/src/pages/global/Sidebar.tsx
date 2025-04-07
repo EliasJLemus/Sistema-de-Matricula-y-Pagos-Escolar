@@ -2,7 +2,8 @@ import {
   Box,
   ListItemButton,
   Typography,
-  Avatar
+  Avatar,
+  IconButton,
 } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -11,12 +12,14 @@ import PeopleIcon from "@mui/icons-material/People";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useState, useEffect } from "react";
 import { getUsuarioFromToken } from "@/helpers/auth";
 
 interface SidebarProps {
   isSidebarVisible: boolean;
   onLogout: () => void;
+  toggleSidebar: () => void;
 }
 
 const fontFamily =
@@ -27,7 +30,8 @@ const BUTTON_SIZE = 44;
 
 const Sidebar: React.FC<SidebarProps> = ({
   isSidebarVisible,
-  onLogout
+  onLogout,
+  toggleSidebar,
 }) => {
   const location = useLocation();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -79,6 +83,20 @@ const Sidebar: React.FC<SidebarProps> = ({
         paddingBottom: `${EXACT_PADDING}px`,
       }}
     >
+      {/* Botón de toggle */}
+      <Box sx={{ textAlign: "right", px: 1, mb: 2 }}>
+        <IconButton
+          onClick={toggleSidebar}
+          sx={{
+            color: "#fff",
+            transform: isSidebarVisible ? "rotate(0deg)" : "rotate(180deg)",
+            transition: "transform 0.3s ease",
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Box>
+
       <Box
         sx={{
           width: "100%",
@@ -109,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             color: "#FFFFFF",
             fontWeight: 600,
             textAlign: "center",
-            fontFamily: fontFamily,
+            fontFamily,
             letterSpacing: "-0.2px",
             mb: 3,
           }}
@@ -139,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               mb: 1.5,
               textTransform: "uppercase",
               letterSpacing: "0.3px",
-              fontFamily: fontFamily,
+              fontFamily,
             }}
           >
             Navegación
@@ -215,7 +233,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       sx={{
                         fontSize: "16px",
                         fontWeight: "inherit",
-                        fontFamily: fontFamily,
+                        fontFamily,
                       }}
                     >
                       {item.text}
@@ -228,7 +246,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Box>
       </Box>
 
-      {/* Botón de Salir */}
+      {/* Salir */}
       <Box
         sx={{
           width: "100%",
@@ -287,7 +305,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 sx={{
                   fontSize: "16px",
                   fontWeight: 600,
-                  fontFamily: fontFamily,
+                  fontFamily,
                 }}
               >
                 Salir

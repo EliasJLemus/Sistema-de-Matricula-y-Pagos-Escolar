@@ -13,7 +13,6 @@ import {
 } from "@shared/reportsType";
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
-
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -344,5 +343,64 @@ export const useUpdateEstudiante = () => {
     onError: (error: any) => {
       throw new Error(error?.response?.data?.message || "Error al actualizar estudiante");
     },
+  });
+};
+
+
+
+// ======================
+// PAGOOOOS: OBTENER MATRICULAS
+// ======================E
+
+export interface MatriculaPagoType {
+  uuid_matricula: string;
+  codigo_estudiante: string;
+  nombre_estudiante: string;
+  grado: string;
+  seccion: string;
+  tarifa_base: number;
+  beneficio_aplicado: string;
+  descuento_aplicado: string;
+  total_pagar: number;
+  estado: string;
+  comprobante: string;
+  fecha_matricula: string;
+}
+
+interface Pagination {
+  limit: number;
+  offset: number;
+  count: number;
+  total: number;
+}
+
+interface MatriculaPagosResponse {
+  data: MatriculaPagoType[];
+  pagination: Pagination;
+}
+
+type FiltrosMatriculaPago = {
+  page?: number;
+  limit?: number;
+};
+
+export const useGetMatriculaPagos = (
+  page: number,
+  limit: number,
+): UseQueryResult<MatriculaPagosResponse, Error> => {
+
+  return useQuery({
+    queryKey: ["getMatriculaPagos", page, limit],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      const response = await axios.get<MatriculaPagosResponse>(
+        `http://localhost:3000/pagos/obtener-matricula?page=${page}&limit=${limit}`
+      );
+      return response.data;
+    },
+    // staleTime: 1000 * 60 * 5, // 5 minutos
   });
 };

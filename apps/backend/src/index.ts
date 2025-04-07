@@ -4,6 +4,7 @@ import reportsRoute from "./routes/reports"
 import studentRoute from "@/routes/estudiantes"
 import cors from "cors";
 import {login} from "@/controller/autController"
+import pagosRoute from "@/routes/pagos"
 // import "../src/db/estudiantes/apoderadosDB"
 
 const app = express();
@@ -21,6 +22,8 @@ app.use(cors({
 app.use("/reportes", reportsRoute);
 
 app.use("/estudiantes", studentRoute)
+
+app.use("/pagos", pagosRoute)
 
 app.use("/login", login)
 

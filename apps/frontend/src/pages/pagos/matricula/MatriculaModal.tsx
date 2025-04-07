@@ -1,23 +1,68 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Dialog, DialogContent, IconButton, Box, useTheme, useMediaQuery, Typography } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
-import FormularioMatricula from "./FormularioMatricula"
+import type React from "react";
+import {
+  Dialog,
+  DialogContent,
+  IconButton,
+  Box,
+  useTheme,
+  useMediaQuery,
+  Typography,
+  Button,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { useEffect, useState } from "react";
+import FormularioMatricula from "./FormularioMatricula";
 
 const fontFamily =
-  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface MatriculaModalProps {
-  open: boolean
-  onClose: () => void
-  estudianteId?: string | number
-  isEditing?: boolean
+  open: boolean;
+  onClose: () => void;
+  estudianteId?: string | number;
+  isEditing?: boolean;
 }
 
-const MatriculaModal: React.FC<MatriculaModalProps> = ({ open, onClose, estudianteId, isEditing = false }) => {
-  const theme = useTheme()
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"))
+const MatriculaModal: React.FC<MatriculaModalProps> = ({
+  open,
+  onClose,
+  estudianteId,
+  isEditing = false,
+}) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [comprobanteUrl, setComprobanteUrl] = useState<string>("");
+  const [loadingComprobante, setLoadingComprobante] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (open && estudianteId) {
+      setLoadingComprobante(true);
+
+      // Simular fetch al backend
+      setTimeout(() => {
+        const simulatedUrl = ""; // o poné una URL real para testear
+        setComprobanteUrl(simulatedUrl);
+        setLoadingComprobante(false);
+      }, 1000);
+    }
+  }, [open, estudianteId]);
+
+  const handleAceptar = () => {
+    console.log("✅ Comprobante aceptado");
+  };
+
+  const handleRechazar = () => {
+    console.log("❌ Comprobante rechazado");
+  };
+
+  const handleEnviarFactura = () => {
+    console.log("📤 Factura enviada");
+  };
 
   return (
     <Dialog
@@ -50,8 +95,6 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({ open, onClose, estudian
           alignItems: "center",
           borderTopLeftRadius: "16px",
           borderTopRightRadius: "16px",
-          borderBottomLeftRadius: "0px",
-          borderBottomRightRadius: "0px",
           boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
           position: "relative",
         }}
@@ -90,7 +133,7 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({ open, onClose, estudian
               m: 0,
             }}
           >
-            {isEditing ? "Editar Matricula" : "Registrar Matricula"}
+            {isEditing ? "Editar Matrícula" : "Registrar Matrícula"}
           </Typography>
         </Box>
 
@@ -110,11 +153,137 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({ open, onClose, estudian
         </IconButton>
       </Box>
 
-      <DialogContent sx={{ p: 0 }}>
-        <FormularioMatricula estudianteId={estudianteId} isEditing={isEditing} isModal={true} onClose={onClose} />
+      <DialogContent sx={{ p: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: fullScreen ? "column" : "row",
+            gap: 3,
+          }}
+        >
+          {/* Formulario */}
+          <Box sx={{ flex: 1 }}>
+            <FormularioMatricula
+              estudianteId={estudianteId}
+              isEditing={isEditing}
+              isModal={true}
+              onClose={onClose}
+            />
+          </Box>
+
+          {/* Comprobante */}
+          <Paper
+            elevation={3}
+            sx={{
+              flex: 1,
+              p: 3,
+              borderRadius: "16px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              bgcolor: "#fff",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.06)",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily,
+                fontWeight: 700,
+                color: "#1A1363",
+                mb: 2,
+              }}
+            >
+              Comprobante Enviado
+            </Typography>
+
+            {loadingComprobante ? (
+              <CircularProgress sx={{ color: "#538A3E", mb: 2 }} />
+            ) : comprobanteUrl ? (
+              <Box
+                component="img"
+                src={comprobanteUrl}
+                alt="Comprobante"
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: 300,
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                  mb: 3,
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
+                }}
+              />
+            ) : (
+              <Paper
+                elevation={0}
+                sx={{
+                  px: 3,
+                  py: 2,
+                  mb: 3,
+                  bgcolor: "#FFF3CD",
+                  color: "#856404",
+                  border: "1px solid #FFECB5",
+                  borderRadius: "12px",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                🛈 Comprobante no enviado
+              </Paper>
+            )}
+
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
+              <Button
+                variant="contained"
+                onClick={handleAceptar}
+                sx={{
+                  bgcolor: "#4CAF50",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  "&:hover": { bgcolor: "#3e8e41" },
+                }}
+              >
+                ACEPTAR
+              </Button>
+
+              <Button
+                variant="outlined"
+                onClick={handleRechazar}
+                sx={{
+                  borderColor: "#e53935",
+                  color: "#e53935",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    bgcolor: "#ffe6e6",
+                    borderColor: "#e53935",
+                  },
+                }}
+              >
+                RECHAZAR
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={handleEnviarFactura}
+                sx={{
+                  bgcolor: "#BDBDBD",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  "&:hover": { bgcolor: "#9e9e9e" },
+                }}
+              >
+                ENVIAR FACTURA
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 export default MatriculaModal;

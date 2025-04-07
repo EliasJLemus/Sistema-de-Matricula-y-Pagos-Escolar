@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -25,42 +25,57 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import useGetMatriculas, { MatriculaType } from "@/lib/queries/useGetMatriculas";
+import { useGetMatriculaPagos } from "@/lib/queries";
 
 const fontFamily = "'Nunito', sans-serif";
 
 interface TablaMatriculaProps {
   onNewMatricula: () => void;
-  onEditMatricula: (id: number) => void;
+  onEditMatricula: (id: string) => void;
 }
+
+const getVisiblePages = (current: number, total: number) => {
+  const visible = 5;
+  let start = Math.max(current - Math.floor(visible / 2), 1);
+  let end = start + visible - 1;
+
+  if (end > total) {
+    end = total;
+    start = Math.max(end - visible + 1, 1);
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+};
 
 export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
   onNewMatricula,
   onEditMatricula,
 }) => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const limit = 10;
-
+  console.log(page)
   const [filters, setFilters] = useState({
     nombreEstudiante: "",
     grado: "",
     estado: "",
   });
-  const [isZoomed, setIsZoomed] = useState<boolean>(false);
+
   const debouncedFilters = useDebounce(filters, 400);
 
-  useEffect(() => {
-    const currentContainer = document.getElementById("tabla-matriculas-container");
-    if (currentContainer) currentContainer.style.zoom = isZoomed ? "60%" : "100%";
-    return () => { if (currentContainer) currentContainer.style.zoom = "100%"; };
-  }, [isZoomed]);
+  const { data, isLoading, isFetching } = useGetMatriculaPagos(
+    page,
+    limit,
+      );
 
-  const handleFreshReload = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["getMatriculas", page, limit, JSON.stringify(filters)],
-    });
+  const tableData = data?.data ?? [];
+  const total = data?.pagination?.total ?? 0;
+  const pageCount = Math.ceil((data?.pagination?.total ?? 1) / limit);
+
+  const handleEdit = (id: string) => onEditMatricula(id);
+  const handleDelete = (id: string, nombre: string) => {
+    if (window.confirm(`¿Está seguro que desea eliminar la matrícula de ${nombre}?`)) {
+      console.log("Eliminar matrícula:", id);
+    }
   };
 
   const handleInputChange = (key: string, value: string) => {
@@ -73,35 +88,23 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
     setPage(1);
   };
 
-  const { data, isLoading, isFetching, error } = useGetMatriculas(page, limit, debouncedFilters);
-
-  const tableData = data?.data ?? [];
-  const total = data?.pagination?.total ?? 0;
-  const pageCount = Math.ceil(total / limit);
-
-  const handleEdit = (id: number) => onEditMatricula(id);
-  const handleDelete = (id: number, nombre: string) => {
-    if (window.confirm(`¿Está seguro que desea eliminar la matrícula de ${nombre}?`)) {
-      console.log("Eliminar matrícula:", id);
-      handleFreshReload();
-    }
-  };
-
   return (
     <Box id="tabla-matriculas-container" sx={{ position: "relative" }}>
       {(isLoading || isFetching) && (
-        <Box sx={{ position: "absolute", top: 0, right: 0, p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <CircularProgress size={20} sx={{ color: "#538A3E" }} />
           <Typography variant="body2" color="text.secondary" sx={{ fontFamily }}>
             {isLoading ? "Cargando..." : "Actualizando..."}
-          </Typography>
-        </Box>
-      )}
-
-      {error && (
-        <Box sx={{ p: 2, color: "error.main", mb: 2 }}>
-          <Typography sx={{ fontFamily }}>
-            Error: {(error as Error).message}
           </Typography>
         </Box>
       )}
@@ -112,7 +115,7 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
         </Typography>
       </Box>
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: "12px", boxShadow: "0 8px 15px rgba(0,0,0,0.15)" }}>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}>
           <TextField
             label="Nombre del estudiante"
@@ -131,8 +134,10 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
               onChange={(e) => handleInputChange("grado", e.target.value)}
             >
               <MenuItem value="">Todos</MenuItem>
-              {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 
-                'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'].map((grado) => (
+              {[
+                "Kinder", "Primero", "Segundo", "Tercero", "Cuarto",
+                "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno", "Décimo"
+              ].map((grado) => (
                 <MenuItem key={grado} value={grado}>{grado}</MenuItem>
               ))}
             </Select>
@@ -151,18 +156,12 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
             </Select>
           </FormControl>
 
-
-
           <Button variant="contained" onClick={clearFilters} sx={{ bgcolor: "#F38223", color: "white" }}>
-          ✖️ Quitar filtros
+            ✖️ Quitar filtros
           </Button>
-          
-          <Button variant="contained" onClick={() => setIsZoomed(!isZoomed)} sx={{ bgcolor: "#1A1363", color: "white" }}>
-            {isZoomed ? "Vista Normal" : "🔍 Ver Tabla Completa"}
-          </Button>
-          
+
           <Button variant="contained" onClick={onNewMatricula} sx={{ bgcolor: "#538A3E", color: "white" }}>
-           📝 Nueva Matrícula
+            📝 Nueva Matrícula
           </Button>
         </Box>
       </Paper>
@@ -173,68 +172,55 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
             <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
                 {[
-                  "ID", "N° Estudiante", "Estudiante", "Grado", "Sección", "Tarifa", 
-                  "Beneficio", "Descuento", "Total", "Estado", "Comprobante", "Fecha", "Acciones"
+                  "Código", "Estudiante", "Grado", "Sección", "Tarifa",
+                  "Beneficio", "Descuento", "Total", "Estado", "Comprobante",
+                  "Fecha", "Acciones"
                 ].map((h, i) => (
-                  <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>{h}</TableHead>
+                  <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>
+                    {h}
+                  </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
-                <TableRow key={item.matricula_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer`}>
-                  <TableCell>{item.matricula_id}</TableCell>
-                  <TableCell>{item.numero_estudiante}</TableCell>
+                <TableRow
+                  key={`${item.uuid_matricula}-${index}`}
+                  className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8]`}
+                >
+                  <TableCell>{item.codigo_estudiante}</TableCell>
                   <TableCell>{item.nombre_estudiante}</TableCell>
                   <TableCell>{item.grado}</TableCell>
                   <TableCell>{item.seccion}</TableCell>
-                  <TableCell>L. {item.tarifa_base.toLocaleString()}</TableCell>
+                  <TableCell>L. {parseFloat(item.tarifa_base.toString()).toFixed(2)}</TableCell>
                   <TableCell>{item.beneficio_aplicado}</TableCell>
                   <TableCell>{item.descuento_aplicado}</TableCell>
+                  <TableCell><strong>L. {parseFloat(item.total_pagar.toString()).toFixed(2)}</strong></TableCell>
                   <TableCell>
-                    <strong>L. {item.total_pagar.toLocaleString()}</strong>
+                    <Badge
+                      variant="outline"
+                      className={item.estado === "Pagado" ? "bg-[#538A3E] text-white" : "bg-[#F38223] text-white"}
+                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
+                    >
+                      {item.estado}
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                                      <Badge
-                                        variant="outline"
-                                        className={
-                                          item.estado === "Pagado"
-                                            ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-20 justify-center"
-                                            : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-20 justify-center"
-                                        }
-                                        style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
-                                      >
-                                        {item.estado}
-                                      </Badge>
-                                    </TableCell>
-
-                <TableCell>
-                                    <Badge
-                                      variant="outline"
-                                      className={
-                                        item.comprobante === "Enviado"
-                                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-20 justify-center"
-                                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-20 justify-center"
-                                      }
-                                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
-                                    >
-                                      {item.comprobante}
-                                    </Badge>
-                                  </TableCell>
-
+                    <Badge
+                      variant="outline"
+                      className={item.comprobante === "Aceptado" ? "bg-[#538A3E] text-white" : "bg-[#F38223] text-white"}
+                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
+                    >
+                      {item.comprobante}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{item.fecha_matricula}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
-                      <button 
-                        onClick={() => handleEdit(item.matricula_id)} 
-                        className="text-[#538A3E] hover:text-[#3e682e]"
-                      >
+                      <button onClick={() => handleEdit(item.uuid_matricula)} className="text-[#538A3E] hover:text-[#3e682e]">
                         <EditIcon fontSize="small" />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(item.matricula_id, item.nombre_estudiante)} 
-                        className="text-red-500 hover:text-red-700"
-                      >
+                      <button onClick={() => handleDelete(item.uuid_matricula, item.nombre_estudiante)} className="text-red-500 hover:text-red-700">
                         <DeleteIcon fontSize="small" />
                       </button>
                     </div>
@@ -246,41 +232,52 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
         </div>
       </div>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, p: 2, bgcolor: "white", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
-        <Typography variant="body2" sx={{ fontFamily }}>Mostrando {tableData.length} de {total} registros</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mt: 2,
+          p: 2,
+          bgcolor: "white",
+          borderRadius: "12px",
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+        }}
+      >
+        <Typography variant="body2" sx={{ fontFamily }}>
+          Mostrando {tableData.length} de {total} registros
+        </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button 
-            variant="contained" 
-            size="small" 
-            onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page <= 1}
-            sx={{ bgcolor: "#F38223", "&:disabled": { bgcolor: "#F3822370" } }}
+            sx={{ bgcolor: "#F38223" }}
           >
             Anterior
           </Button>
-          {[...Array(Math.min(5, pageCount))].map((_, i) => {
-            const pageNum = page <= 3 ? i + 1 : page - 2 + i;
-            return pageNum <= pageCount ? (
-              <Button 
-                key={i}
-                variant={pageNum === page ? "contained" : "outlined"}
-                onClick={() => setPage(pageNum)}
-                sx={{ 
-                  bgcolor: pageNum === page ? "#538A3E" : "inherit",
-                  color: pageNum === page ? "white" : "inherit",
-                  "&:hover": { bgcolor: pageNum === page ? "#3e682e" : "#f5f5f5" }
-                }}
-              >
-                {pageNum}
-              </Button>
-            ) : null;
-          })}
-          <Button 
-            variant="contained" 
-            size="small" 
-            onClick={() => setPage((p) => Math.min(p + 1, pageCount))} 
+
+          {getVisiblePages(page, pageCount).map((pageNum) => (
+            <Button
+              key={pageNum}
+              variant={pageNum === page ? "contained" : "outlined"}
+              onClick={() => setPage(pageNum)}
+              sx={{
+                bgcolor: pageNum === page ? "#538A3E" : "inherit",
+                color: pageNum === page ? "white" : "inherit",
+                "&:hover": { bgcolor: pageNum === page ? "#3e682e" : "#f5f5f5" },
+              }}
+            >
+              {pageNum}
+            </Button>
+          ))}
+
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setPage((p) => Math.min(p + 1, pageCount))}
             disabled={page >= pageCount}
-            sx={{ bgcolor: "#F38223", "&:disabled": { bgcolor: "#F3822370" } }}
+            sx={{ bgcolor: "#F38223" }}
           >
             Siguiente
           </Button>
@@ -288,7 +285,7 @@ export const TablaMatricula: React.FC<TablaMatriculaProps> = ({
       </Box>
 
       {!isLoading && !isFetching && tableData.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: "center", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
+        <Paper sx={{ p: 4, textAlign: "center", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0,0,0,0.15)" }}>
           <Typography color="text.secondary" sx={{ fontFamily }}>
             No se encontraron matrículas para los filtros actuales.
           </Typography>
