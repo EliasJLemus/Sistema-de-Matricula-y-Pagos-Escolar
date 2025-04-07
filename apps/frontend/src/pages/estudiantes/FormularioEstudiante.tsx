@@ -508,11 +508,17 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
       if (!isEditing) {
         registrarEstudiante(payload, {
           onSuccess: (response: RegisterType) => {
-            setModalStatus("success");
-            setModalTitle("Éxito");
-            setModalDescription(`${response.data}
-              `);
 
+            if(response.success){
+              setModalStatus("success");
+              setModalTitle("Éxito");
+              setModalDescription(`${response.data}
+                `);
+            }else{
+              setModalStatus("error");
+              setModalTitle("Error");
+              setModalDescription(response.message || "Hubo un problema al guardar el estudiante.");
+            }
             queryClient.invalidateQueries({
               queryKey: ['getEstudiantes'],
               exact: false,

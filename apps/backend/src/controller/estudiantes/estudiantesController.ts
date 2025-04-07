@@ -55,6 +55,14 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
       parsed.fecha_admision,
       parsed.plan_pago,
     );
+    
+    if(result.codigo_estudiante === null){
+      res.status(201).json({
+        success: false,
+        message: result.mensaje,
+      });
+      return;
+    }
 
     res.status(201).json({
       success: true,
