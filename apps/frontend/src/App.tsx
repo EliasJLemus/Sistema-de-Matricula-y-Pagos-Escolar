@@ -23,6 +23,14 @@ import ApoderadoPage from "./pages/apoderados/ApoderadosPage";
 import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
 import SubirComprobante from "./components/Comprobante/subirComprobante";
+import Pagos from "./pages/pagos/Pagos";
+ import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
+ import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
+ import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
+ 
+ import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
+ import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
+ import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
 import Login from "./pages/login/login";
 
 function App() {
@@ -172,6 +180,30 @@ function App() {
                     isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />
                   }
                 />
+  <Route path="/pagos" element={<Pagos />} />
+
+{/* Rutas de matricula*/}
+<Route path="/pagos/matricula" element={<MatriculaPage />} />
+                 <Route
+                   path="/pagos/matricula/nuevo"
+                   element={<NuevoMatricula />}
+                 />
+                 <Route
+                   path="/pagos/matricula/editar/:id"
+                   element={<EditarMatricula />}
+                 />
+ 
+  {/* Rutas de matricula*/}
+  <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
+                 <Route
+                   path="/pagos/mensualidad/nuevo"
+                   element={<NuevoMensualidad />}
+                 />
+                 <Route
+                   path="/pagos/mensualidad/editar/:id"
+                   element={<EditarMensualidad />}
+                 />
+
                 <Route
                   path="/subir-comprobante"
                   element={
@@ -187,4 +219,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;
