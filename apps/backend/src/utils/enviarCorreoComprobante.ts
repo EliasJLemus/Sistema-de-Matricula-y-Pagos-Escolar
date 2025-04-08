@@ -18,6 +18,7 @@ type DatosCorreoMatricula = {
 
 export const enviarCorreoComprobante = async (datos: DatosCorreoMatricula) => {
   try {
+    console.log("📧 Enviando correo de comprobante...");
     const pdfBuffer = await generarPDF(datos);
 
     const transporter = nodemailer.createTransport({

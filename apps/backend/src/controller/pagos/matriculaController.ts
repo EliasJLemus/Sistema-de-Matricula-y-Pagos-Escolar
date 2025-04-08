@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { getPaginationParams } from "@/controller/utils/pagination";
 import { PagosMatriculasDB } from "@/db/pagos/matricula";
 import {MatriculaType} from "@shared/pagos"
+import { enviarCorreoComprobante } from "@/utils/enviarCorreoComprobante";
+
 
 const pagosMatriculasDB = new PagosMatriculasDB();
 
@@ -117,6 +119,12 @@ export const crearMatriculaController = async (req: Request, res: Response): Pro
     
     console.log("Resultado de la creación de matrícula:", result);
 
+    const datosCorreo = await pagosMatriculasDB.datosCorreoMatricula(uuid_estudiante, result.codigo_matricula);
+
+    if (datosCorreo) {
+      await enviarCorreoComprobante(datosCorreo);
+    }
+    
     res.status(201).json({
       success: true,
       data: `${result.mensaje} el codugo de matrícula es ${result.codigo_matricula}`,

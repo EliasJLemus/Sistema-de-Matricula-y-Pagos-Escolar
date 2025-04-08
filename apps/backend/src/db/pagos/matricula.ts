@@ -139,7 +139,7 @@ export class PagosMatriculasDB {
   }
   
 
-  public async datosCorreoMatricula(uuidEstudiante: string, fechaMatricula: string) {
+  public async datosCorreoMatricula(uuidEstudiante: string, codigo_matricula: string) {
     const client = await this.db.getClient();
     try {
       const query = `
@@ -168,11 +168,11 @@ export class PagosMatriculasDB {
         JOIN "Pagos"."ComprobantePago" cp ON cp.uuid = m.uuid_comprobante
         WHERE cp.estado = 'Pendiente'
           AND m.uuid_estudiante = $1
-          AND m.fecha_matricula = $2
+          AND m.codigo_matricula = $2
         LIMIT 1;
       `;
   
-      const result = await client.query(query, [uuidEstudiante, fechaMatricula]);
+      const result = await client.query(query, [uuidEstudiante, codigo_matricula]);
       return result.rows[0] || null;
     } catch (error) {
       console.error("❌ Error al obtener datos para correo de matrícula:", error);
