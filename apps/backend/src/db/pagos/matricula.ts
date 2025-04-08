@@ -112,25 +112,24 @@ export class PagosMatriculasDB {
     p_uuid: string,
     v_uuid_plan_matricula: string,
     p_fecha_admision: string // formato 'YYYY-MM-DD'
-  ): Promise<void> {
+  ): Promise<{
+    codigo_matricula?: string;
+    mensaje: string;
+  }> {
     const client = await this.db.getClient();
   
     try {
-      await client.query(
+      const response =await client.query(
         `
-        INSERT INTO "Pagos"."Matricula" (
-          uuid,
-          uuid_estudiante,
-          uuid_plan_matricula,
-          fecha_matricula,
-          year_academico,
-          estado
-        ) VALUES (
-          gen_random_uuid(), $1, $2, $3, EXTRACT(YEAR FROM $3)::INT, 'Pendiente'
-        )
-      `,
-        [p_uuid, v_uuid_plan_matricula, p_fecha_admision]
+      SELECT * FROM "Pagos".registrar_matricula_estudiante(
+        $1,
+        $2
       );
+      `,
+        [p_uuid, p_fecha_admision]
+      );
+
+      return response.rows[0];
   
       client.release();
     } catch (error) {

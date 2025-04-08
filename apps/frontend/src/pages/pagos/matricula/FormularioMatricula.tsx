@@ -1,3 +1,4 @@
+// FormularioMatricula.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,14 +17,23 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { useGetMatriculaPagos, useCrearMatricula } from "@/lib/queries";
 import type { MatriculaType } from "@shared/pagos";
+import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
 
 const fontFamily = "'Nunito', sans-serif";
 
-const FormularioMatricula = () => {
-  const navigate = useNavigate();
+interface FormularioMatriculaProps {
+  matriculaId?: string | number;
+  isEditing?: boolean;
+  onClose: () => void;
+}
+
+const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
+  matriculaId,
+  isEditing = false,
+  onClose,
+}) => {
   const [gradoSeleccionado, setGradoSeleccionado] = useState("");
   const [uuidEstudianteSeleccionado, setUuidEstudianteSeleccionado] = useState("");
   const [formData, setFormData] = useState<Partial<MatriculaType>>({});
@@ -31,10 +41,16 @@ const FormularioMatricula = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState<FeedbackStatus>("loading");
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalDescription, setModalDescription] = useState("");
+
   const { data, isLoading } = useGetMatriculaPagos({
     page: 1,
     limit: 100,
     grado: gradoSeleccionado,
+    year: new Date().getFullYear(),
   });
 
   const { mutate: crearMatricula } = useCrearMatricula();
@@ -44,7 +60,18 @@ const FormularioMatricula = () => {
   );
 
   useEffect(() => {
-    if (uuidEstudianteSeleccionado) {
+    if (isEditing && matriculaId && data?.data?.length) {
+      const matricula = data.data.find((m) => m.uuid_matricula === matriculaId);
+      if (matricula) {
+        setGradoSeleccionado(matricula.grado || "");
+        setUuidEstudianteSeleccionado(matricula.uuid_estudiante || "");
+        setFormData({ ...matricula });
+      }
+    }
+  }, [isEditing, matriculaId, data?.data]);
+
+  useEffect(() => {
+    if (!isEditing && uuidEstudianteSeleccionado) {
       const estudiante = estudiantesFiltrados?.find(
         (est) => est.uuid_estudiante === uuidEstudianteSeleccionado
       );
@@ -77,32 +104,48 @@ const FormularioMatricula = () => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    if (modalStatus === "success") {
+      onClose();
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.uuid_estudiante ||
-      !formData.uuid_matricula ||
-      !formData.fecha_matricula
-    ) {
-      setAlertMessage("Faltan campos obligatorios: estudiante, plan o fecha.");
+    if (!formData.uuid_estudiante || !formData.fecha_matricula) {
+      setAlertMessage("Faltan campos obligatorios: estudiante o fecha.");
       setAlertOpen(true);
       return;
     }
 
+    setModalOpen(true);
+    setModalStatus("loading");
+    setModalTitle("Registrando...");
+    setModalDescription("Estamos registrando la matrícula...");
+
     crearMatricula(
       {
         uuid_estudiante: formData.uuid_estudiante,
-        uuid_matricula: formData.uuid_matricula,
         fecha_matricula: formData.fecha_matricula,
       },
       {
-        onSuccess: () => {
-          navigate("/matriculas");
+        onSuccess: (res: any) => {
+          if (res.success) {
+            setModalStatus("success");
+            setModalTitle("¡Matrícula registrada!");
+            setModalDescription(res.data);
+          } else {
+            setModalStatus("error");
+            setModalTitle("Error");
+            setModalDescription(res.message);
+          }
         },
         onError: (error: any) => {
-          setAlertMessage(error.message);
-          setAlertOpen(true);
+          setModalStatus("error");
+          setModalTitle("Error");
+          setModalDescription(error.message || "Error al registrar la matrícula.");
         },
       }
     );
@@ -136,7 +179,7 @@ const FormularioMatricula = () => {
             textAlign: "center",
           }}
         >
-          Registro de Matrícula
+          {isEditing ? "Edición de Matrícula" : "Registro de Matrícula"}
         </Typography>
 
         {isLoading ? (
@@ -146,7 +189,6 @@ const FormularioMatricula = () => {
         ) : (
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Grado */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!errors.grado}>
                   <InputLabel>Grado</InputLabel>
@@ -155,20 +197,10 @@ const FormularioMatricula = () => {
                     value={gradoSeleccionado}
                     onChange={handleChange}
                     label="Grado"
+                    disabled={isEditing}
                     sx={{ fontFamily }}
                   >
-                    {[
-                      "Kinder",
-                      "Primero",
-                      "Segundo",
-                      "Tercero",
-                      "Cuarto",
-                      "Quinto",
-                      "Sexto",
-                      "Séptimo",
-                      "Octavo",
-                      "Noveno",
-                    ].map((grado) => (
+                    {["Kinder", "Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno"].map((grado) => (
                       <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
                         {grado}
                       </MenuItem>
@@ -177,7 +209,6 @@ const FormularioMatricula = () => {
                 </FormControl>
               </Grid>
 
-              {/* Estudiante */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!errors.uuid_estudiante}>
                   <InputLabel>Estudiante</InputLabel>
@@ -186,14 +217,11 @@ const FormularioMatricula = () => {
                     value={uuidEstudianteSeleccionado}
                     onChange={handleChange}
                     label="Estudiante"
+                    disabled={isEditing}
                     sx={{ fontFamily }}
                   >
                     {estudiantesFiltrados?.map((est) => (
-                      <MenuItem
-                        key={est.uuid_estudiante}
-                        value={est.uuid_estudiante}
-                        sx={{ fontFamily }}
-                      >
+                      <MenuItem key={est.uuid_estudiante} value={est.uuid_estudiante} sx={{ fontFamily }}>
                         {est.nombre_estudiante}
                       </MenuItem>
                     ))}
@@ -201,7 +229,6 @@ const FormularioMatricula = () => {
                 </FormControl>
               </Grid>
 
-              {/* Campos autocompletados */}
               {[
                 { label: "Código Estudiante", value: formData.codigo_estudiante },
                 { label: "Nombre Estudiante", value: formData.nombre_estudiante },
@@ -213,22 +240,8 @@ const FormularioMatricula = () => {
                 { label: "Estado", value: formData.estado },
                 { label: "Comprobante", value: formData.comprobante },
                 { label: "Año Académico", value: formData.year_academico },
-                {
-                  label: "Encargado Principal",
-                  value: formData.nombre_encargado_principal?.trim() || "No asignado",
-                },
-                {
-                  label: "Código Encargado Principal",
-                  value: formData.codigo_encargado_principal || "No disponible",
-                },
-                {
-                  label: "Encargado Secundario",
-                  value: formData.nombre_encargado_secundario?.trim() || "No asignado",
-                },
-                {
-                  label: "Código Encargado Secundario",
-                  value: formData.codigo_encargado_secundario || "No disponible",
-                },
+                { label: "Encargado Principal", value: formData.nombre_encargado_principal?.trim() || "No asignado" },
+                { label: "Código Encargado Principal", value: formData.codigo_encargado_principal || "No disponible" },
               ].map(({ label, value }) => (
                 <Grid item xs={12} md={6} key={label}>
                   <TextField
@@ -248,7 +261,6 @@ const FormularioMatricula = () => {
                 </Grid>
               ))}
 
-              {/* Fecha matrícula */}
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -262,12 +274,11 @@ const FormularioMatricula = () => {
                 />
               </Grid>
 
-              {/* Botones */}
               <Grid item xs={12}>
                 <Box sx={{ display: "flex", justifyContent: "center", gap: 3, mt: 2 }}>
                   <Button
                     variant="outlined"
-                    onClick={() => navigate("/matriculas")}
+                    onClick={onClose}
                     sx={{
                       fontFamily,
                       borderColor: "#1A1363",
@@ -296,7 +307,7 @@ const FormularioMatricula = () => {
                       },
                     }}
                   >
-                    Registrar Matrícula
+                    {isEditing ? "Actualizar Matrícula" : "Registrar Matrícula"}
                   </Button>
                 </Box>
               </Grid>
@@ -304,6 +315,14 @@ const FormularioMatricula = () => {
           </form>
         )}
       </Paper>
+
+      <FeedbackModal
+        open={modalOpen}
+        status={modalStatus}
+        title={modalTitle}
+        description={modalDescription}
+        onClose={handleCloseModal}
+      />
     </Box>
   );
 };

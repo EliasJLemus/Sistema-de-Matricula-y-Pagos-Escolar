@@ -10,7 +10,7 @@ class Database {
             port: parseInt(Keys.Database.Port),
             user: Keys.Database.Username,
             password: Keys.Database.Password,
-            database: Keys.Database.Database,
+            database: "school_system_dev",
             ssl: {
               rejectUnauthorized: false
             },

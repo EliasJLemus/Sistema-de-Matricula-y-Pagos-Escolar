@@ -12,8 +12,9 @@ export const getMatriculasController = async (req: Request, res: Response): Prom
     const year = req.query.year ? parseInt(req.query.year as string, 10) : undefined;
     const grado = req.query.grado as string | undefined;
     const uuid_estudiante = req.query.uuid_estudiante as string | undefined;
-
+    
     if (year && isNaN(year)) {
+      console.log("El año proporcionado no es un número válido:", year);
       res.status(400).json({
         success: false,
         message: "El año proporcionado no es válido.",
@@ -88,9 +89,14 @@ export const getMatriculaByEstudianteAndYearController = async (
 
 export const crearMatriculaController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { uuid_estudiante, uuid_plan_matricula, fecha_matricula } = req.body;
+    const { uuid_estudiante, uuid_matricula, fecha_matricula } = req.body;
 
-    if (!uuid_estudiante || !uuid_plan_matricula || !fecha_matricula) {
+    if (!uuid_estudiante || !fecha_matricula) {
+      console.log("Faltan campos obligatorios:", {
+        uuid_estudiante,
+        uuid_matricula,
+        fecha_matricula,
+      });
       res.status(400).json({
         success: false,
         message: "Faltan campos obligatorios: uuid_estudiante, uuid_plan_matricula, fecha_matricula",
@@ -98,12 +104,24 @@ export const crearMatriculaController = async (req: Request, res: Response): Pro
       return;
     }
 
-    await pagosMatriculasDB.creacionMatricula(uuid_estudiante, uuid_plan_matricula, fecha_matricula);
+    const result = await pagosMatriculasDB.creacionMatricula(uuid_estudiante, uuid_matricula, fecha_matricula);
+
+    if(result.codigo_matricula === null){
+      res.status(201).json({
+        success: false,
+        message: result.mensaje,
+      })
+
+      return
+    }
+    
+    console.log("Resultado de la creación de matrícula:", result);
 
     res.status(201).json({
       success: true,
-      message: "Matrícula creada exitosamente",
+      data: `${result.mensaje} el codugo de matrícula es ${result.codigo_matricula}`,
     });
+    return;
   } catch (error) {
     console.error("❌ Error en crearMatriculaController:", error);
     res.status(500).json({
