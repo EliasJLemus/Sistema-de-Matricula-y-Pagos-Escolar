@@ -84,8 +84,9 @@ function App() {
           {isLoggedIn && (
             <Sidebar
               isSidebarVisible={isSidebarVisible}
-              onLogout={handleLogout}
-            />
+              onLogout={handleLogout} toggleSidebar={function (): void {
+                throw new Error("Function not implemented.");
+              } }            />
           )}
 
           <Box
@@ -183,7 +184,7 @@ function App() {
   <Route path="/pagos" element={<Pagos />} />
 
 {/* Rutas de matricula*/}
-{/* <Route path="/pagos/matricula" element={<MatriculaPage />} />
+<Route path="/pagos/matricula" element={<MatriculaPage />} />
                  <Route
                    path="/pagos/matricula/nuevo"
                    element={<NuevoMatricula />}
@@ -191,7 +192,7 @@ function App() {
                  <Route
                    path="/pagos/matricula/editar/:id"
                    element={<EditarMatricula />}
-                 /> */}
+                 />
  
   {/* Rutas de matricula*/}
   <Route path="/pagos/mensualidad" element={<MensualidadPage />} />

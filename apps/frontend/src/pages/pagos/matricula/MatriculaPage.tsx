@@ -1,164 +1,77 @@
-import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Grid,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
-import { useGetMatriculaById, useUpdateMatricula, useRegistrarMatricula } from "@/lib/queries"; // ajustá estos hooks si tienen nombres distintos
+import React, { useState } from "react";
+import { Box, Typography } from "@mui/material";
+import { TablaMatricula } from "./TablaMatricula";
+import MatriculaModal from "./MatriculaModal";
 
-const fontFamily = "'Nunito', sans-serif";
+const fontFamily =
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
-export interface MatriculaModalProps {
-  open: boolean;
-  onClose: () => void;
-  isEditing: boolean;
-  matriculaId?: string;
-}
+const MatriculaPage: React.FC = () => {
+  const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [selectedMatriculaId, setSelectedMatriculaId] = useState<number | null>(null);
 
-const MatriculaModal: React.FC<MatriculaModalProps> = ({
-  open,
-  onClose,
-  isEditing,
-  matriculaId,
-}) => {
-  const [formData, setFormData] = useState({
-    codigo_estudiante: "",
-    nombre_estudiante: "",
-    grado: "",
-    seccion: "",
-    tarifa_base: "",
-    beneficio_aplicado: "",
-    descuento_aplicado: "",
-    total_pagar: "",
-    estado: "",
-    comprobante: "",
-    fecha_matricula: "",
-  });
+  // Handlers para modales
+  const handleOpenCreateModal = () => setCreateModalOpen(true);
+  const handleCloseCreateModal = () => setCreateModalOpen(false);
 
-  const { data, isLoading } = useGetMatriculaById(matriculaId!, { enabled: isEditing && !!matriculaId });
-  const updateMutation = useUpdateMatricula(); // ajustá si el hook se llama distinto
-  const createMutation = useRegistrarMatricula(); // ajustá si el hook se llama distinto
-
-  useEffect(() => {
-    if (isEditing && data?.data) {
-      const m = data.data;
-      setFormData({
-        codigo_estudiante: m.codigo_estudiante || "",
-        nombre_estudiante: m.nombre_estudiante || "",
-        grado: m.grado || "",
-        seccion: m.seccion || "",
-        tarifa_base: m.tarifa_base || "",
-        beneficio_aplicado: m.beneficio_aplicado || "",
-        descuento_aplicado: m.descuento_aplicado || "",
-        total_pagar: m.total_pagar || "",
-        estado: m.estado || "",
-        comprobante: m.comprobante || "",
-        fecha_matricula: m.fecha_matricula || "",
-      });
-    } else {
-      setFormData({
-        codigo_estudiante: "",
-        nombre_estudiante: "",
-        grado: "",
-        seccion: "",
-        tarifa_base: "",
-        beneficio_aplicado: "",
-        descuento_aplicado: "",
-        total_pagar: "",
-        estado: "",
-        comprobante: "",
-        fecha_matricula: "",
-      });
-    }
-  }, [isEditing, data]);
-
-  const handleChange = (key: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const handleOpenEditModal = (id: number) => {
+    setSelectedMatriculaId(id);
+    setEditModalOpen(true);
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (isEditing && matriculaId) {
-        await updateMutation.mutateAsync({ uuid: matriculaId, data: formData });
-      } else {
-        await createMutation.mutateAsync(formData);
-      }
-      onClose();
-    } catch (err) {
-      console.error("Error al guardar matrícula:", err);
-    }
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedMatriculaId(null);
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ fontFamily }}>
-        {isEditing ? "Editar Matrícula" : "Nueva Matrícula"}
-      </DialogTitle>
-
-      <DialogContent dividers>
-        {isLoading ? (
-          <Grid container justifyContent="center" alignItems="center" sx={{ py: 4 }}>
-            <CircularProgress />
-          </Grid>
-        ) : (
-          <Grid container spacing={2}>
-            {[
-              { label: "Código", key: "codigo_estudiante" },
-              { label: "Nombre del Estudiante", key: "nombre_estudiante" },
-              { label: "Grado", key: "grado" },
-              { label: "Sección", key: "seccion" },
-              { label: "Tarifa Base", key: "tarifa_base" },
-              { label: "Beneficio Aplicado", key: "beneficio_aplicado" },
-              { label: "Descuento Aplicado", key: "descuento_aplicado" },
-              { label: "Total a Pagar", key: "total_pagar" },
-              { label: "Estado", key: "estado" },
-              { label: "Comprobante", key: "comprobante" },
-              { label: "Fecha Matrícula", key: "fecha_matricula" },
-            ].map((field) => (
-              <Grid item xs={6} key={field.key}>
-                <TextField
-                  label={field.label}
-                  value={formData[field.key as keyof typeof formData]}
-                  onChange={(e) => handleChange(field.key, e.target.value)}
-                  fullWidth
-                  size="small"
-                  sx={{ fontFamily }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancelar
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            backgroundColor: "#538A3E",
-            color: "white",
-            fontFamily,
-            "&:hover": { backgroundColor: "#3e682e" },
-          }}
-          disabled={updateMutation.isLoading || createMutation.isLoading}
+    <Box sx={{ p: 3 }}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        mb={3}
+        sx={{
+          fontFamily,
+          color: "#1A1363",
+          display: "flex",
+          alignItems: "center",
+          gap: 2
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="#1A1363"
         >
-          {isEditing ? "Actualizar" : "Registrar"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          <path d="M17 3h-1v2h-3V3H7v2H4V3H3v18h18V3h-4zm0 16H5V5h1v2h3V5h6v2h3V5h1v14z"/>
+          <path d="M15 11h-2V9h-2v2H9v2h2v2h2v-2h2z"/>
+        </svg>
+        Gestión de Matrículas
+      </Typography>
+
+      <TablaMatricula
+        onNewMatricula={handleOpenCreateModal}
+        onEditMatricula={handleOpenEditModal}
+      />
+
+      {/* Modales */}
+      <MatriculaModal
+        open={createModalOpen}
+        onClose={handleCloseCreateModal}
+        isEditing={false}
+      />
+
+      <MatriculaModal
+        open={editModalOpen}
+        onClose={handleCloseEditModal}
+        matriculaId={selectedMatriculaId || undefined}
+        isEditing={true}
+      />
+    </Box>
   );
 };
 
-export default MatriculaModal;
+export default MatriculaPage;

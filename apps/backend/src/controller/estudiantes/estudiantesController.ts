@@ -25,7 +25,7 @@ export const registroEstudiante = async (req: Request, res: Response): Promise<v
     if(!success){
       console.log(error)
     }
-    console.log("UUID", req.body)
+    
     const parsed = registrarEstudianteSchema.parse({
       uuid: uuid_estudiante,
       uuid_info_general: uuid_info_general,
