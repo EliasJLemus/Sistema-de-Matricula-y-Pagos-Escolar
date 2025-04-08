@@ -139,4 +139,48 @@ export class PagosMatriculasDB {
   }
   
 
+  public async datosCorreoMatricula(uuidEstudiante: string, fechaMatricula: string) {
+    const client = await this.db.getClient();
+    try {
+      const query = `
+        SELECT 
+          e.codigo_estudiante,
+          i.primer_nombre || ' ' || i.primer_apellido AS nombre_estudiante,
+          i2.primer_nombre || ' ' || i2.primer_apellido AS nombre_encargado,
+          enc.correo_electronico AS correo,
+          g.nombre_grado,
+          g.seccion,
+          ppm.tarifa AS tarifa_base,
+          COALESCE(b.descuento, 0) AS descuento_aplicado,
+          (ppm.tarifa - COALESCE(b.descuento, 0)) AS total,
+          m.fecha_matricula,
+          m.codigo_matricula,
+          cp.uuid AS uuid_comprobante
+        FROM "Pagos"."Matricula" m
+        JOIN "Pagos"."PlanPagoMatricula" ppm ON ppm.uuid = m.uuid_plan_matricula
+        JOIN "Estudiantes"."Estudiantes" e ON e.uuid = m.uuid_estudiante
+        JOIN "Estudiantes"."InformacionGeneral" i ON e.uuid_info_general = i.uuid
+        JOIN "Estudiantes"."EstudianteEncargado" ee ON ee.uuid_estudiante = e.uuid AND ee.es_principal = true
+        JOIN "Estudiantes"."Encargados" enc ON enc.uuid = ee.uuid_encargado
+        JOIN "Estudiantes"."InformacionGeneral" i2 ON i2.uuid = enc.uuid_info_general
+        JOIN "Administracion"."Grados" g ON g.uuid = e.uuid_grado
+        LEFT JOIN "Pagos"."Becas" b ON b.uuid = ppm.uuid
+        JOIN "Pagos"."ComprobantePago" cp ON cp.uuid = m.uuid_comprobante
+        WHERE cp.estado = 'Pendiente'
+          AND m.uuid_estudiante = $1
+          AND m.fecha_matricula = $2
+        LIMIT 1;
+      `;
+  
+      const result = await client.query(query, [uuidEstudiante, fechaMatricula]);
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error("❌ Error al obtener datos para correo de matrícula:", error);
+      throw new Error("Error al obtener datos de matrícula para el correo");
+    } finally {
+      client.release();
+    }
+  }
+  
+
 }
