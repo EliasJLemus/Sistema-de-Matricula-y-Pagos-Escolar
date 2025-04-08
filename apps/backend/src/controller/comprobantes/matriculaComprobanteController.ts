@@ -1,5 +1,7 @@
 import { Database } from "@/db/service";
 import { Request, Response } from "express";
+import path from "path";
+import fs from "fs";
 
 // controlador en Express
 export const getInfoParaComprobanteController = async (req: Request, res: Response): Promise<void> => {
@@ -40,3 +42,37 @@ export const getInfoParaComprobanteController = async (req: Request, res: Respon
     }
   };
   
+
+  interface MulterRequest extends Request {
+    file?: Express.Multer.File;
+  }
+  
+
+  export const subirComprobanteMatriculaController = async (req: MulterRequest, res: Response): Promise<void> => {
+    const { uuid_comprobante } = req.params;
+  
+    if (!req.file) {
+      res.status(400).json({ success: false, message: "No se adjuntó ninguna imagen." });
+      return;
+    }
+  
+    const rutaLocal = req.file.path.replace(/\\/g, "/"); 
+    const db = new Database();
+  
+    try {
+      const updateQuery = `
+        UPDATE "Pagos"."ComprobantePago"
+        SET url_imagen = $1,
+            estado = 'Enviado',
+            fecha_subida = CURRENT_TIMESTAMP
+        WHERE uuid = $2
+      `;
+      await db.query(updateQuery, [rutaLocal, uuid_comprobante]);
+  
+      res.json({ success: true, message: "Comprobante actualizado con éxito." });
+    } catch (err) {
+      console.error("❌ Error al guardar comprobante:", err);
+      fs.unlinkSync(req.file.path); 
+      res.status(500).json({ success: false, message: "Error al guardar el comprobante." });
+    }
+  };

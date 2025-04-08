@@ -52,9 +52,12 @@ export default function SubirComprobante() {
     formData.append("uuid_comprobante", uuidComprobante);
 
     try {
-      await axios.post("http://localhost:3000/comprobante/subir-comprobante", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(
+        `http://localhost:3000/comprobante/subir-comprobante-matricula/${uuidComprobante}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      
       setMensaje("✅ Comprobante enviado con éxito.");
     } catch (error) {
       console.error(error);
