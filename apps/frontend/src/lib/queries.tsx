@@ -13,6 +13,7 @@ import {
 } from "@shared/reportsType";
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
+import {MatriculaType} from "@shared/pagos"
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -347,26 +348,64 @@ export const useUpdateEstudiante = () => {
   });
 };
 
+// ======================
+// Registrar Apoderado
+// ======================
+
+interface RegistrarApoderadoInput {
+  primer_nombre: string;
+  segundo_nombre?: string;
+  primer_apellido: string;
+  segundo_apellido?: string;
+  identidad: string;
+  genero: "Masculino" | "Femenino" | "Otro";
+  fecha_nacimiento: string;
+  correo: string;
+  telefono: string;
+  es_principal: boolean;
+  parentesco: string;
+  uuid_estudiante: string;
+}
+
+interface RegistrarApoderadoResponse {
+  success: boolean;
+  data?: string;
+  message?: string;
+}
+
+export const useRegistrarApoderado = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["registrarApoderado"],
+    mutationFn: async (data: RegistrarApoderadoInput): Promise<RegistrarApoderadoResponse> => {
+      try {
+        const response = await axios.post<RegistrarApoderadoResponse>(
+          "http://localhost:3000/estudiantes/registro-apoderado",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        throw new Error(
+          error?.response?.data?.message || "Error al registrar apoderado"
+        );
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getEstudiantes"] }); // Por si querés refrescar lista
+    },
+  });
+};
 
 
 // ======================
 // PAGOOOOS: OBTENER MATRICULAS
 // ======================E
-
-export interface MatriculaPagoType {
-  uuid_matricula: string;
-  codigo_estudiante: string;
-  nombre_estudiante: string;
-  grado: string;
-  seccion: string;
-  tarifa_base: number;
-  beneficio_aplicado: string;
-  descuento_aplicado: string;
-  total_pagar: number;
-  estado: string;
-  comprobante: string;
-  fecha_matricula: string;
-}
 
 interface Pagination {
   limit: number;
@@ -376,32 +415,68 @@ interface Pagination {
 }
 
 interface MatriculaPagosResponse {
-  data: MatriculaPagoType[];
+  data: MatriculaType[];
   pagination: Pagination;
 }
 
-type FiltrosMatriculaPago = {
-  page?: number;
-  limit?: number;
-};
+interface UseGetMatriculaPagosParams {
+  page: number;
+  limit: number;
+  year?: number;
+  grado?: string;
+  uuid_estudiante?: string;
+}
 
-export const useGetMatriculaPagos = (
-  page: number,
-  limit: number,
-): UseQueryResult<MatriculaPagosResponse, Error> => {
-
+export const useGetMatriculaPagos = ({
+  page,
+  limit,
+  year,
+  grado,
+  uuid_estudiante,
+}: UseGetMatriculaPagosParams): UseQueryResult<MatriculaPagosResponse, Error> => {
   return useQuery({
-    queryKey: ["getMatriculaPagos", page, limit],
+    queryKey: ["getMatriculaPagos", page, limit, year, grado, uuid_estudiante],
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append("page", page.toString());
       params.append("limit", limit.toString());
 
+      if (year) params.append("year", year.toString());
+      if (grado) params.append("grado", grado);
+      if (uuid_estudiante) params.append("uuid_estudiante", uuid_estudiante);
+
       const response = await axios.get<MatriculaPagosResponse>(
-        `http://localhost:3000/pagos/obtener-matricula?page=${page}&limit=${limit}`
+        `http://localhost:3000/pagos/obtener-matricula?${params.toString()}`
+      );
+
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+};
+
+export const useCrearMatricula = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ success: boolean; message: string }, Error, MatriculaType>({
+    mutationKey: ["crearMatricula"],
+    mutationFn: async (data: MatriculaType) => {
+      const response = await axios.post(
+        "http://localhost:3000/pagos/creacion-matricula",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     },
-    // staleTime: 1000 * 60 * 5, // 5 minutos
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getMatriculaPagos"] });
+    },
+    onError: (error: any) => {
+      throw new Error(error?.response?.data?.message || "Error al crear matrícula");
+    },
   });
 };

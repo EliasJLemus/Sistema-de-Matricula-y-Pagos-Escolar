@@ -6,6 +6,7 @@ import cors from "cors";
 import {login} from "@/controller/autController"
 import pagosRoute from "@/routes/pagos"
 // import "../src/db/estudiantes/apoderadosDB"
+// import "./envio"
 
 const app = express();
 

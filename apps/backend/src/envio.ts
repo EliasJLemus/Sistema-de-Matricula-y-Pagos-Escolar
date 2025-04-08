@@ -1,90 +1,91 @@
 import cron from "node-cron";
 import nodemailer from "nodemailer";
 import PDFDocument from "pdfkit";
+import {Database} from "@/db/service"
+
+const db = new Database()
+
+const obtenerMatriculasPendientes = async () => {
+  const query = `
+    SELECT 
+      e.codigo_estudiante,
+      i.primer_nombre || ' ' || i.primer_apellido AS nombre_estudiante,
+      i2.primer_nombre || ' ' || i2.primer_apellido AS nombre_encargado,
+      enc.correo_electronico AS correo,
+      g.nombre_grado,
+      g.seccion,
+      m.total,
+      m.fecha_matricula
+    FROM "Pagos"."Matricula" m
+    JOIN "Estudiantes"."Estudiantes" e ON e.uuid = m.uuid_estudiante
+    JOIN "Estudiantes"."InformacionGeneral" i ON e.uuid_info_general = i.uuid
+    JOIN "Estudiantes"."EstudianteEncargado" ee ON ee.uuid_estudiante = e.uuid AND ee.es_principal = true
+    JOIN "Estudiantes"."Encargados" enc ON enc.uuid = ee.uuid_encargado
+    JOIN "Estudiantes"."InformacionGeneral" i2 ON i2.uuid = enc.uuid_info_general
+    JOIN "Administracion"."Grados" g ON g.uuid = e.uuid_grado
+    WHERE m.uuid_comprobante IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM "Pagos"."ComprobantePago" c 
+      WHERE c.uuid = m.uuid_comprobante AND c.estado = 'Pendiente'
+    )
+      WHERE enc = '9bbf9712-386f-4fbf-a01f-02a5d1f66303'
+  `;
+
+  const result = await db.query(query);
+  return result.rows;
+};
 
 // Simulación: padres
-const obtenerPadresParaEnvio = async () => [
-  {
-    nombre: "Carlos López",
-    correo: "av2002273@gmail.com", // poné tu correo real para pruebas
-    estudiante: "Luis López",
-    grado: "3ro Primaria",
-    monto: "L.1,200.00",
-    fecha_pago: "05/04/2025",
-  },
-];
-
-// PDF Generator
-const generarPDF = async (padre) =>
+const generarPDF = (datos) =>
   new Promise((resolve) => {
     const doc = new PDFDocument();
     const chunks = [];
     doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
 
-    doc.fontSize(18).text("Comprobante de Pago", { align: "center" }).moveDown();
-    doc.fontSize(14).text(`Padre: ${padre.nombre}`);
-    doc.text(`Estudiante: ${padre.estudiante}`);
-    doc.text(`Grado: ${padre.grado}`);
-    doc.text(`Monto pagado: ${padre.monto}`);
-    doc.text(`Fecha de pago: ${padre.fecha_pago}`);
-    doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`);
-
+    doc.fontSize(18).text("Comprobante de Matrícula Pendiente", { align: "center" }).moveDown();
+    doc.fontSize(14).text(`Encargado: ${datos.nombre_encargado}`);
+    doc.text(`Estudiante: ${datos.nombre_estudiante}`);
+    doc.text(`Grado: ${datos.nombre_grado} - Sección: ${datos.seccion}`);
+    doc.text(`Monto: L. ${datos.total}`);
+    doc.text(`Fecha de Matrícula: ${new Date(datos.fecha_matricula).toLocaleDateString()}`);
+    doc.text(`Fecha de Envío: ${new Date().toLocaleDateString()}`);
     doc.end();
   });
 
-// ✅ Transporter usando Brevo SMTP
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "ajvb2002@gmail.com", 
-    pass: "xmruvtwenvhyzkon", 
-  },
-});
-
-// CRON JOB (cada minuto, para probar)
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "ajvb2002@gmail.com", 
+      pass: "xmruvtwenvhyzkon", 
+    },
+  });
 cron.schedule("* * * * *", async () => {
-  console.log("⏰ Cron ejecutado");
+  console.log("🚀 Ejecutando CRON de comprobantes de matrícula...");
 
-  const padres = await obtenerPadresParaEnvio();
+  try {
+    const registros = await obtenerMatriculasPendientes();
 
-  for (const padre of padres) {
-    const pdfBuffer = await generarPDF(padre);
+    for (const padre of registros) {
+      const pdf = await generarPDF(padre);
 
-    try {
-        await transporter.sendMail({
-            from: `"Sunny Path" <ajvb2002@gmail.com>`,
-            to: padre.correo,
-            subject: "Adjunte su Comprobante de Pago",
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc;">
-                <h2 style="color: #2e7d32;">📄 Comprobante de Pago Pendiente</h2>
-                <p>Hola <strong>${padre.nombre}</strong>,</p>
-                <p>Hemos registrado que debe subir el comprobante correspondiente al pago de:</p>
-                <ul>
-                  <li><strong>Estudiante:</strong> ${padre.estudiante}</li>
-                  <li><strong>Grado:</strong> ${padre.grado}</li>
-                  <li><strong>Monto:</strong> ${padre.monto}</li>
-                  <li><strong>Fecha de pago:</strong> ${padre.fecha_pago}</li>
-                </ul>
-                <p>Por favor, haga clic en el botón de abajo para subir la foto del comprobante:</p>
-               <a href="http://localhost:5173/subir-comprobante?padre=${encodeURIComponent(padre.nombre)}"
-                style="display:inline-block;background:#2e7d32;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;margin-top:15px;">
-                Subir Comprobante
-                </a>
-                <p style="margin-top: 30px; font-size: 0.9em; color: #555;">Gracias por su colaboración. Este paso es necesario para emitir su factura oficial.</p>
-              </div>
-            `,
-          });
-          
+      await transporter.sendMail({
+        from: '"Sunny Path" <tucorreo@gmail.com>',
+        to: padre.correo,
+        subject: "Comprobante de Matrícula Pendiente",
+        text: `Estimado/a ${padre.nombre_encargado}, adjunto encontrará el comprobante pendiente.`,
+        attachments: [{ filename: "comprobante_matricula.pdf", content: pdf }],
+      });
 
-      console.log(`✅ Comprobante enviado a ${padre.correo}`);
-    } catch (err) {
-      console.error(`❌ Error al enviar a ${padre.correo}:`, err.message);
+      console.log(`✅ Correo enviado a ${padre.nombre_encargado} <${padre.correo}>`);
     }
+
+    if (registros.length === 0) console.log("🟡 No hay comprobantes pendientes.");
+  } catch (error) {
+    console.error("❌ Error en el CRON de matrícula:", error.message);
   }
 });
 
-console.log("📡 Cron job de envío de comprobantes ACTIVADO");
+console.log("🟢 CRON de comprobantes de matrícula ACTIVADO");

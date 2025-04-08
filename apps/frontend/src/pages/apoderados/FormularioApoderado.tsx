@@ -1,102 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
   TextField,
   FormControl,
-  FormControlLabel,
   InputLabel,
   Select,
   MenuItem,
-  Radio,
-  RadioGroup,
-  FormLabel,
   Typography,
-  Paper,
-  Grid,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Avatar,
-  Chip,
   Card,
   CardContent,
-  Alert,
+  Grid,
+  CircularProgress,
   Snackbar,
+  Alert,
   Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetEstudiantes } from "@/lib/queries";
-import type { ApoderadoType } from "@/lib/queries/useGetApoderados";
+import { useRegistrarApoderado } from "@/lib/queries";
 
 const fontFamily = "'Nunito', sans-serif";
 
 interface FormularioApoderadoProps {
-  apoderadoId?: string | number;
-  isEditing?: boolean;
   isModal?: boolean;
   onClose?: () => void;
 }
 
 const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
-  apoderadoId,
-  isEditing = false,
-  isModal = false,
-  onClose,
+  
 }) => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const actualId = apoderadoId || id;
-  const [isLoading, setIsLoading] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  const [formData, setFormData] = useState<Partial<ApoderadoType>>({
+  const [formData, setFormData] = useState({
     primer_nombre: "",
     segundo_nombre: "",
     primer_apellido: "",
     segundo_apellido: "",
     identidad: "",
-    genero: "M",
-    telefono_personal: "",
+    genero: "Masculino",
+    fecha_nacimiento: "",
     correo_electronico: "",
+    telefono_personal: "",
     parentesco: "",
     es_encargado_principal: false,
-    numero_estudiante: 0,
     grado_estudiante: "",
+    uuid_estudiante: "",
   });
-
-  const { data: estudiantesData } = useGetEstudiantes(1, 10000, { grado: formData.grado_estudiante });
-
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (isEditing && actualId) {
-      setIsLoading(true);
-      setTimeout(() => {
-        const mock: Partial<ApoderadoType> = {
-          encargado_id: Number(actualId),
-          numero_encargado: 123,
-          primer_nombre: "Mario",
-          segundo_nombre: "",
-          primer_apellido: "Ramos",
-          segundo_apellido: "López",
-          identidad: "0801198012345",
-          genero: "M",
-          telefono_personal: "99998888",
-          correo_electronico: "mario@test.com",
-          parentesco: "Padre",
-          es_encargado_principal: true,
-          numero_estudiante: 1001,
-          grado_estudiante: "Sexto",
-        };
-        setFormData(mock);
-        setIsLoading(false);
-      }, 1000);
-    }
-  }, [isEditing, actualId]);
+  const { data: estudiantesData } = useGetEstudiantes(1, 10000, {
+    grado: formData.grado_estudiante,
+  });
+
+  const { mutate: registrarApoderado } = useRegistrarApoderado();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -113,7 +76,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "grado_estudiante" ? { numero_estudiante: 0 } : {}),
+      ...(name === "grado_estudiante" ? { uuid_estudiante: "" } : {}),
     }));
     if (errors[name]) {
       const newErrors = { ...errors };
@@ -139,7 +102,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       newErrors.correo_electronico = "Correo inválido";
     }
     if (!formData.parentesco) newErrors.parentesco = "Requerido";
-    if (!formData.numero_estudiante) newErrors.numero_estudiante = "Seleccione estudiante";
+    if (!formData.uuid_estudiante) newErrors.uuid_estudiante = "Seleccione estudiante";
+    if (!formData.fecha_nacimiento) newErrors.fecha_nacimiento = "Requerido";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -148,29 +112,45 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      console.log("Datos enviados:", formData);
-      setIsSubmitting(false);
-      if (isModal && onClose) {
-        onClose();
-      } else {
-        navigate("/apoderados");
-      }
-    }, 1000);
-  };
 
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height={300}>
-        <CircularProgress />
-      </Box>
+    registrarApoderado(
+      {
+        primer_nombre: formData.primer_nombre,
+        segundo_nombre: formData.segundo_nombre || "",
+        primer_apellido: formData.primer_apellido,
+        segundo_apellido: formData.segundo_apellido || "",
+        identidad: formData.identidad,
+        genero: formData.genero as "Masculino" | "Femenino" | "Otro",
+        fecha_nacimiento: formData.fecha_nacimiento,
+        correo: formData.correo_electronico,
+        telefono: formData.telefono_personal,
+        es_principal: formData.es_encargado_principal,
+        parentesco: formData.parentesco,
+        uuid_estudiante: formData.uuid_estudiante,
+      },
+      {
+        onSuccess: (res) => {
+          setIsSubmitting(false);
+          if (res.success) {
+            navigate("/apoderados");
+          } else {
+            setAlertMessage(res.message || "No se pudo registrar");
+            setAlertOpen(true);
+          }
+        },
+        onError: (err: any) => {
+          setIsSubmitting(false);
+          setAlertMessage(err.message || "Error inesperado");
+          setAlertOpen(true);
+        },
+      }
     );
-  }
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit} p={4}>
       <Typography variant="h4" sx={{ fontFamily, fontWeight: "bold", color: "#1A1363", mb: 4 }}>
-        {isEditing ? "Editar Apoderado" : "Registrar Apoderado"}
+        Registrar Apoderado
       </Typography>
 
       <Card variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 3 }}>
@@ -182,7 +162,13 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
             <TextField label="Primer Nombre" name="primer_nombre" value={formData.primer_nombre} onChange={handleChange} fullWidth error={!!errors.primer_nombre} helperText={errors.primer_nombre} />
           </Grid>
           <Grid item xs={12} md={6}>
+            <TextField label="Segundo Nombre" name="segundo_nombre" value={formData.segundo_nombre} onChange={handleChange} fullWidth />
+          </Grid>
+          <Grid item xs={12} md={6}>
             <TextField label="Primer Apellido" name="primer_apellido" value={formData.primer_apellido} onChange={handleChange} fullWidth error={!!errors.primer_apellido} helperText={errors.primer_apellido} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField label="Segundo Apellido" name="segundo_apellido" value={formData.segundo_apellido} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField label="Identidad" name="identidad" value={formData.identidad} onChange={handleChange} fullWidth error={!!errors.identidad} helperText={errors.identidad} />
@@ -194,9 +180,23 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
             <TextField label="Correo Electrónico" name="correo_electronico" value={formData.correo_electronico} onChange={handleChange} fullWidth error={!!errors.correo_electronico} helperText={errors.correo_electronico} />
           </Grid>
           <Grid item xs={12} md={6}>
+            <InputLabel shrink>Fecha de Nacimiento</InputLabel>
+            <TextField type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento} onChange={handleChange} fullWidth error={!!errors.fecha_nacimiento} helperText={errors.fecha_nacimiento} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Género</InputLabel>
+              <Select name="genero" value={formData.genero} onChange={handleSelectChange}>
+                <MenuItem value="Masculino">Masculino</MenuItem>
+                <MenuItem value="Femenino">Femenino</MenuItem>
+                <MenuItem value="Otro">Otro</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
             <FormControl fullWidth error={!!errors.parentesco}>
               <InputLabel>Parentesco</InputLabel>
-              <Select name="parentesco" value={formData.parentesco || ""} onChange={handleSelectChange}>
+              <Select name="parentesco" value={formData.parentesco} onChange={handleSelectChange}>
                 <MenuItem value="Padre">Padre</MenuItem>
                 <MenuItem value="Madre">Madre</MenuItem>
                 <MenuItem value="Tutor">Tutor</MenuItem>
@@ -214,7 +214,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
           <Grid item xs={12} md={6}>
             <FormControl fullWidth>
               <InputLabel>Grado</InputLabel>
-              <Select name="grado_estudiante" value={formData.grado_estudiante || ""} onChange={handleSelectChange} MenuProps={{ PaperProps: { sx: { maxHeight: 250 } } }}>
+              <Select name="grado_estudiante" value={formData.grado_estudiante} onChange={handleSelectChange}>
                 {[
                   "Jardín", "Preparatoria", "Primero", "Segundo", "Tercero", "Cuarto", "Quinto",
                   "Sexto", "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo"
@@ -225,18 +225,18 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
             </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
-            <FormControl fullWidth error={!!errors.numero_estudiante}>
+            <FormControl fullWidth error={!!errors.uuid_estudiante}>
               <InputLabel>Estudiante</InputLabel>
-              <Select name="numero_estudiante" value={formData.numero_estudiante || ""} onChange={handleSelectChange} disabled={!formData.grado_estudiante} MenuProps={{ PaperProps: { sx: { maxHeight: 250 } } }}>
+              <Select name="uuid_estudiante" value={formData.uuid_estudiante} onChange={handleSelectChange} disabled={!formData.grado_estudiante}>
                 {estudiantesData?.data?.map((est) => (
                   <MenuItem key={est.uuid} value={est.uuid}>
                     {est.codigo_estudiante} - {est.primer_nombre} {est.primer_apellido}
                   </MenuItem>
                 ))}
               </Select>
-              {errors.numero_estudiante && (
+              {errors.uuid_estudiante && (
                 <Typography variant="caption" color="error">
-                  {errors.numero_estudiante}
+                  {errors.uuid_estudiante}
                 </Typography>
               )}
             </FormControl>
@@ -245,28 +245,13 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       </Card>
 
       <FormControlLabel
-        control={<Checkbox checked={formData.es_encargado_principal || false} onChange={handleCheckboxChange} name="es_encargado_principal" />}
+        control={<Checkbox checked={formData.es_encargado_principal} onChange={handleCheckboxChange} name="es_encargado_principal" />}
         label="Es encargado principal"
         sx={{ mb: 3 }}
       />
 
       <Box display="flex" justifyContent="flex-end" mt={2}>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={isSubmitting}
-          startIcon={
-            isSubmitting ? (
-              <CircularProgress size={20} sx={{ color: "white" }} />
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
-            )
-          }
-        >
+        <Button type="submit" variant="contained" disabled={isSubmitting} startIcon={isSubmitting ? <CircularProgress size={20} sx={{ color: "white" }} /> : undefined}>
           {isSubmitting ? "Guardando..." : "Guardar"}
         </Button>
       </Box>

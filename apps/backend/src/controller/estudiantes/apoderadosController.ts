@@ -40,7 +40,7 @@ export const registrarApoderado = async(req: Request, res: Response): Promise<vo
     }catch(error){
         res.status(500).json({
             success: false,
-            message: "Error interno del servidor",
+            message:error.message,
             detail: error.message,
         });
     }
