@@ -30,13 +30,13 @@ import useGetNivelados, { NiveladoType } from "@/lib/queries/useGetNivelados";
 const fontFamily = "'Nunito', sans-serif";
 
 interface TablaNiveladoProps {
-  onNewNivelados: () => void;
-  onEditNivelados: (id: number) => void;
+  onNewNivelado: () => void;
+  onEditNivelado: (id: number) => void;
 }
 
 export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
-  onNewNivelados,
-  onEditNivelados,
+  onNewNivelado,
+  onEditNivelado,
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -47,20 +47,20 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
     estudiante: "",
     grado: "",
     estado: "",
-    fecha_vencimiento: ""
+    fecha_pago: ""
   });
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const debouncedFilters = useDebounce(filters, 400);
 
   useEffect(() => {
-    const currentContainer = document.getElementById("tabla-mensualidades-container");
+    const currentContainer = document.getElementById("tabla-nivelados-container");
     if (currentContainer) currentContainer.style.zoom = isZoomed ? "60%" : "100%";
     return () => { if (currentContainer) currentContainer.style.zoom = "100%"; };
   }, [isZoomed]);
 
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
-      queryKey: ["getMensualidades", page, limit, JSON.stringify(filters)],
+      queryKey: ["getNivelados", page, limit, JSON.stringify(filters)],
     });
   };
 
@@ -70,7 +70,7 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
   };
 
   const clearFilters = () => {
-    setFilters({ estudiante: "", grado: "", estado: "", fecha_vencimiento: "" });
+    setFilters({ estudiante: "", grado: "", estado: "", fecha_pago: "" });
     setPage(1);
   };
 
@@ -80,10 +80,10 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleEdit = (id: number) => onEditNivelados(id);
+  const handleEdit = (id: number) => onEditNivelado(id);
   const handleDelete = (id: number, nombre: string) => {
-    if (window.confirm(`¿Está seguro que desea eliminar la mensualidad de ${nombre}?`)) {
-      console.log("Eliminar mensualidad:", id);
+    if (window.confirm(`¿Está seguro que desea eliminar el pago nivelado de ${nombre}?`)) {
+      console.log("Eliminar nivelado:", id);
       handleFreshReload();
     }
   };
@@ -109,7 +109,7 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
 
       <Box sx={{ display: "flex", alignItems: "center", mb: 3, pl: 1 }}>
         <Typography variant="h5" sx={{ fontFamily, color: "#1A1363", fontWeight: 700 }}>
-          Gestión de Planes Nivelados
+          Gestión de Pagos Nivelados
         </Typography>
       </Box>
 
@@ -149,17 +149,17 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
               <MenuItem value="">Todos</MenuItem>
               <MenuItem value="Pendiente">Pendiente</MenuItem>
               <MenuItem value="Pagado">Pagado</MenuItem>
-              <MenuItem value="Parcial">Parcial</MenuItem>
+              <MenuItem value="Atrasado">Atrasado</MenuItem>
             </Select>
           </FormControl>
 
           <TextField
-            label="Fecha Vencimiento (DD/MM/YYYY)"
+            label="Fecha de Pago (DD/MM/YYYY)"
             variant="outlined"
             size="small"
             sx={{ minWidth: 250 }}
-            value={filters.fecha_vencimiento}
-            onChange={(e) => handleInputChange("fecha_vencimiento", e.target.value)}
+            value={filters.fecha_pago}
+            onChange={(e) => handleInputChange("fecha_pago", e.target.value)}
           />
 
           <Button variant="contained" onClick={clearFilters} sx={{ bgcolor: "#F38223", color: "white" }}>
@@ -170,8 +170,8 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
             {isZoomed ? "Vista Normal" : "🔍 Ver Tabla Completa"}
           </Button>
           
-          <Button variant="contained" onClick={onNewNivelados} sx={{ bgcolor: "#538A3E", color: "white" }}>
-            📝 Nueva Mensualidad
+          <Button variant="contained" onClick={onNewNivelado} sx={{ bgcolor: "#538A3E", color: "white" }}>
+            📝 Nuevo Nivelado
           </Button>
         </Box>
       </Paper>
@@ -183,8 +183,8 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
               <TableRow>
                 {[
                   "ID", "N° Estudiante", "Estudiante", "Grado", "Sección", 
-                  "Fecha Inicio", "Fecha Vencimiento", "Monto Total", "Beneficio", 
-                  "Descuento", "Saldo Pagado", "Saldo Pendiente", "Recargo", "Estado","Comprobante", "Acciones"
+                  "Fecha Pago", "Monto Pagado", "Saldo Restante", "Beca", 
+                  "Descuento", "Recargo", "Estado", "Comprobante", "Acciones"
                 ].map((h, i) => (
                   <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>{h}</TableHead>
                 ))}
@@ -198,30 +198,27 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
                   <TableCell>{item.estudiante}</TableCell>
                   <TableCell>{item.grado}</TableCell>
                   <TableCell>{item.seccion}</TableCell>
-                  <TableCell>{item.fecha_inicio}</TableCell>
-                  <TableCell>{item.fecha_vencimiento}</TableCell>
-                  <TableCell>L. {item.monto_total.toLocaleString()}</TableCell>
-                  <TableCell>{item.beneficio_aplicado}</TableCell>
-                  <TableCell>{item.porcentaje_descuento}%</TableCell>
-                  <TableCell>L. {item.saldo_pagado.toLocaleString()}</TableCell>
+                  <TableCell>{item.fecha_pago}</TableCell>
+                  <TableCell>L. {item.monto_pagado.toLocaleString()}</TableCell>
                   <TableCell>
-                    <strong>L. {item.saldo_pendiente.toLocaleString()}</strong>
+                    <strong>L. {item.saldo_restante.toLocaleString()}</strong>
                   </TableCell>
+                  <TableCell>{item.beca_aplicada}</TableCell>
+                  <TableCell>{item.porcentaje_descuento}</TableCell>
                   <TableCell>L. {item.recargo.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
                       className={
                         item.estado === "Pagado" ? "bg-[#538A3E] text-white" :
-                        item.estado === "Parcial" ? "bg-[#F38223] text-white" :
-                        "bg-red-500 text-white"
+                        item.estado === "Atrasado" ? "bg-red-500 text-white" :
+                        "bg-[#F38223] text-white"
                       }
                       style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
                     >
                       {item.estado}
                     </Badge>
                   </TableCell>
-
                   <TableCell>
                                     <Badge
                                       variant="outline"
@@ -303,7 +300,7 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
       {!isLoading && !isFetching && tableData.length === 0 && (
         <Paper sx={{ p: 4, textAlign: "center", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
           <Typography color="text.secondary" sx={{ fontFamily }}>
-            No se encontraron mensualidades para los filtros actuales.
+            No se encontraron pagos nivelados para los filtros actuales.
           </Typography>
         </Paper>
       )}
