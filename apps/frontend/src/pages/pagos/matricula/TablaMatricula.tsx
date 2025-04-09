@@ -150,7 +150,9 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({ onNewMatricula, onEditM
                   variant="outlined"
                   size="small"
                   color="primary"
-                  onClick={() => onEditMatricula(item.codigo_matricula)}
+                  onClick={() => {
+                    console.log("Editando matrícula:", item.uuid_matricula);
+                    onEditMatricula(item.uuid_matricula ?? "")}}
                 >
                   Editar
                 </Button>

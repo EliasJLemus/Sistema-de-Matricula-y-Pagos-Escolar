@@ -1,4 +1,3 @@
-// FormularioMatricula.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,7 +16,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { useGetMatriculaPagos, useCrearMatricula } from "@/lib/queries";
+import { useGetMatriculaPagos, useCrearMatricula, useGetMatriculaByUuid } from "@/lib/queries";
 import type { MatriculaType } from "@shared/pagos";
 import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
 
@@ -46,7 +45,11 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [modalTitle, setModalTitle] = useState("");
   const [modalDescription, setModalDescription] = useState("");
 
-  const { data, isLoading } = useGetMatriculaPagos({
+  const { data: dataMatricula, isLoading: isLoadingMatricula } = useGetMatriculaByUuid(
+    typeof matriculaId === "string" ? matriculaId : ""
+  );
+
+  const { data, isLoading: isLoadingLista } = useGetMatriculaPagos({
     page: 1,
     limit: 100,
     grado: gradoSeleccionado,
@@ -60,15 +63,13 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   );
 
   useEffect(() => {
-    if (isEditing && matriculaId && data?.data?.length) {
-      const matricula = data.data.find((m) => m.uuid_matricula === matriculaId);
-      if (matricula) {
-        setGradoSeleccionado(matricula.grado || "");
-        setUuidEstudianteSeleccionado(matricula.uuid_estudiante || "");
-        setFormData({ ...matricula });
-      }
+    if (isEditing && dataMatricula?.data) {
+      const matricula = dataMatricula.data;
+      setGradoSeleccionado(matricula.grado || "");
+      setUuidEstudianteSeleccionado(matricula.uuid_estudiante || "");
+      setFormData(matricula);
     }
-  }, [isEditing, matriculaId, data?.data]);
+  }, [isEditing, dataMatricula]);
 
   useEffect(() => {
     if (!isEditing && uuidEstudianteSeleccionado) {
@@ -153,11 +154,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
 
   return (
     <Box sx={{ maxWidth: 1000, margin: "auto", px: 2, py: 4 }}>
-      <Snackbar
-        open={alertOpen}
-        autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
-      >
+      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={() => setAlertOpen(false)}>
         <Alert severity="error">{alertMessage}</Alert>
       </Snackbar>
 
@@ -182,7 +179,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
           {isEditing ? "Edición de Matrícula" : "Registro de Matrícula"}
         </Typography>
 
-        {isLoading ? (
+        {isLoadingLista || (isEditing && isLoadingMatricula) ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress sx={{ color: "#538A3E" }} />
           </Box>
@@ -229,25 +226,12 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                 </FormControl>
               </Grid>
 
-              {[
-                { label: "Código Estudiante", value: formData.codigo_estudiante },
-                { label: "Nombre Estudiante", value: formData.nombre_estudiante },
-                { label: "Sección", value: formData.seccion },
-                { label: "Tarifa Base", value: formData.tarifa_base },
-                { label: "Beneficio Aplicado", value: formData.beneficio_aplicado },
-                { label: "Descuento", value: formData.descuento_aplicado },
-                { label: "Total a Pagar", value: `L. ${formData.total_pagar || "0.00"}` },
-                { label: "Estado", value: formData.estado },
-                { label: "Comprobante", value: formData.comprobante },
-                { label: "Año Académico", value: formData.year_academico },
-                { label: "Encargado Principal", value: formData.nombre_encargado_principal?.trim() || "No asignado" },
-                { label: "Código Encargado Principal", value: formData.codigo_encargado_principal || "No disponible" },
-              ].map(({ label, value }) => (
-                <Grid item xs={12} md={6} key={label}>
+              {[["codigo_estudiante", "Código Estudiante"], ["nombre_estudiante", "Nombre Estudiante"], ["seccion", "Sección"], ["tarifa_base", "Tarifa Base"], ["beneficio_aplicado", "Beneficio Aplicado"], ["descuento_aplicado", "Descuento"], ["total_pagar", "Total a Pagar"], ["estado", "Estado"], ["estado_comprobante", "Comprobante"], ["year_academico", "Año Académico"], ["nombre_encargado_principal", "Encargado Principal"], ["codigo_encargado_principal", "Código Encargado Principal"]].map(([field, label]) => (
+                <Grid item xs={12} md={6} key={field}>
                   <TextField
                     fullWidth
                     label={label}
-                    value={value || ""}
+                    value={formData[field as keyof MatriculaType] || ""}
                     InputProps={{ readOnly: true }}
                     sx={{
                       "& .MuiInputBase-input": {

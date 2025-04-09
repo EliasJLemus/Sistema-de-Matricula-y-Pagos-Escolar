@@ -3,7 +3,8 @@ import {getMatriculasController,
     getMatriculaByEstudianteAndYearController,
     crearMatriculaController,
     getAllMatriculasController,
-    obtenerMatriculaPorUuid
+    obtenerMatriculaPorUuid,
+    actualizarEstadoComprobanteController
 } from "@/controller/pagos/matriculaController"
 
 const pagosRoute = Router();
@@ -18,6 +19,9 @@ pagosRoute.post("/creacion-matricula", crearMatriculaController)
 pagosRoute.get("/matriculas", getAllMatriculasController);
 
 pagosRoute.get("/matricula/:uuid", obtenerMatriculaPorUuid);
+
+pagosRoute.patch("/comprobante/:uuid", actualizarEstadoComprobanteController);
+
 
 
 export default pagosRoute

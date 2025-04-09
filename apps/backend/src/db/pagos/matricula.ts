@@ -55,14 +55,14 @@ export class PagosMatriculasDB {
       const countWhereClause = countConditions.length > 0 ? `WHERE ${countConditions.join(" AND ")}` : "";
   
       const query = `
-        SELECT * FROM "Pagos"."VistaDetalleMatricula"
+        SELECT * FROM "Pagos"."VistaPlanPagoDetallado"
         ${whereClause}
-        ORDER BY fecha_matricula ASC
+        ORDER BY codigo_estudiante ASC
         LIMIT $1 OFFSET $2
       `;
   
       const countQuery = `
-        SELECT COUNT(*) FROM "Pagos"."VistaDetalleMatricula"
+        SELECT COUNT(*) FROM "Pagos"."VistaPlanPagoDetallado" 
         ${countWhereClause}
       `;
   
@@ -188,6 +188,7 @@ export class PagosMatriculasDB {
 
       const query = `
        SELECT 
+       m.uuid AS uuid_matricula,
         m.codigo_matricula,
         e.codigo_estudiante,
         i.primer_nombre || ' ' || i.primer_apellido AS nombre_estudiante,
@@ -287,5 +288,22 @@ export class PagosMatriculasDB {
     }
   }
   
+  public async actualizarEstadoComprobante(uuid_comprobante: string, estado: "Aceptado" | "Rechazado") {
+    const client = await this.db.getClient();
+    try {
+      console.log(uuid_comprobante)
+      const query = `
+        SELECT "Pagos".actualizar_estado_comprobante($1, $2);
+      `;
+     const result = await client.query(query, [estado, uuid_comprobante]);
+
+     console.log(result.rows[0])
+    } catch (error) {
+      console.error("❌ Error en actualizarEstadoComprobante:", error);
+      throw new Error("No se pudo actualizar el estado del comprobante.");
+    } finally {
+      client.release();
+    }
+  }
 
 }

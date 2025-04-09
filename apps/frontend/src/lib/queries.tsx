@@ -563,10 +563,20 @@ export const useGetMatriculaByUuid = (
             : undefined,
         },
       };
-
+      console.log("Respuesta del servidor:", updatedData);
       return updatedData;
     },
     enabled: !!uuid,
     staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+};
+
+//Actualizar comprobante
+export const useActualizarEstadoComprobante = () => {
+  return useMutation({
+    mutationFn: async ({ uuid, estado }: { uuid: string; estado: "Aceptado" | "Rechazado" }) => {
+      const res = await axios.patch(`http://localhost:3000/pagos/comprobante/${uuid}`, { estado });
+      return res.data;
+    },
   });
 };

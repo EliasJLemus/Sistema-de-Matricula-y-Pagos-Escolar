@@ -37,6 +37,7 @@ export interface MatriculaPagoType {
   }
 
   export interface MatriculaTableType {
+    uuid_matricula?: string;
     codigo_matricula: string;
     codigo_estudiante: string;
     nombre_estudiante: string;

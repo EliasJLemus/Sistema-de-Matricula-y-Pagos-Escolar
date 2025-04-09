@@ -192,3 +192,32 @@ export const obtenerMatriculaPorUuid = async (req: Request, res: Response): Prom
   }
 };
 
+export const actualizarEstadoComprobanteController = async (req: Request, res: Response): Promise<void> => {
+  const { uuid } = req.params;
+  const { estado } = req.body;
+
+  if (!uuid || !estado || !["Aceptado", "Rechazado"].includes(estado)) {
+     res.status(400).json({
+      success: false,
+      message: "UUID o estado inválido. Estados permitidos: Aceptado, Rechazado.",
+    });
+    return
+  }
+
+  try {
+  await pagosMatriculasDB.actualizarEstadoComprobante(uuid, estado);
+
+     res.status(200).json({
+      success: true,
+      message: `Comprobante ${estado.toLowerCase()} correctamente.`,
+    });
+    return
+  } catch (error) {
+    console.error("❌ Error al actualizar estado del comprobante:", error);
+     res.status(500).json({
+      success: false,
+      message: "Error al actualizar estado del comprobante.",
+    });
+    return
+  }
+};
