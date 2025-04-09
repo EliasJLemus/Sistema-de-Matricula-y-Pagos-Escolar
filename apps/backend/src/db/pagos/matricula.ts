@@ -182,5 +182,55 @@ export class PagosMatriculasDB {
     }
   }
   
+  public async getAllMatriculas(limit: number, offset: number) {
+    try {
+      const client = await this.db.getClient();
+
+      const query = `
+       SELECT 
+        m.codigo_matricula,
+        e.codigo_estudiante,
+        i.primer_nombre || ' ' || i.primer_apellido AS nombre_estudiante,
+        g.nombre_grado,
+        g.seccion,
+        ppm.tarifa,
+        COALESCE(b.nombre_beca, 'Sin beneficio') AS beneficio,
+        COALESCE(b.descuento, 0) AS descuento,
+        (ppm.tarifa - (ppm.tarifa * COALESCE(b.descuento, 0) / 100)) AS total,
+        m.estado,
+        cp.estado AS estado_comprobante,
+        m.fecha_matricula
+      FROM "Pagos"."Matricula" m
+      JOIN "Estudiantes"."Estudiantes" e ON e.uuid = m.uuid_estudiante
+      JOIN "Estudiantes"."InformacionGeneral" i ON i.uuid = e.uuid_info_general
+      JOIN "Administracion"."Grados" g ON g.uuid = e.uuid_grado
+      JOIN "Pagos"."PlanPagoMatricula" ppm ON ppm.uuid = m.uuid_plan_matricula
+      LEFT JOIN "Pagos"."PlanPagoDetallado" pd ON pd.uuid_estudiante = e.uuid AND pd.uuid_plan_matricula = ppm.uuid
+      LEFT JOIN "Pagos"."Becas" b ON b.uuid = m.uuid_beca
+      LEFT JOIN "Pagos"."ComprobantePago" cp ON cp.uuid = m.uuid_comprobante
+      ORDER BY m.fecha_matricula ASC
+              LIMIT $1 OFFSET $2;
+      `;
+
+      const countQuery = `
+        SELECT COUNT(*) FROM "Pagos"."Matricula"
+      `;
+
+      const [result, countResult] = await Promise.all([
+        client.query(query, [limit, offset]),
+        client.query(countQuery),
+      ]);
+
+      client.release();
+
+      return {
+        data: result.rows,
+        total: parseInt(countResult.rows[0].count),
+      };
+    } catch (error) {
+      console.error("❌ Error al obtener todas las matrículas:", error);
+      throw new Error("Error al obtener las matrículas.");
+    }
+  }
 
 }

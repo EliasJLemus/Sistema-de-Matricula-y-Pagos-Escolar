@@ -13,7 +13,7 @@ import {
 } from "@shared/reportsType";
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
-import {MatriculaType} from "@shared/pagos"
+import {MatriculaTableType, MatriculaType} from "@shared/pagos"
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -478,5 +478,49 @@ export const useCrearMatricula = () => {
     onError: (error: any) => {
       throw new Error(error?.response?.data?.message || "Error al crear matrícula");
     },
+  });
+};
+
+
+
+interface FiltersType {
+  nombreEstudiante?: string;
+  grado?: string;
+  estado?: string;
+  year?: number;
+}
+
+interface ResponseStructure {
+  data: MatriculaTableType[];
+  pagination: {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
+  };
+}
+
+export const useGetMatriculas = (
+  page: number,
+  limit: number,
+  filters: FiltrosMatricula
+): UseQueryResult<StructureAndData<MatriculaTableType>, Error> => {
+  return useQuery({
+    queryKey: ["getMatriculas", page, limit, JSON.stringify(filters)],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+      if (filters.nombre) params.append("nombre", filters.nombre);
+      if (filters.grado) params.append("grado", filters.grado);
+      if (filters.estado) params.append("estado", filters.estado);
+      if (filters.year) params.append("year", filters.year.toString());
+
+      const response = await axios.get<StructureAndData<MatriculaTableType>>(
+        `http://localhost:3000/pagos/matriculas?${params.toString()}`
+      );
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
   });
 };

@@ -139,3 +139,27 @@ export const crearMatriculaController = async (req: Request, res: Response): Pro
   }
 };
 
+export const getAllMatriculasController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { limit, offset } = getPaginationParams(req);
+
+    const { data, total } = await pagosMatriculasDB.getAllMatriculas(limit, offset);
+
+    res.status(200).json({
+      success: true,
+      data,
+      pagination: {
+        limit,
+        offset,
+        count: data.length,
+        total,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error en getAllMatriculasController:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las matrículas.",
+    });
+  }
+};

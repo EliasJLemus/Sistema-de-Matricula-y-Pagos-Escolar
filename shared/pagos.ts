@@ -35,3 +35,19 @@ export interface MatriculaPagoType {
     codigo_encargado_secundario?: string;
     nombre_encargado_secundario?: string
   }
+
+  export interface MatriculaTableType {
+    codigo_matricula: string;
+    codigo_estudiante: string;
+    nombre_estudiante: string;
+    nombre_grado: string;
+    seccion: string;
+    tarifa: string;
+    beneficio: string;
+    descuento: number;
+    total: string;
+    estado: string;
+    estado_comprobante: string;
+    fecha_matricula: string;
+  }
+  

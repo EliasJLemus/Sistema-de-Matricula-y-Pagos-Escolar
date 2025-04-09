@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { TablaMatricula } from "./TablaMatricula";
+import TablaMatricula from "./TablaMatricula";
 import MatriculaModal from "./MatriculaModal";
 
-const fontFamily =
-  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const fontFamily = "'Nunito', sans-serif";
 
 const MatriculaPage: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
-  const [selectedMatriculaId, setSelectedMatriculaId] = useState<number | null>(null);
+  const [selectedMatriculaId, setSelectedMatriculaId] = useState<string | null>(null);
 
-  // Handlers para modales
   const handleOpenCreateModal = () => setCreateModalOpen(true);
   const handleCloseCreateModal = () => setCreateModalOpen(false);
 
-  const handleOpenEditModal = (id: number) => {
-    setSelectedMatriculaId(id);
+  const handleOpenEditModal = (codigo: string) => {
+    setSelectedMatriculaId(codigo);
     setEditModalOpen(true);
   };
 
@@ -36,7 +34,7 @@ const MatriculaPage: React.FC = () => {
           color: "#1A1363",
           display: "flex",
           alignItems: "center",
-          gap: 2
+          gap: 2,
         }}
       >
         <svg
@@ -46,8 +44,8 @@ const MatriculaPage: React.FC = () => {
           viewBox="0 0 24 24"
           fill="#1A1363"
         >
-          <path d="M17 3h-1v2h-3V3H7v2H4V3H3v18h18V3h-4zm0 16H5V5h1v2h3V5h6v2h3V5h1v14z"/>
-          <path d="M15 11h-2V9h-2v2H9v2h2v2h2v-2h2z"/>
+          <path d="M17 3h-1v2h-3V3H7v2H4V3H3v18h18V3h-4zm0 16H5V5h1v2h3V5h6v2h3V5h1v14z" />
+          <path d="M15 11h-2V9h-2v2H9v2h2v2h2v-2h2z" />
         </svg>
         Gestión de Matrículas
       </Typography>
@@ -57,7 +55,6 @@ const MatriculaPage: React.FC = () => {
         onEditMatricula={handleOpenEditModal}
       />
 
-      {/* Modales */}
       <MatriculaModal
         open={createModalOpen}
         onClose={handleCloseCreateModal}

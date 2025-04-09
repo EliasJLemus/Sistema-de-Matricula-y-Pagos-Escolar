@@ -155,7 +155,7 @@ const fetchMatriculas = async (
 };
 
 // Hook personalizado para matrículas
-export const useGetMatriculas = (
+export const useGetMatriculasPagos = (
   page: number,
   limit: number,
   filters: {
@@ -172,4 +172,3 @@ export const useGetMatriculas = (
   });
 };
 
-export default useGetMatriculas;
