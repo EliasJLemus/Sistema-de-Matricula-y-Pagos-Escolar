@@ -18,11 +18,16 @@ import {
   Card,
   CardContent,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+
 } from "@mui/material";
 
 const fontFamily = "'Nunito', sans-serif";
 
-// Lista mock de estudiantes (puedes reutilizar la misma)
 const estudiantes = [
   { numero: "EST001", nombre: "Abigail López" },
   { numero: "EST002", nombre: "Carlos Martínez" },
@@ -47,6 +52,8 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -57,7 +64,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     fecha_vencimiento: "",
     monto_total: 5000,
     beneficio_aplicado: "",
-    porcentaje_descuento: 0,
+    porcentaje_descuento: "0%",
     saldo_pagado: 0,
     recargo: 0,
     estado: "Pendiente",
@@ -69,7 +76,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   useEffect(() => {
     if (isEditing && mensualidadId) {
       setIsLoading(true);
-      // Simular carga de datos de mensualidad
       setTimeout(() => {
         setFormData({
           numero_estudiante: "EST001",
@@ -80,7 +86,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
           fecha_vencimiento: "2025-03-01",
           monto_total: 5000,
           beneficio_aplicado: "Descuento Hermanos",
-          porcentaje_descuento: 25,
+          porcentaje_descuento: "25%",
           saldo_pagado: 3750,
           recargo: 0,
           estado: "Parcial",
@@ -92,7 +98,8 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   }, [isEditing, mensualidadId]);
 
   const calculateSaldoPendiente = () => {
-    const descuento = formData.monto_total * (formData.porcentaje_descuento / 100);
+    const porcentaje = parseInt(formData.porcentaje_descuento.replace('%', ''));
+    const descuento = formData.monto_total * (porcentaje / 100);
     const totalConDescuento = formData.monto_total - descuento;
     return totalConDescuento - formData.saldo_pagado + formData.recargo;
   };
@@ -110,7 +117,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: name === "porcentaje_descuento" || name === "saldo_pagado" || name === "recargo" 
+        [name]: name === "saldo_pagado" || name === "recargo" 
           ? Number(value) 
           : value
       }));
@@ -146,21 +153,97 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
           saldo_pendiente: calculateSaldoPendiente()
         });
         setIsSubmitting(false);
-        onClose?.();
-        navigate("/mensualidades");
+        setAlertMessage("Se guardó exitosamente la mensualidad");
+        setAlertSeverity("success");
+        setAlertOpen(true);
       }, 1500);
     }
   };
 
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/mensualidad");
+    }
+  };
+
+   // Estilo para botón primario verde
+   const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+
   return (
     <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
-      <Snackbar
+     <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
+        onClose={handleSnackbarClose}
       >
-        <Alert severity="error">{alertMessage}</Alert>
+        <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/mensualidad");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Typography variant="h4" sx={{ 
@@ -184,13 +267,12 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
         ) : (
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Columna izquierda: Formulario */}
               <Grid item xs={12} md={8}>
                 <Card sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 3, color: '#1A1363', display: 'flex', alignItems: 'center', gap: 1 }}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#1A1363">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z" />
+                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/>
                       </svg>
                       Información de la Mensualidad
                     </Typography>
@@ -265,7 +347,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                 </Card>
               </Grid>
 
-              {/* Columna derecha: Imagen del comprobante */}
               <Grid item xs={12} md={4}>
                 <Paper
                   sx={{
@@ -280,7 +361,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                     Comprobante de Pago
                   </Typography>
 
-                  {/* Espacio para cargar la imagen */}
                   {formData.comprobante ? (
                     <Box
                       component="img"
@@ -299,7 +379,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                     </Typography>
                   )}
 
-                  {/* Botón para cargar la imagen */}
                   <Button
                     variant="contained"
                     component="label"
@@ -334,7 +413,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                 </Paper>
               </Grid>
 
-              {/* Sección Detalles de Pago */}
               <Grid item xs={12}>
                 <Card sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                   <CardContent>
@@ -405,16 +483,23 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                         </FormControl>
                       </Grid>
 
+                      {/* Campo modificado: Select para descuentos */}
                       <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="% Descuento"
-                          name="porcentaje_descuento"
-                          type="number"
-                          value={formData.porcentaje_descuento}
-                          onChange={handleChange}
-                          InputProps={{ inputProps: { min: 0, max: 100 } }}
-                        />
+                        <FormControl fullWidth>
+                          <InputLabel>Descuento</InputLabel>
+                          <Select
+                            name="porcentaje_descuento"
+                            value={formData.porcentaje_descuento}
+                            onChange={handleChange}
+                            label="Descuento"
+                          >
+                            {[0, 10, 20, 25, 50, 75, 100].map(desc => (
+                              <MenuItem key={desc} value={`${desc}%`}>
+                                {desc}% Descuento
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Grid>
 
                       <Grid item xs={12} md={6}>
@@ -474,7 +559,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                 </Card>
               </Grid>
 
-              {/* Botones de Acción */}
               <Grid item xs={12} sx={{ mt: 4 }}>
                 <Box
                   sx={{
@@ -486,29 +570,63 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                     mt: 2,
                   }}
                 >
-                  {/* Botón Cancelar */}
                   <Button
-                    variant="outlined"
-                    onClick={onClose || (() => navigate('/mensualidades'))}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '12px',
-                      borderColor: '#1A1363',
-                      color: '#1A1363',
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      '&:hover': {
-                        bgcolor: '#1A136310',
-                        borderColor: '#1A1363',
-                      },
-                    }}
+            variant="outlined"
+            onClick={() => setOpenCancelDialog(true)}  // Cambiado aquí
+            sx={{
+              fontFamily,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              borderColor: '#1A1363',
+              color: '#1A1363',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: '#1A136310',
+                borderColor: '#1A1363',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+                  <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={primaryButtonStyle}
+              startIcon={  // Cambiado de endIcon a startIcon
+                isSubmitting ? (
+                  <CircularProgress size={20} sx={{ color: "white" }} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    Cancelar
-                  </Button>
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                )
+              }
+              >
+              {isSubmitting
+                ? isEditing
+                  ? "Actualizando..."
+                  : "Guardando..."
+                : isEditing
+                ? "Actualizar"
+                : "Guardar"}
+            </Button>
 
-                  {/* Botón Registrar y Generar Factura */}
+
                   {isEditing && (
                     <Button
                       variant="contained"
@@ -523,16 +641,11 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                         textTransform: 'none',
                         '&:hover': { bgcolor: '#d96d1c' },
                       }}
-                      onClick={() => {
-                        console.log('Registrar y Generar Factura');
-                        // Aquí puedes agregar la lógica para registrar y generar factura
-                      }}
                     >
                       Registrar y Generar Factura
                     </Button>
                   )}
 
-                  {/* Botón Efectuar Pago */}
                   {isEditing && (
                     <Button
                       variant="contained"
@@ -546,10 +659,6 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
                         fontWeight: 600,
                         textTransform: 'none',
                         '&:hover': { bgcolor: '#3e682e' },
-                      }}
-                      onClick={() => {
-                        console.log('Efectuar Pago');
-                        // Aquí puedes agregar la lógica para efectuar el pago
                       }}
                     >
                       Efectuar Pago

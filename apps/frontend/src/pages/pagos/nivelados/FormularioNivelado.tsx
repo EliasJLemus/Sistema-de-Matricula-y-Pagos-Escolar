@@ -18,6 +18,11 @@ import {
   Card,
   CardContent,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 const fontFamily = "'Nunito', sans-serif";
@@ -47,6 +52,8 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -141,9 +148,22 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
           saldo_restante: calculateSaldoRestante()
         });
         setIsSubmitting(false);
-        onClose?.();
-        navigate("/nivelados");
+        setAlertMessage("Se guardó exitosamente el plan nivelado");
+        setAlertSeverity("success");
+        setAlertOpen(true);
       }, 1500);
+    }
+  };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/nivelados");
     }
   };
 
@@ -182,10 +202,44 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
       <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
+        onClose={handleSnackbarClose}
       >
-        <Alert severity="error">{alertMessage}</Alert>
+     <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/nivelados");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
+
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Typography variant="h4" sx={{ 
@@ -476,60 +530,60 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
               {/* Botones de Acción */}
               <Grid item xs={12} sx={{ mt: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="outlined"
-                    onClick={onClose || (() => navigate('/nivelados'))}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      borderColor: '#1A1363',
-                      color: '#1A1363',
-                      '&:hover': {
-                        bgcolor: '#1A136310',
-                        borderColor: '#1A1363'
-                      }
-                    }}
-                  >
-                    Cancelar
-                  </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setOpenCancelDialog(true)}
+                  sx={{
+                    fontFamily,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: '8px',
+                    borderColor: '#1A1363',
+                    color: '#1A1363',
+                    '&:hover': {
+                      bgcolor: '#1A136310',
+                      borderColor: '#1A1363'
+                    }
+                  }}
+                >
+                  Cancelar
+                </Button>
                   
-                  <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              sx={primaryButtonStyle}
-              startIcon={  // Cambiado de endIcon a startIcon
-                isSubmitting ? (
-                  <CircularProgress size={20} sx={{ color: "white" }} />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                    <polyline points="7 3 7 8 15 8"></polyline>
-                  </svg>
-                )
-              }
-              >
-              {isSubmitting
-                ? isEditing
-                  ? "Actualizando..."
-                  : "Guardando..."
-                : isEditing
-                ? "Actualizar"
-                : "Guardar"}
-            </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={primaryButtonStyle}
+                  startIcon={
+                    isSubmitting ? (
+                      <CircularProgress size={20} sx={{ color: "white" }} />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                      </svg>
+                    )
+                  }
+                >
+                  {isSubmitting
+                    ? isEditing
+                      ? "Actualizando..."
+                      : "Guardando..."
+                    : isEditing
+                    ? "Actualizar"
+                    : "Guardar"}
+                </Button>
   {/* Botón Registrar y Generar Factura */}
   {isEditing && (
                     <Button

@@ -18,6 +18,11 @@ import {
   Card,
   CardContent,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 const fontFamily = "'Nunito', sans-serif";
@@ -47,6 +52,8 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+    const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -138,6 +145,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -145,23 +153,99 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
       setIsSubmitting(true);
       
       setTimeout(() => {
-        console.log("Datos guardados:", formData);
+        console.log("Datos guardados:",formData);
         setIsSubmitting(false);
-        onClose?.();
-        navigate("/matriculas");
+        setAlertMessage("Se guardó exitosamente la matricula");
+        setAlertSeverity("success");
+        setAlertOpen(true);
       }, 1500);
     }
   };
 
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/matricula");
+    }
+  };
+
+
+  // Estilo para botón primario verde
+  const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
   return (
     <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
-      <Snackbar
+     <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
+        onClose={handleSnackbarClose}
       >
-        <Alert severity="error">{alertMessage}</Alert>
+        <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/matricula");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Typography variant="h4" sx={{ 
@@ -457,7 +541,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                             onChange={handleChange}
                             label="Descuento"
                           >
-                            {[0, 10, 20, 25, 30, 50, 100].map(desc => (
+                            {[0, 10, 20, 25, 50, 75, 100].map(desc => (
                               <MenuItem key={desc} value={`${desc}%`}>
                                 {desc}% Descuento
                               </MenuItem>
@@ -528,25 +612,62 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                 >
                   {/* Botón Cancelar */}
                   <Button
-                    variant="outlined"
-                    onClick={onClose || (() => navigate("/matriculas"))}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: "12px",
-                      borderColor: "#1A1363",
-                      color: "#1A1363",
-                      fontWeight: 600,
-                      textTransform: "none",
-                      "&:hover": {
-                        bgcolor: "#1A136310",
-                        borderColor: "#1A1363",
-                      },
-                    }}
+            variant="outlined"
+            onClick={() => setOpenCancelDialog(true)}  // Cambiado aquí
+            sx={{
+              fontFamily,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              borderColor: '#1A1363',
+              color: '#1A1363',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: '#1A136310',
+                borderColor: '#1A1363',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+
+<Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={primaryButtonStyle}
+              startIcon={  // Cambiado de endIcon a startIcon
+                isSubmitting ? (
+                  <CircularProgress size={20} sx={{ color: "white" }} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    Cancelar
-                  </Button>
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                )
+              }
+              >
+              {isSubmitting
+                ? isEditing
+                  ? "Actualizando..."
+                  : "Guardando..."
+                : isEditing
+                ? "Actualizar"
+                : "Guardar"}
+            </Button>
+
 
                   {/* Botón Registrar y Generar Factura */}
                   {isEditing && (
