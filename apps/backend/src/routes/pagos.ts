@@ -2,7 +2,8 @@ import {Router} from "express"
 import {getMatriculasController,
     getMatriculaByEstudianteAndYearController,
     crearMatriculaController,
-    getAllMatriculasController
+    getAllMatriculasController,
+    obtenerMatriculaPorUuid
 } from "@/controller/pagos/matriculaController"
 
 const pagosRoute = Router();
@@ -15,5 +16,8 @@ pagosRoute.get("/matriculaByUuid/:uuid_estudiante", getMatriculaByEstudianteAndY
 pagosRoute.post("/creacion-matricula", crearMatriculaController)
 
 pagosRoute.get("/matriculas", getAllMatriculasController);
+
+pagosRoute.get("/matricula/:uuid", obtenerMatriculaPorUuid);
+
 
 export default pagosRoute

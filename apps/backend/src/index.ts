@@ -6,6 +6,7 @@ import cors from "cors";
 import {login} from "@/controller/autController"
 import pagosRoute from "@/routes/pagos"
 import comprobanteRoute from "@/routes/comprobantes"
+import path from "path";
 // import "../src/db/estudiantes/apoderadosDB"
 // import "./envio"
 
@@ -16,6 +17,9 @@ app.use(json());
 app.use(cors({
     origin: "*"
 }))
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 
 // app.use("/", (req, res) => {
 //     res.json({message: "Probando una ruta random en el backend"})

@@ -233,4 +233,59 @@ export class PagosMatriculasDB {
     }
   }
 
+  public async getMatriculaPorUuid(uuid_matricula: string) {
+    try {
+      const client = await this.db.getClient();
+  
+      const result = await client.query(
+        `
+        SELECT
+          m.uuid AS uuid_matricula,
+          m.codigo_matricula,
+          m.fecha_matricula,
+          m.estado,
+          m.year_academico,
+  
+          e.uuid AS uuid_estudiante,
+          e.codigo_estudiante,
+          ig.primer_nombre || ' ' || ig.primer_apellido AS nombre_estudiante,
+  
+          g.nombre_grado,
+          g.seccion,
+  
+          ppm.tarifa AS tarifa_base,
+  
+          co.estado AS estado_comprobante,
+  
+          enc.codigo_encargado AS codigo_encargado_principal,
+          ieg.primer_nombre || ' ' || ieg.primer_apellido AS nombre_encargado_principal,
+  
+          -- ✅ Se reemplaza la ruta absoluta con una ruta accesible desde el frontend
+          CONCAT('/uploads/comprobantesMatricula/', REGEXP_REPLACE(co.url_imagen, '^.*[\\/]', '')) AS url_imagen
+  
+        FROM "Pagos"."Matricula" m
+        JOIN "Estudiantes"."Estudiantes" e ON e.uuid = m.uuid_estudiante
+        JOIN "Estudiantes"."InformacionGeneral" ig ON ig.uuid = e.uuid_info_general
+  
+        LEFT JOIN "Administracion"."Grados" g ON g.uuid = e.uuid_grado
+        LEFT JOIN "Pagos"."PlanPagoMatricula" ppm ON ppm.uuid = m.uuid_plan_matricula
+        LEFT JOIN "Pagos"."ComprobantePago" co ON co.uuid = m.uuid_comprobante
+  
+        LEFT JOIN "Estudiantes"."EstudianteEncargado" ee ON ee.uuid_estudiante = e.uuid AND ee.es_principal = true
+        LEFT JOIN "Estudiantes"."Encargados" enc ON enc.uuid = ee.uuid_encargado
+        LEFT JOIN "Estudiantes"."InformacionGeneral" ieg ON ieg.uuid = enc.uuid_info_general
+        
+        WHERE m.uuid = $1
+        `,
+        [uuid_matricula]
+      );
+  
+      return result.rows[0];
+    } catch (error) {
+      console.error("Error en getMatriculaPorUuid:", error);
+      throw new Error("No se pudo obtener la matrícula");
+    }
+  }
+  
+
 }

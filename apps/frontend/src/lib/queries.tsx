@@ -524,3 +524,49 @@ export const useGetMatriculas = (
     staleTime: 1000 * 60 * 5,
   });
 };
+
+// ======================
+// Hook para obtener matrícula por UUID
+// ======================
+
+interface MatriculaConImagen extends MatriculaType {
+  url_imagen?: string;
+}
+
+
+interface BackendResponse {
+  success: boolean;
+  data: MatriculaConImagen;
+  message: string;
+}
+
+export const useGetMatriculaByUuid = (
+  uuid: string
+): UseQueryResult<BackendResponse, Error> => {
+  return useQuery({
+    queryKey: ["getMatriculaByUuid", uuid],
+    queryFn: async () => {
+      const response = await axios.get<BackendResponse>(
+        `http://localhost:3000/pagos/matricula/${uuid}`
+      );
+
+      // Reemplazar ruta absoluta por ruta accesible públicamente
+      const updatedData = {
+        ...response.data,
+        data: {
+          ...response.data.data,
+          url_imagen: response.data.data.url_imagen
+            ? response.data.data.url_imagen.replace(
+                "/home/andrea/repo/Sistema-de-Matricula-y-Pagos-Escolar/apps/backend/uploads",
+                "http://localhost:3000/uploads"
+              )
+            : undefined,
+        },
+      };
+
+      return updatedData;
+    },
+    enabled: !!uuid,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+};

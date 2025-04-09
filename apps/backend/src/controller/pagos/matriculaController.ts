@@ -163,3 +163,32 @@ export const getAllMatriculasController = async (req: Request, res: Response): P
     });
   }
 };
+
+export const obtenerMatriculaPorUuid = async (req: Request, res: Response): Promise<void> => {
+  const { uuid } = req.params;
+
+  try {
+    const data = await pagosMatriculasDB.getMatriculaPorUuid(uuid);
+
+    if (!data) {
+      res.status(404).json({
+        success: false,
+        message: "Matrícula no encontrada.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data,
+      message: "Matrícula obtenida correctamente.",
+    });
+  } catch (error: any) {
+    console.error("Error al obtener matrícula:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error del servidor al obtener la matrícula.",
+    });
+  }
+};
+
