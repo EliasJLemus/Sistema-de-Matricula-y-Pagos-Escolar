@@ -26,6 +26,12 @@ import {
   Snackbar,
   useTheme,
   Checkbox,
+  InputAdornment,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from "@mui/material";
 import type { ApoderadoType } from "@/lib/queries/useGetApoderados";
 import { TelefonoInput } from "@/components/TelefonoInput";
@@ -56,6 +62,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
   const [alertSeverity, setAlertSeverity] = useState<"success" | "warning" | "error">("warning");
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [filterEstudiante, setFilterEstudiante] = useState("");
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const theme = useTheme();
 
   // Lista de estudiantes con sus datos
@@ -352,6 +359,24 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       setAlertSeverity("warning");
       setAlertMessage("Por favor complete todos los campos requeridos correctamente");
       setAlertOpen(true);
+    }
+  };
+
+  // Funciones para manejar el diálogo de cancelación
+  const handleOpenCancelDialog = () => {
+    setOpenCancelDialog(true);
+  };
+
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+  };
+
+  const handleConfirmCancel = () => {
+    setOpenCancelDialog(false);
+    if (isModal && onClose) {
+      onClose();
+    } else {
+      navigate("/apoderados");
     }
   };
 
@@ -917,7 +942,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Correo Electrónico"
+                      label={formData.correo_electronico || document.activeElement === document.querySelector('[name="correo_electronico"]') ? "Correo Electrónico" : ""}
                       name="correo_electronico"
                       type="email"
                       value={formData.correo_electronico || ""}
@@ -927,6 +952,30 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       helperText={errors.correo_electronico}
                       required
                       sx={textFieldStyle}
+                      placeholder="ejemplo: nombre@dominio.com"
+                      InputLabelProps={{
+                        shrink: !!formData.correo_electronico || document.activeElement === document.querySelector('[name="correo_electronico"]'),
+                      }}
+                      InputProps={{
+                        startAdornment: !formData.correo_electronico && document.activeElement !== document.querySelector('[name="correo_electronico"]') ? (
+                          <InputAdornment position="start" sx={{ color: "#999", mr: 1 }}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                              <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                          </InputAdornment>
+                        ) : null,
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -1149,7 +1198,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
           >
             <Button
               variant="contained"
-              onClick={() => isModal && onClose ? onClose() : navigate("/apoderados")}
+              onClick={handleOpenCancelDialog}
               sx={secondaryButtonStyle}
               startIcon={
                 <svg
@@ -1209,6 +1258,50 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
           </Box>
         </form>
       </Paper>
+
+      {/* Diálogo de confirmación para cancelar */}
+      <Dialog
+        open={openCancelDialog}
+        onClose={handleCloseCancelDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ fontFamily }}>
+          Confirmar cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description" sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleCloseCancelDialog} 
+            sx={{ 
+              fontFamily,
+              color: "#1A1363",
+              "&:hover": {
+                backgroundColor: "#f0f0f0"
+              }
+            }}
+          >
+            No
+          </Button>
+          <Button 
+            onClick={handleConfirmCancel} 
+            autoFocus
+            sx={{ 
+              fontFamily,
+              color: "#F38223",
+              "&:hover": {
+                backgroundColor: "#f0f0f0"
+              }
+            }}
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

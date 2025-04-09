@@ -57,6 +57,7 @@ interface TelefonoInputProps {
   helperText?: string;
   label?: string;
   onBlur?: () => void;
+  required?: boolean; // Nueva prop
 }
 
 export const TelefonoInput: React.FC<TelefonoInputProps> = ({ 
@@ -65,7 +66,8 @@ export const TelefonoInput: React.FC<TelefonoInputProps> = ({
   error = false,
   helperText = "",
   label = "Teléfono",
-  onBlur
+  onBlur,
+  required = false // Nueva prop con valor por defecto
 }) => {
   const theme = useTheme();
   const [paisSeleccionado, setPaisSeleccionado] = useState(paises[0]);
@@ -126,7 +128,9 @@ export const TelefonoInput: React.FC<TelefonoInputProps> = ({
   const handleBlur = () => {
     setIsFocused(false);
     setTouched(true);
-    if (numero.length !== paisSeleccionado.digitos) {
+    if (required && !numero) {
+      setErrorLocal("Este campo es requerido");
+    } else if (numero.length !== paisSeleccionado.digitos) {
       setErrorLocal(`${paisSeleccionado.digitos} dígitos requeridos`);
     } else {
       setErrorLocal("");
@@ -138,7 +142,7 @@ export const TelefonoInput: React.FC<TelefonoInputProps> = ({
     ? paises.filter(pais => 
         pais.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
         pais.codigo.includes(busqueda)
-    , paises)
+    )
     : paises;
 
   const hasError = (touched && !!errorLocal) || error;
@@ -148,6 +152,7 @@ export const TelefonoInput: React.FC<TelefonoInputProps> = ({
     <FormControl 
       fullWidth 
       error={hasError || showNumberError}
+      required={required} // Pasamos la prop required al FormControl
       sx={{
         '& .MuiInputLabel-root': {
           fontFamily: "'Nunito', sans-serif",
@@ -182,13 +187,16 @@ export const TelefonoInput: React.FC<TelefonoInputProps> = ({
         },
       }}
     >
-      <InputLabel htmlFor="telefono-input">{label}</InputLabel>
+      <InputLabel htmlFor="telefono-input" required={required}>
+        {label}
+      </InputLabel>
       <OutlinedInput
         id="telefono-input"
         value={numero}
         onChange={handleNumeroChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        required={required} // Pasamos la prop al OutlinedInput
         startAdornment={
           <InputAdornment position="start" sx={{ mr: 1 }}>
             <FormControl variant="standard" sx={{ minWidth: 70 }}>
