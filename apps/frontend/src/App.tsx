@@ -31,6 +31,11 @@ import Pagos from "./pages/pagos/Pagos";
  import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
  import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
  import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
+
+ import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
+ import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
+ import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
+
 import Login from "./pages/login/login";
 
 function App() {
@@ -193,7 +198,7 @@ function App() {
                    element={<EditarMatricula />}
                  />
  
-  {/* Rutas de matricula*/}
+  {/* Rutas de mensualidad*/}
   <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
                  <Route
                    path="/pagos/mensualidad/nuevo"
@@ -210,6 +215,20 @@ function App() {
                     isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
                   }
                 />
+
+ {/* Rutas de nivelados*/}
+                <Route path="/pagos/nivelados" element={<NiveladoPage />} />
+                
+                <Route path="/pagos/nivelados/nuevo"  element={<NuevoNivelado />} />
+                 <Route path="/pagos/nivelados/editar/:id" element={<EditarNivelado />}/>
+    
+                 <Route
+                  path="/subir-comprobante"
+                  element={
+                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
+                  }
+                />
+
               </Routes>
             </Box>
           </Box>
