@@ -74,7 +74,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     primer_apellido: "",
     segundo_apellido: "",
     identidad: "",
-    genero: undefined, // Cambiado a string vacío para que no haya selección inicial
+    genero: undefined,
     telefono_personal: "",
     correo_electronico: "",
     parentesco: "",
@@ -112,7 +112,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
           primer_apellido: "Pérez",
           segundo_apellido: "López",
           identidad: "0801198012345",
-          genero: "M", // En modo edición sí tendrá un valor
+          genero: "M",
           telefono_personal: "+50498765432",
           correo_electronico: "juan.perez@example.com",
           parentesco: "Padre",
@@ -130,7 +130,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
   }, [isEditing, actualId]);
 
   // Validar la entrada según el campo
-  const validateInput = (name: string, value: string): boolean => {
+  const validateInput = (name: string, value: string): { isValid: boolean; error?: string } => {
     // Solo letras con acentos y diéresis para nombres y apellidos (sin espacios al inicio)
     if (
       [
@@ -140,19 +140,27 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
         "segundo_apellido",
       ].includes(name)
     ) {
-      if (value.startsWith(" ")) return false;
-      return /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s]*$/.test(value);
+      if (value.startsWith(" ")) {
+        return { isValid: false, error: "No se permiten espacios al inicio" };
+      }
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s]*$/.test(value)) {
+        return { isValid: false, error: "Solo se permiten letras, acentos y diéresis" };
+      }
+      return { isValid: true };
     }
 
     // Solo números para identidad
     if (name === "identidad") {
-      return /^\d*$/.test(value);
+      if (!/^\d*$/.test(value)) {
+        return { isValid: false, error: "Solo se permiten números" };
+      }
+      return { isValid: true };
     }
 
     // Permitir siempre la escritura en el campo de correo
-    if (name === "correo_electronico") return true;
+    if (name === "correo_electronico") return { isValid: true };
 
-    return true;
+    return { isValid: true };
   };
 
   // Manejar blur de los campos
@@ -161,14 +169,16 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     setTouchedFields(prev => ({ ...prev, [name]: true }));
   };
 
-  // Actualizar el valor del formulario con validación
+  // Actualizar el valor del formulario con validación en tiempo real
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
     // Validar la entrada según el campo
-    if (validateInput(name, value)) {
+    const validation = validateInput(name, value);
+
+    if (validation.isValid) {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -183,30 +193,14 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
         });
       }
     } else {
-      // Si la entrada no es válida, establecer un mensaje de error específico
-      let errorMessage = "";
-
-      if (
-        [
-          "primer_nombre",
-          "segundo_nombre",
-          "primer_apellido",
-          "segundo_apellido",
-        ].includes(name)
-      ) {
-        if (value.startsWith(" ")) {
-          errorMessage = "No se permiten espacios al inicio";
-        } else {
-          errorMessage = "Solo se permiten letras, acentos y diéresis";
-        }
-      } else if (name === "identidad") {
-        errorMessage = "Solo se permiten números";
-      }
-
+      // Si la entrada no es válida, establecer el mensaje de error
       setErrors((prev) => ({
         ...prev,
-        [name]: errorMessage,
+        [name]: validation.error || "",
       }));
+      
+      // Marcar el campo como tocado para mostrar el error inmediatamente
+      setTouchedFields(prev => ({ ...prev, [name]: true }));
     }
   };
 
@@ -263,12 +257,16 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       newErrors.primer_nombre = "El primer nombre es requerido";
     } else if (formData.primer_nombre.startsWith(" ")) {
       newErrors.primer_nombre = "No se permiten espacios al inicio";
+    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s]+$/.test(formData.primer_nombre)) {
+      newErrors.primer_nombre = "Solo se permiten letras, acentos y diéresis";
     }
 
     if (!formData.primer_apellido?.trim()) {
       newErrors.primer_apellido = "El primer apellido es requerido";
     } else if (formData.primer_apellido.startsWith(" ")) {
       newErrors.primer_apellido = "No se permiten espacios al inicio";
+    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜäëïöüÄËÏÖÜ\s]+$/.test(formData.primer_apellido)) {
+      newErrors.primer_apellido = "Solo se permiten letras, acentos y diéresis";
     }
 
     if (!formData.identidad?.trim()) {
@@ -309,6 +307,21 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
   // Manejar envío del formulario
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Marcar todos los campos como tocados antes de validar
+    const allFields = {
+      primer_nombre: true,
+      segundo_nombre: true,
+      primer_apellido: true,
+      segundo_apellido: true,
+      identidad: true,
+      genero: true,
+      telefono_personal: true,
+      correo_electronico: true,
+      parentesco: true,
+      numero_estudiante: true,
+    };
+    setTouchedFields(allFields);
 
     if (validateForm()) {
       setIsSubmitting(true);
@@ -737,8 +750,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.primer_nombre || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.primer_nombre && touchedFields.primer_nombre}
-                      helperText={touchedFields.primer_nombre && errors.primer_nombre}
+                      error={!!errors.primer_nombre}
+                      helperText={errors.primer_nombre}
                       required
                       sx={textFieldStyle}
                     />
@@ -751,8 +764,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.segundo_nombre || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.segundo_nombre && touchedFields.segundo_nombre}
-                      helperText={touchedFields.segundo_nombre && errors.segundo_nombre}
+                      error={!!errors.segundo_nombre}
+                      helperText={errors.segundo_nombre}
                       sx={textFieldStyle}
                     />
                   </Grid>
@@ -764,8 +777,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.primer_apellido || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.primer_apellido && touchedFields.primer_apellido}
-                      helperText={touchedFields.primer_apellido && errors.primer_apellido}
+                      error={!!errors.primer_apellido}
+                      helperText={errors.primer_apellido}
                       required
                       sx={textFieldStyle}
                     />
@@ -778,8 +791,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.segundo_apellido || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.segundo_apellido && touchedFields.segundo_apellido}
-                      helperText={touchedFields.segundo_apellido && errors.segundo_apellido}
+                      error={!!errors.segundo_apellido}
+                      helperText={errors.segundo_apellido}
                       sx={textFieldStyle}
                     />
                   </Grid>
@@ -793,8 +806,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.identidad || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.identidad && touchedFields.identidad}
-                      helperText={touchedFields.identidad && errors.identidad}
+                      error={!!errors.identidad}
+                      helperText={errors.identidad}
                       required
                       inputProps={{
                         maxLength: 13
@@ -811,7 +824,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                           color: "#1A1363", 
                         },
                       }}
-                      error={!!errors.genero && touchedFields.genero}
+                      error={!!errors.genero}
                     >
                       <FormLabel id="genero-label">Género *</FormLabel>
                       <RadioGroup
@@ -820,7 +833,6 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                         name="genero"
                         value={formData.genero || ""}
                         onChange={handleSelectChange}
-                        onBlur={() => setTouchedFields(prev => ({ ...prev, genero: true }))}
                       >
                         <FormControlLabel
                           value="M"
@@ -885,7 +897,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                           }}
                         />
                       </RadioGroup>
-                      {errors.genero && touchedFields.genero && (
+                      {errors.genero && (
                         <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
                           {errors.genero}
                         </Typography>
@@ -911,8 +923,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       value={formData.correo_electronico || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={!!errors.correo_electronico && touchedFields.correo_electronico}
-                      helperText={touchedFields.correo_electronico && errors.correo_electronico}
+                      error={!!errors.correo_electronico}
+                      helperText={errors.correo_electronico}
                       required
                       sx={textFieldStyle}
                     />
@@ -920,7 +932,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                   <Grid item xs={12} md={6}>
                     <FormControl
                       fullWidth
-                      error={!!errors.parentesco && touchedFields.parentesco}
+                      error={!!errors.parentesco}
                       required
                       sx={formControlStyle}
                     >
@@ -931,7 +943,6 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                         value={formData.parentesco || ""}
                         label="Parentesco"
                         onChange={handleSelectChange}
-                        onBlur={() => setTouchedFields(prev => ({ ...prev, parentesco: true }))}
                         MenuProps={{
                           PaperProps: {
                             sx: {
@@ -952,7 +963,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                         <MenuItem value="Abuelo" sx={{ fontFamily }}>Abuelo</MenuItem>
                         <MenuItem value="Hermano" sx={{ fontFamily }}>Hermano</MenuItem>
                       </Select>
-                      {errors.parentesco && touchedFields.parentesco && (
+                      {errors.parentesco && (
                         <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
                           {errors.parentesco}
                         </Typography>
@@ -1030,7 +1041,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                   <Grid item xs={12} md={6}>
                     <FormControl
                       fullWidth
-                      error={!!errors.numero_estudiante && touchedFields.numero_estudiante}
+                      error={!!errors.numero_estudiante}
                       required
                       sx={formControlStyle}
                     >
@@ -1041,7 +1052,6 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                         value={formData.numero_estudiante || ""}
                         label="Estudiante Asociado"
                         onChange={handleSelectChange}
-                        onBlur={() => setTouchedFields(prev => ({ ...prev, numero_estudiante: true }))}
                         MenuProps={{
                           PaperProps: {
                             sx: {
@@ -1094,7 +1104,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                           </MenuItem>
                         )}
                       </Select>
-                      {errors.numero_estudiante && touchedFields.numero_estudiante && (
+                      {errors.numero_estudiante && (
                         <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
                           {errors.numero_estudiante}
                         </Typography>
