@@ -1,3 +1,4 @@
+// FormularioMatricula.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,8 +14,6 @@ import {
   MenuItem,
   Paper,
   CircularProgress,
-  Card,
-  CardContent,
   Grid,
   Dialog,
   DialogTitle,
@@ -23,12 +22,16 @@ import {
   DialogActions,
   Typography,
 } from "@mui/material";
-import { useGetMatriculaPagos, useCrearMatricula, useGetMatriculaByUuid, useGetVistaDetalleMatricula } from "@/lib/queries";
+import {
+  useGetMatriculaPagos,
+  useCrearMatricula,
+  useGetMatriculaByUuid,
+  useGetVistaDetalleMatricula,
+} from "@/lib/queries";
 import type { MatriculaType } from "@shared/pagos";
 import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-
 
 const fontFamily = "'Nunito', sans-serif";
 
@@ -66,9 +69,8 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
 
   const {
     data: vistaDetalleMatricula,
-    refetch: refetchDetalleMatricula
   } = useGetVistaDetalleMatricula(uuidEstudianteSeleccionado);
-  
+
   const { data, isLoading: isLoadingLista } = useGetMatriculaPagos({
     page: 1,
     limit: 100,
@@ -81,7 +83,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const estudiantesFiltrados = data?.data.filter(
     (e) => e.uuid_estudiante && e.nombre_estudiante
   );
-console.log(vistaDetalleMatricula)
+
   useEffect(() => {
     if (isEditing && dataMatricula?.data) {
       const matricula = dataMatricula.data;
@@ -96,7 +98,7 @@ console.log(vistaDetalleMatricula)
       const estudiante = estudiantesFiltrados?.find(
         (est) => est.uuid_estudiante === uuidEstudianteSeleccionado
       );
-  
+
       if (estudiante) {
         setFormData({
           ...estudiante,
@@ -117,7 +119,6 @@ console.log(vistaDetalleMatricula)
       }
     }
   }, [uuidEstudianteSeleccionado, vistaDetalleMatricula]);
-  
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -188,7 +189,7 @@ console.log(vistaDetalleMatricula)
             setModalStatus("success");
             setModalTitle("¡Matrícula registrada!");
             setModalDescription(res.data);
-            queryClient.invalidateQueries({ queryKey: ["getMatriculas"] });
+            queryClient.invalidateQueries({ queryKey: ["getMatriculaPagos"] });
           } else {
             setModalStatus("error");
             setModalTitle("Error");
@@ -207,10 +208,17 @@ console.log(vistaDetalleMatricula)
 
   return (
     <Box sx={{ maxWidth: 1000, margin: "auto", px: 2, py: 4 }}>
-      {/* Snackbar y Diálogo cancelación (igual) */}
-
       <Paper sx={{ p: 4, borderRadius: 4, boxShadow: 6, bgcolor: "#FAFAFF" }}>
-        <Typography variant="h4" sx={{ mb: 4, fontFamily, color: "#1A1363", fontWeight: 800, textAlign: "center" }}>
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 4,
+            fontFamily,
+            color: "#1A1363",
+            fontWeight: 800,
+            textAlign: "center",
+          }}
+        >
           {isEditing ? "Edición de Matrícula" : "Registro de Matrícula"}
         </Typography>
 
@@ -221,24 +229,38 @@ console.log(vistaDetalleMatricula)
         ) : (
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-
-              {/* Grado */}
+              {/* Campos de selección y solo lectura */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!errors.grado}>
                   <InputLabel>Grado</InputLabel>
-                  <Select name="grado" value={gradoSeleccionado} onChange={handleChange} label="Grado" disabled={isEditing} sx={{ fontFamily }}>
+                  <Select
+                    name="grado"
+                    value={gradoSeleccionado}
+                    onChange={handleChange}
+                    label="Grado"
+                    disabled={isEditing}
+                    sx={{ fontFamily }}
+                  >
                     {["Kinder", "Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno"].map((grado) => (
-                      <MenuItem key={grado} value={grado} sx={{ fontFamily }}>{grado}</MenuItem>
+                      <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
+                        {grado}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
 
-              {/* Estudiante */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!errors.uuid_estudiante}>
                   <InputLabel>Estudiante</InputLabel>
-                  <Select name="uuid_estudiante" value={uuidEstudianteSeleccionado} onChange={handleChange} label="Estudiante" disabled={isEditing} sx={{ fontFamily }}>
+                  <Select
+                    name="uuid_estudiante"
+                    value={uuidEstudianteSeleccionado}
+                    onChange={handleChange}
+                    label="Estudiante"
+                    disabled={isEditing}
+                    sx={{ fontFamily }}
+                  >
                     {estudiantesFiltrados?.map((est) => (
                       <MenuItem key={est.uuid_estudiante} value={est.uuid_estudiante} sx={{ fontFamily }}>
                         {est.nombre_estudiante}
@@ -248,7 +270,6 @@ console.log(vistaDetalleMatricula)
                 </FormControl>
               </Grid>
 
-              {/* Fecha matrícula */}
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -264,72 +285,87 @@ console.log(vistaDetalleMatricula)
                 />
               </Grid>
 
-              {/* CAMPOS NUEVOS - SOLO LECTURA */}
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Tipo de Pago" value={formData.tipo_pago || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField fullWidth label="Descripción" value={formData.descripcion || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Periodicidad" value={formData.periodicidad || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Código Plan Detallado" value={formData.codigo_plan_detallado || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Código Plan Matrícula" value={formData.codigo_plan_matricula || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Tarifa del Plan" value={formData.tarifa_plan_matricula || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Vencimiento" value={formData.vencimiento?.substring(0, 10) || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Tipo Plan Matrícula" value={formData.tipo_plan_matricula || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Nivel" value={formData.nivel_plan_matricula || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
+              {/* Campos de solo lectura */}
+              {[
+                ["Tipo de Pago", "tipo_pago"],
+                ["Descripción", "descripcion"],
+                ["Periodicidad", "periodicidad"],
+                ["Código Plan Detallado", "codigo_plan_detallado"],
+                ["Código Plan Matrícula", "codigo_plan_matricula"],
+                ["Tarifa del Plan", "tarifa_plan_matricula"],
+                ["Vencimiento", "vencimiento"],
+                ["Tipo Plan Matrícula", "tipo_plan_matricula"],
+                ["Nivel", "nivel_plan_matricula"],
+                ["Año Académico", "year_plan_matricula"],
+                ["Beca Aplicada", "nombre_beca"],
+                ["Descuento", "descuento"],
+                ["Código de Beca", "codigo_beca"],
+              ].map(([label, key], i) => (
+                <Grid item xs={12} md={6} key={key}>
+                  <TextField
+                    fullWidth
+                    label={label}
+                    value={
+                      key === "descuento"
+                        ? formData.descuento
+                          ? `${formData.descuento}%`
+                          : "0%"
+                        : key === "vencimiento"
+                        ? formData.vencimiento?.substring(0, 10) || ""
+                        : formData[key as keyof MatriculaType] || ""
+                    }
+                    InputProps={{ readOnly: true }}
+                    sx={{ fontFamily }}
+                  />
+                </Grid>
+              ))}
 
               <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Año Académico" value={formData.year_plan_matricula || ""} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
+                <TextField
+                  fullWidth
+                  label="Total a Pagar"
+                  value={`L. ${formData.total_matricula || formData.tarifa_plan_matricula || "0.00"}`}
+                  InputProps={{ readOnly: true }}
+                  sx={{ fontFamily, fontWeight: 600 }}
+                />
               </Grid>
 
-              {/* Datos de beca si existen */}
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Beca Aplicada" value={formData.nombre_beca || "Sin beca"} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Descuento" value={formData.descuento ? `${formData.descuento}%` : "0%"} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Código de Beca" value={formData.codigo_beca || "-"} InputProps={{ readOnly: true }} sx={{ fontFamily }} />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Total a Pagar" value={`L. ${formData.total_matricula || formData.tarifa_plan_matricula || "0.00"}`} InputProps={{ readOnly: true }} sx={{ fontFamily, fontWeight: 600 }} />
-              </Grid>
-
-              {/* BOTONES */}
+              {/* Botones */}
               <Grid item xs={12}>
                 <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
-                  <Button variant="outlined" onClick={() => setOpenCancelDialog(true)} sx={{ fontFamily, borderColor: "#1A1363", color: "#1A1363", px: 4, fontWeight: 600 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setOpenCancelDialog(true)}
+                    sx={{
+                      fontFamily,
+                      borderColor: "#1A1363",
+                      color: "#1A1363",
+                      px: 4,
+                      fontWeight: 600,
+                    }}
+                  >
                     Cancelar
                   </Button>
-                  <Button type="submit" variant="contained" disabled={isSubmitting} sx={{ bgcolor: "#538A3E", fontFamily, color: "white", px: 4, fontWeight: 600, "&:hover": { bgcolor: "#426E30" } }}>
-                    {isSubmitting ? (isEditing ? "Actualizando..." : "Guardando...") : isEditing ? "Actualizar Matrícula" : "Registrar Matrícula"}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    sx={{
+                      bgcolor: "#538A3E",
+                      fontFamily,
+                      color: "white",
+                      px: 4,
+                      fontWeight: 600,
+                      "&:hover": { bgcolor: "#426E30" },
+                    }}
+                  >
+                    {isSubmitting
+                      ? isEditing
+                        ? "Actualizando..."
+                        : "Guardando..."
+                      : isEditing
+                      ? "Actualizar Matrícula"
+                      : "Registrar Matrícula"}
                   </Button>
                 </Box>
               </Grid>
@@ -338,7 +374,42 @@ console.log(vistaDetalleMatricula)
         )}
       </Paper>
 
-      <FeedbackModal open={modalOpen} status={modalStatus} title={modalTitle} description={modalDescription} onClose={handleCloseModal} />
+      {/* Modales y alertas */}
+      <FeedbackModal
+        open={modalOpen}
+        status={modalStatus}
+        title={modalTitle}
+        description={modalDescription}
+        onClose={handleCloseModal}
+      />
+
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ fontFamily }}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
+
+      <Dialog open={openCancelDialog} onClose={() => setOpenCancelDialog(false)}>
+        <DialogTitle sx={{ fontFamily, fontWeight: 700 }}>¿Cancelar Registro?</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Estás seguro de que deseas cancelar el registro de esta matrícula? Los datos ingresados no se guardarán.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenCancelDialog(false)} sx={{ fontFamily }}>
+            Continuar editando
+          </Button>
+          <Button onClick={() => { setOpenCancelDialog(false); onClose(); }} color="error" variant="contained" sx={{ fontFamily }}>
+            Cancelar Registro
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
