@@ -24,18 +24,15 @@ import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
 import SubirComprobante from "./components/Comprobante/subirComprobante";
 import Pagos from "./pages/pagos/Pagos";
- import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
- import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
- import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
- 
- import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
- import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
- import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
-
- import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
- import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
- import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
-
+import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
+import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
+import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
+import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
+import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
+import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
+import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
+import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
+import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
 import Login from "./pages/login/login";
 
 function App() {
@@ -135,6 +132,7 @@ function App() {
                     )
                   }
                 />
+                <Route path="/subir-comprobante" element={<SubirComprobante />} />
 
                 {/* Rutas protegidas */}
                 <Route
@@ -167,54 +165,48 @@ function App() {
                 />
                 <Route
                   path="/apoderados/editar/:id"
-                  element={
-                    isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />
-                  }
+                  element={isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />}
                 />
-  <Route path="/pagos" element={<Pagos />} />
-
-{/* Rutas de matricula*/}
-<Route path="/pagos/matricula" element={<MatriculaPage />} />
-                 <Route
-                   path="/pagos/matricula/nuevo"
-                   element={<NuevoMatricula />}
-                 />
-                 <Route
-                   path="/pagos/matricula/editar/:id"
-                   element={<EditarMatricula />}
-                 />
- 
-  {/* Rutas de mensualidad*/}
-  <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
-                 <Route
-                   path="/pagos/mensualidad/nuevo"
-                   element={<NuevoMensualidad />}
-                 />
-                 <Route
-                   path="/pagos/mensualidad/editar/:id"
-                   element={<EditarMensualidad />}
-                 />
-
                 <Route
-                  path="/subir-comprobante"
-                  element={
-                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
-                  }
+                  path="/pagos"
+                  element={isLoggedIn ? <Pagos /> : <Navigate to="/login" />}
                 />
-
- {/* Rutas de nivelados*/}
-                <Route path="/pagos/nivelados" element={<NiveladoPage />} />
-                
-                <Route path="/pagos/nivelados/nuevo"  element={<NuevoNivelado />} />
-                 <Route path="/pagos/nivelados/editar/:id" element={<EditarNivelado />}/>
-    
-                 <Route
-                  path="/subir-comprobante"
-                  element={
-                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
-                  }
+                <Route
+                  path="/pagos/matricula"
+                  element={isLoggedIn ? <MatriculaPage /> : <Navigate to="/login" />}
                 />
-
+                <Route
+                  path="/pagos/matricula/nuevo"
+                  element={isLoggedIn ? <NuevoMatricula /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/matricula/editar/:id"
+                  element={isLoggedIn ? <EditarMatricula /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/mensualidad"
+                  element={isLoggedIn ? <MensualidadPage /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/mensualidad/nuevo"
+                  element={isLoggedIn ? <NuevoMensualidad /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/mensualidad/editar/:id"
+                  element={isLoggedIn ? <EditarMensualidad /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/nivelados"
+                  element={isLoggedIn ? <NiveladoPage /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/nivelados/nuevo"
+                  element={isLoggedIn ? <NuevoNivelado /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/nivelados/editar/:id"
+                  element={isLoggedIn ? <EditarNivelado /> : <Navigate to="/login" />}
+                />
               </Routes>
             </Box>
           </Box>

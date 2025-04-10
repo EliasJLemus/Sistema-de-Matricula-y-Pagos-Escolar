@@ -43,7 +43,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={status === "loading" ? undefined : onClose} maxWidth="xs" fullWidth>
       <DialogTitle
         sx={{
           fontFamily: "Nunito, sans-serif",
@@ -70,7 +70,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           {description}
         </Typography>
 
-        {(status === "success" || status === "error") && (
+        {status !== "loading" && (
           <DialogActions sx={{ justifyContent: "center" }}>
             <Button
               onClick={onClose}

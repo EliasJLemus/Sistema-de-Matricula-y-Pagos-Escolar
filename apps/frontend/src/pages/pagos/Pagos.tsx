@@ -1,10 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { To, useNavigate } from "react-router-dom";
 
 const Pagos = () => {
   const navigate = useNavigate();
 
-  const handleNavigation = (route) => {
+  const handleNavigation = (route: To) => {
     navigate(route);
   };
 

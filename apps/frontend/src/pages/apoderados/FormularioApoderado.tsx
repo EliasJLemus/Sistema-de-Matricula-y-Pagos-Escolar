@@ -8,34 +8,28 @@ import {
   Select,
   MenuItem,
   Typography,
-  Card,
-  CardContent,
   Grid,
-  CircularProgress,
-  Snackbar,
-  Alert,
-  Checkbox,
-  InputAdornment,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useTheme,
-  IconButton,
-  Tooltip,
   Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useGetEstudiantes, useRegistrarApoderado } from "@/lib/queries";
 import { TelefonoInput } from "@/components/TelefonoInput";
-import { ApoderadoType } from "@/lib/queries/useGetApoderados";
+import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
 
 const fontFamily = "'Nunito', sans-serif";
 
-const FormularioApoderado = () => {
+interface Props {
+  isModal?: boolean;
+  onClose?: () => void;
+}
+
+const FormularioApoderado: React.FC<Props> = ({ isModal = false, onClose }) => {
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const [formData, setFormData] = useState({
     primer_nombre: "",
@@ -43,7 +37,7 @@ const FormularioApoderado = () => {
     primer_apellido: "",
     segundo_apellido: "",
     identidad: "",
-    genero: "M",
+    genero: "Masculino",
     fecha_nacimiento: "",
     correo_electronico: "",
     telefono_personal: "",
@@ -54,12 +48,13 @@ const FormularioApoderado = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "warning" | "error">("error");
-  const [openCancelDialog, setOpenCancelDialog] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [filterEstudiante, setFilterEstudiante] = useState("");
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState<FeedbackStatus>("loading");
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalDesc, setModalDesc] = useState("");
 
   const { data: estudiantesData } = useGetEstudiantes(1, 10000, {
     grado: formData.grado_estudiante,
@@ -69,7 +64,7 @@ const FormularioApoderado = () => {
 
   const filteredEstudiantes =
     estudiantesData?.data?.filter((e: any) =>
-      `${e.primer_nombre}`.toLowerCase().includes(filterEstudiante.toLowerCase())
+      `${e.primer_nombre} ${e.primer_apellido}`.toLowerCase().includes(filterEstudiante.toLowerCase())
     ) || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,7 +117,10 @@ const FormularioApoderado = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setIsSubmitting(true);
+    setModalOpen(true);
+    setModalStatus("loading");
+    setModalTitle("Registrando apoderado...");
+    setModalDesc("Por favor espere mientras se guarda la información.");
 
     registrarApoderado(
       {
@@ -131,7 +129,7 @@ const FormularioApoderado = () => {
         primer_apellido: formData.primer_apellido,
         segundo_apellido: formData.segundo_apellido || "",
         identidad: formData.identidad,
-        genero: formData.genero === "F" ? "Femenino" : "Masculino",
+        genero: formData.genero as "Masculino" | "Femenino" | "Otro",
         fecha_nacimiento: formData.fecha_nacimiento,
         correo: formData.correo_electronico,
         telefono: formData.telefono_personal,
@@ -141,23 +139,25 @@ const FormularioApoderado = () => {
       },
       {
         onSuccess: (res) => {
-          setIsSubmitting(false);
           if (res.success) {
-            setAlertSeverity("success");
-            setAlertMessage("Apoderado registrado correctamente");
-            setAlertOpen(true);
-            navigate("/apoderados");
+            setModalStatus("success");
+            setModalTitle("¡Registro exitoso!");
+            setModalDesc("El apoderado ha sido registrado correctamente.");
+            setTimeout(() => {
+              setModalOpen(false);
+              if (onClose) onClose();
+              else navigate("/apoderados");
+            }, 2000);
           } else {
-            setAlertSeverity("warning");
-            setAlertMessage(res.message || "No se pudo registrar");
-            setAlertOpen(true);
+            setModalStatus("error");
+            setModalTitle("Error");
+            setModalDesc(res.message || "No se pudo registrar el apoderado.");
           }
         },
         onError: (err: any) => {
-          setIsSubmitting(false);
-          setAlertSeverity("error");
-          setAlertMessage(err.message || "Error inesperado");
-          setAlertOpen(true);
+          setModalStatus("error");
+          setModalTitle("Error");
+          setModalDesc(err.message || "Error inesperado");
         },
       }
     );
@@ -165,38 +165,13 @@ const FormularioApoderado = () => {
 
   const handleOpenCancelDialog = () => setOpenCancelDialog(true);
   const handleCloseCancelDialog = () => setOpenCancelDialog(false);
-  const handleConfirmCancel = () => navigate("/apoderados");
-
-  const getGradoEstudiante = (uuid: string) =>
-    estudiantesData?.data?.find((e) => e.uuid === uuid)?.grado || "";
+  const handleConfirmCancel = () => {
+    if (onClose) onClose();
+    else navigate("/apoderados");
+  };
 
   return (
     <Box>
-      <Snackbar
-        open={alertOpen}
-        autoHideDuration={5000}
-        onClose={() => setAlertOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setAlertOpen(false)}
-          severity={alertSeverity}
-          sx={{
-            fontFamily,
-            "& .MuiAlert-icon": {
-              color:
-                alertSeverity === "success"
-                  ? "#538A3E"
-                  : alertSeverity === "warning"
-                  ? "#F38223"
-                  : "#f44336",
-            },
-          }}
-        >
-          {alertMessage}
-        </Alert>
-      </Snackbar>
-
       <Paper sx={{ p: 4, borderRadius: "12px" }}>
         <form onSubmit={handleSubmit}>
           <Typography variant="h6" sx={{ fontFamily, mb: 3 }}>
@@ -278,13 +253,11 @@ const FormularioApoderado = () => {
                   value={formData.uuid_estudiante}
                   onChange={handleSelectChange}
                 >
-                  {filteredEstudiantes.map((e: any) => {
-                    return (
-                      <MenuItem key={e.uuid_encargado} value={e.uuid_encargado}>
-                        {e.primer_nombre} - {e.grado_estudiante} 
-                      </MenuItem>
-                    );
-                  })}
+                  {filteredEstudiantes.map((e: any) => (
+                    <MenuItem key={e.uuid} value={e.uuid}>
+                      {e.primer_nombre} {e.primer_apellido} - {e.grado}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -299,8 +272,8 @@ const FormularioApoderado = () => {
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
-              {isSubmitting ? <CircularProgress size={20} /> : "Guardar"}
+            <Button type="submit" variant="contained">
+              Guardar
             </Button>
           </Box>
         </form>
@@ -322,6 +295,14 @@ const FormularioApoderado = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <FeedbackModal
+        open={modalOpen}
+        status={modalStatus}
+        title={modalTitle}
+        description={modalDesc}
+        onClose={() => setModalOpen(false)}
+      />
     </Box>
   );
 };

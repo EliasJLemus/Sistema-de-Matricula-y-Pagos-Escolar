@@ -389,6 +389,7 @@ export const useRegistrarApoderado = () => {
             },
           }
         );
+        console.log("Respuesta del servidor:", response.data);
         return response.data;
       } catch (error: any) {
         throw new Error(

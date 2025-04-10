@@ -1,17 +1,17 @@
-import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  IconButton, 
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  IconButton,
   Box,
   Typography,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Button
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FormularioApoderado from './FormularioApoderado';
 
-// Font family constant to match sidebar and topbar
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -62,8 +62,6 @@ const ApoderadoModal: React.FC<ApoderadoModalProps> = ({
           alignItems: 'center',
           borderTopLeftRadius: '16px',
           borderTopRightRadius: '16px',
-          borderBottomLeftRadius: '0px',
-          borderBottomRightRadius: '0px',
           boxShadow: '0 8px 15px rgba(0, 0, 0, 0.15)',
           position: 'relative',
         }}
@@ -123,9 +121,7 @@ const ApoderadoModal: React.FC<ApoderadoModalProps> = ({
       </Box>
 
       <DialogContent sx={{ p: 0 }}>
-        <FormularioApoderado 
-          apoderadoId={apoderadoId} 
-          isEditing={isEditing} 
+        <FormularioApoderado
           isModal={true}
           onClose={onClose}
         />

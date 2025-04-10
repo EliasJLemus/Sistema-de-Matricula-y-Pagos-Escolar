@@ -46,9 +46,6 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [uuidEstudianteSeleccionado, setUuidEstudianteSeleccionado] = useState("");
   const [formData, setFormData] = useState<Partial<MatriculaType>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -125,29 +122,10 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSnackbarClose = () => {
-    setAlertOpen(false);
-    if (alertSeverity === "success") {
-      onClose?.();
-      navigate("/pagos/matricula");
-    }
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    if (modalStatus === "success") {
-      onClose();
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      setAlertMessage("Faltan campos obligatorios.");
-      setAlertOpen(true);
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setModalOpen(true);
@@ -183,12 +161,15 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
     );
   };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    if (modalStatus === "success") {
+      onClose();
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: 1000, margin: "auto", px: 2, py: 4 }}>
-      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert severity={alertSeverity}>{alertMessage}</Alert>
-      </Snackbar>
-
       <Dialog open={openCancelDialog} onClose={() => setOpenCancelDialog(false)}>
         <DialogTitle sx={{ fontFamily, color: "#1A1363" }}>Confirmar Cancelación</DialogTitle>
         <DialogContent>
@@ -228,7 +209,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
           {isEditing ? "Edición de Matrícula" : "Registro de Matrícula"}
         </Typography>
 
-        {isLoadingLista || (isEditing && isLoadingMatricula) ? (
+        {(isLoadingLista || (isEditing && isLoadingMatricula)) ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress sx={{ color: "#538A3E" }} />
           </Box>
@@ -246,10 +227,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                     disabled={isEditing}
                     sx={{ fontFamily }}
                   >
-                    {[
-                      "Kinder", "Primero", "Segundo", "Tercero", "Cuarto",
-                      "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno"
-                    ].map((grado) => (
+                    {["Kinder", "Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno"].map((grado) => (
                       <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
                         {grado}
                       </MenuItem>
@@ -296,101 +274,50 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                   sx={{ fontFamily }}
                 />
               </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Tarifa Base"
-                  name="tarifa_base"
-                  type="number"
-                  value={formData.tarifa_base || ""}
-                  onChange={handleChange}
-                  sx={{ fontFamily }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Beneficio Aplicado</InputLabel>
-                  <Select
-                    name="beneficio_aplicado"
-                    value={formData.beneficio_aplicado || ""}
-                    onChange={handleChange}
-                    label="Beneficio Aplicado"
-                    sx={{ fontFamily }}
-                  >
-                    <MenuItem value="">Ninguno</MenuItem>
-                    <MenuItem value="Beca Excelencia">Beca Excelencia</MenuItem>
-                    <MenuItem value="Descuento Hermanos">Descuento Hermanos</MenuItem>
-                    <MenuItem value="Beca Deportiva">Beca Deportiva</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Descuento</InputLabel>
-                  <Select
-                    name="descuento_aplicado"
-                    value={formData.descuento_aplicado || ""}
-                    onChange={handleChange}
-                    label="Descuento"
-                    sx={{ fontFamily }}
-                  >
-                    {[0, 10, 20, 25, 50, 75, 100].map((desc) => (
-                      <MenuItem key={desc} value={`${desc}%`}>
-                        {desc}% Descuento
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setOpenCancelDialog(true)}
-                    sx={{
-                      fontFamily,
-                      borderColor: "#1A1363",
-                      color: "#1A1363",
-                      px: 4,
-                      fontWeight: 600,
-                      "&:hover": {
-                        borderColor: "#1A1363",
-                        backgroundColor: "#F0F0FF",
-                      },
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    disabled={isSubmitting}
-                    sx={{
-                      bgcolor: "#538A3E",
-                      fontFamily,
-                      color: "white",
-                      px: 4,
-                      fontWeight: 600,
-                      "&:hover": {
-                        bgcolor: "#426E30",
-                      },
-                    }}
-                  >
-                    {isSubmitting
-                      ? isEditing
-                        ? "Actualizando..."
-                        : "Guardando..."
-                      : isEditing
-                      ? "Actualizar Matrícula"
-                      : "Registrar Matrícula"}
-                  </Button>
-                </Box>
-              </Grid>
             </Grid>
+
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setOpenCancelDialog(true)}
+                sx={{
+                  fontFamily,
+                  borderColor: "#1A1363",
+                  color: "#1A1363",
+                  px: 4,
+                  fontWeight: 600,
+                  "&:hover": {
+                    borderColor: "#1A1363",
+                    backgroundColor: "#F0F0FF",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="contained"
+                type="submit"
+                disabled={isSubmitting}
+                sx={{
+                  bgcolor: "#538A3E",
+                  fontFamily,
+                  color: "white",
+                  px: 4,
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#426E30",
+                  },
+                }}
+              >
+                {isSubmitting
+                  ? isEditing
+                    ? "Actualizando..."
+                    : "Guardando..."
+                  : isEditing
+                  ? "Actualizar Matrícula"
+                  : "Registrar Matrícula"}
+              </Button>
+            </Box>
           </form>
         )}
       </Paper>
