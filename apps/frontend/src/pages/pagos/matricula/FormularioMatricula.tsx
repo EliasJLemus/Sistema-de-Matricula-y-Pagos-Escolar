@@ -207,7 +207,47 @@ console.log(vistaDetalleMatricula)
 
   return (
     <Box sx={{ maxWidth: 1000, margin: "auto", px: 2, py: 4 }}>
-      {/* Snackbar y Diálogo cancelación (igual) */}
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert severity={alertSeverity}>{alertMessage}</Alert>
+      </Snackbar>
+
+      {/* Diálogo de confirmación para cancelar - NUEVO */}
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: "#1A1363" }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso? Los cambios no guardados se perderán.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+  <Button 
+    onClick={() => setOpenCancelDialog(false)}
+    sx={{ fontFamily, color: "#1A1363" }}
+  >
+    No
+  </Button>
+  <Button
+    onClick={() => {
+      setOpenCancelDialog(false);
+      onClose?.(); // Cierra el modal si está en uno
+      navigate("/pagos/matricula"); // Redirección garantizada
+    }}
+    sx={{ fontFamily, color: "#1A1363" }}
+    autoFocus
+  >
+    Sí
+  </Button>
+</DialogActions>
+      </Dialog>
 
       <Paper sx={{ p: 4, borderRadius: 4, boxShadow: 6, bgcolor: "#FAFAFF" }}>
         <Typography variant="h4" sx={{ mb: 4, fontFamily, color: "#1A1363", fontWeight: 800, textAlign: "center" }}>
@@ -325,9 +365,23 @@ console.log(vistaDetalleMatricula)
               {/* BOTONES */}
               <Grid item xs={12}>
                 <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
-                  <Button variant="outlined" onClick={() => setOpenCancelDialog(true)} sx={{ fontFamily, borderColor: "#1A1363", color: "#1A1363", px: 4, fontWeight: 600 }}>
-                    Cancelar
-                  </Button>
+                <Button 
+  variant="outlined" 
+  onClick={() => setOpenCancelDialog(true)} // Solo abre el diálogo
+  sx={{ 
+    fontFamily, 
+    borderColor: "#1A1363", 
+    color: "#1A1363", 
+    px: 4, 
+    fontWeight: 600,
+    "&:hover": {
+      borderColor: "#1A1363",
+      backgroundColor: "#F0F0FF",
+    }
+  }}
+>
+  Cancelar
+</Button>
                   <Button type="submit" variant="contained" disabled={isSubmitting} sx={{ bgcolor: "#538A3E", fontFamily, color: "white", px: 4, fontWeight: 600, "&:hover": { bgcolor: "#426E30" } }}>
                     {isSubmitting ? (isEditing ? "Actualizando..." : "Guardando...") : isEditing ? "Actualizar Matrícula" : "Registrar Matrícula"}
                   </Button>
