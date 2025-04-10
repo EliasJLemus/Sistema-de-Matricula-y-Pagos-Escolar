@@ -27,16 +27,18 @@ import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 import useGetMensualidades, { MensualidadType } from "@/lib/queries/useGetMensualidades";
 
-const fontFamily = "'Nunito', sans-serif";
+const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaMensualidadProps {
   onNewMensualidad: () => void;
   onEditMensualidad: (id: number) => void;
+  onDeleteMensualidad: (id: number, nombre: string) => void;
 }
 
 export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
   onNewMensualidad,
   onEditMensualidad,
+  onDeleteMensualidad,
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -54,8 +56,18 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
 
   useEffect(() => {
     const currentContainer = document.getElementById("tabla-mensualidades-container");
-    if (currentContainer) currentContainer.style.zoom = isZoomed ? "60%" : "100%";
-    return () => { if (currentContainer) currentContainer.style.zoom = "100%"; };
+    if (currentContainer) {
+      if (isZoomed) {
+        currentContainer.style.zoom = "60%";
+      } else {
+        currentContainer.style.zoom = "100%";
+      }
+    }
+    return () => {
+      if (currentContainer) {
+        currentContainer.style.zoom = "100%";
+      }
+    };
   }, [isZoomed]);
 
   const handleFreshReload = () => {
@@ -74,6 +86,163 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
     setPage(1);
   };
 
+  // Estilos comunes para TextField
+  const textFieldStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiInputBase-root": {
+      fontFamily,
+      borderRadius: "8px",
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+      },
+    },
+    "& .MuiFormHelperText-root": {
+      fontFamily,
+    },
+  };
+
+  // Estilos comunes para FormControl
+  const formControlStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiFormLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiSelect-select": {
+      fontFamily,
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiRadio-root": {
+      color: "#538A3E",
+    },
+    "& .Mui-checked": {
+      color: "#538A3E",
+    },
+    "& .MuiInputBase-root": {
+      borderRadius: "8px",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+      },
+    },
+    "& .MuiMenuItem-root:hover": {
+      backgroundColor: "#e7f5e8",
+    },
+  };
+
+  // Estilo para botón primario verde
+  const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    color: "white",
+    px: 3,
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  // Estilo para botón secundario naranja
+  const secondaryButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    bgcolor: "#F38223",
+    color: "white",
+    px: 3,
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)",
+    "&:hover": {
+      backgroundColor: "#e67615",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#d56a10",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(243, 130, 35, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  // Estilo para paginación
+  const paginationButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    minWidth: "34px",
+    height: "34px",
+    fontWeight: 600,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
+    transition: "all 0.2s ease-in-out",
+  };
+
+  const zoomButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "10px",
+    bgcolor: "#1A1363",
+    color: "white",
+    px: 3,
+    py: 1.2,
+    height: "40px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(26, 19, 99, 0.3)",
+    "&:hover": {
+      backgroundColor: "#13104d",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(26, 19, 99, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#0c0a33",
+      transform: "translateY(1px)",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
   const { data, isLoading, isFetching, error } = useGetMensualidades(page, limit, debouncedFilters);
 
   const tableData = data?.data ?? [];
@@ -83,7 +252,7 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
   const handleEdit = (id: number) => onEditMensualidad(id);
   const handleDelete = (id: number, nombre: string) => {
     if (window.confirm(`¿Está seguro que desea eliminar la mensualidad de ${nombre}?`)) {
-      console.log("Eliminar mensualidad:", id);
+      onDeleteMensualidad(id, nombre);
       handleFreshReload();
     }
   };
@@ -91,9 +260,23 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
   return (
     <Box id="tabla-mensualidades-container" sx={{ position: "relative" }}>
       {(isLoading || isFetching) && (
-        <Box sx={{ position: "absolute", top: 0, right: 0, p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <CircularProgress size={20} sx={{ color: "#538A3E" }} />
-          <Typography variant="body2" color="text.secondary" sx={{ fontFamily }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontFamily }}
+          >
             {isLoading ? "Cargando..." : "Actualizando..."}
           </Typography>
         </Box>
@@ -107,49 +290,139 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
         </Box>
       )}
 
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3, pl: 1 }}>
-        <Typography variant="h5" sx={{ fontFamily, color: "#1A1363", fontWeight: 700 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 3,
+          pl: 1,
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#1A1363"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginRight: "10px" }}
+        >
+          <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+        </svg>
+        <Typography
+          variant="h5"
+          sx={{
+            fontFamily,
+            color: "#1A1363",
+            fontWeight: 700,
+          }}
+        >
           Gestión de Mensualidades
         </Typography>
       </Box>
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}>
+      <Paper
+        sx={{
+          p: 3,
+          mb: 3,
+          borderRadius: "12px",
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
           <TextField
             label="Nombre del estudiante"
             variant="outlined"
             size="small"
-            sx={{ minWidth: 250 }}
+            sx={{
+              minWidth: 250,
+              height: "40px",
+              ...textFieldStyle,
+            }}
             value={filters.estudiante}
             onChange={(e) => handleInputChange("estudiante", e.target.value)}
           />
 
-          <FormControl sx={{ minWidth: 150 }} size="small">
-            <InputLabel>Grado</InputLabel>
+          <FormControl
+            sx={{
+              minWidth: 150,
+              height: "40px",
+              ...formControlStyle,
+            }}
+            size="small"
+          >
+            <InputLabel id="grado-label">Grado</InputLabel>
             <Select
-              value={filters.grado}
+              labelId="grado-label"
+              value={filters.grado || "todos"}
               label="Grado"
               onChange={(e) => handleInputChange("grado", e.target.value)}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    "& .MuiMenuItem-root:hover": {
+                      backgroundColor: "#e7f5e8",
+                    },
+                  },
+                },
+              }}
             >
-              <MenuItem value="">Todos</MenuItem>
+              <MenuItem value="todos" sx={{ fontFamily }}>
+                Todos
+              </MenuItem>
               {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 
                 'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'].map((grado) => (
-                <MenuItem key={grado} value={grado}>{grado}</MenuItem>
+                <MenuItem key={grado} value={grado} sx={{ fontFamily }}>{grado}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 150 }} size="small">
-            <InputLabel>Estado</InputLabel>
+          <FormControl
+            sx={{
+              minWidth: 150,
+              height: "40px",
+              ...formControlStyle,
+            }}
+            size="small"
+          >
+            <InputLabel id="estado-label">Estado</InputLabel>
             <Select
-              value={filters.estado}
+              labelId="estado-label"
+              value={filters.estado || "todos"}
               label="Estado"
               onChange={(e) => handleInputChange("estado", e.target.value)}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    "& .MuiMenuItem-root:hover": {
+                      backgroundColor: "#e7f5e8",
+                    },
+                  },
+                },
+              }}
             >
-              <MenuItem value="">Todos</MenuItem>
-              <MenuItem value="Pendiente">Pendiente</MenuItem>
-              <MenuItem value="Pagado">Pagado</MenuItem>
-              <MenuItem value="Parcial">Parcial</MenuItem>
+              <MenuItem value="todos" sx={{ fontFamily }}>
+                Todos
+              </MenuItem>
+              <MenuItem value="Pendiente" sx={{ fontFamily }}>
+                Pendiente
+              </MenuItem>
+              <MenuItem value="Pagado" sx={{ fontFamily }}>
+                Pagado
+              </MenuItem>
+              <MenuItem value="Parcial" sx={{ fontFamily }}>
+                Parcial
+              </MenuItem>
             </Select>
           </FormControl>
 
@@ -157,19 +430,108 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
             label="Fecha Vencimiento (DD/MM/YYYY)"
             variant="outlined"
             size="small"
-            sx={{ minWidth: 250 }}
+            sx={{
+              minWidth: 250,
+              height: "40px",
+              ...textFieldStyle,
+            }}
             value={filters.fecha_vencimiento}
             onChange={(e) => handleInputChange("fecha_vencimiento", e.target.value)}
           />
 
-          <Button variant="contained" onClick={clearFilters} sx={{ bgcolor: "#F38223", color: "white" }}>
-            ✖️ Quitar filtros
+          <Button
+            variant="contained"
+            onClick={clearFilters}
+            sx={secondaryButtonStyle}
+            startIcon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            }
+          >
+            Quitar filtros
           </Button>
-          
-          <Button variant="contained" onClick={() => setIsZoomed(!isZoomed)} sx={{ bgcolor: "#1A1363", color: "white" }}>
-            {isZoomed ? "Vista Normal" : "🔍 Ver Tabla Completa"}
-          </Button>
-          
+
+          <Box
+            sx={{
+              display: "flex",
+              ml: "auto",
+              gap: 2,
+              flexWrap: "nowrap",
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={() => setIsZoomed(!isZoomed)}
+              sx={zoomButtonStyle}
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {isZoomed ? (
+                    <>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                    </>
+                  ) : (
+                    <>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </>
+                  )}
+                </svg>
+              }
+            >
+              {isZoomed ? "Vista Normal" : "Ver Tabla Completa"}
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={onNewMensualidad}
+              sx={primaryButtonStyle}
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+              }
+            >
+              Nueva Mensualidad
+            </Button>
+          </Box>
         </Box>
       </Paper>
 
@@ -181,7 +543,7 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
                 {[
                   "ID", "N° Estudiante", "Estudiante", "Grado", "Sección", 
                   "Fecha Inicio", "Fecha Vencimiento", "Monto Total", "Beneficio", 
-                  "Descuento", "Saldo Pagado", "Saldo Pendiente", "Recargo", "Estado","Comprobante", "Acciones"
+                  "Descuento", "Saldo Pagado", "Saldo Pendiente", "Recargo", "Estado", "Comprobante", "Acciones"
                 ].map((h, i) => (
                   <TableHead key={i} className="text-white font-bold" style={{ fontFamily }}>{h}</TableHead>
                 ))}
@@ -189,61 +551,63 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
-                <TableRow key={item.mensualidad_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer`}>
-                  <TableCell>{item.mensualidad_id}</TableCell>
-                  <TableCell>{item.numero_estudiante}</TableCell>
-                  <TableCell>{item.estudiante}</TableCell>
-                  <TableCell>{item.grado}</TableCell>
-                  <TableCell>{item.seccion}</TableCell>
-                  <TableCell>{item.fecha_inicio}</TableCell>
-                  <TableCell>{item.fecha_vencimiento}</TableCell>
-                  <TableCell>L. {item.monto_total.toLocaleString()}</TableCell>
-                  <TableCell>{item.beneficio_aplicado}</TableCell>
-                  <TableCell>{item.porcentaje_descuento}%</TableCell>
-                  <TableCell>L. {item.saldo_pagado.toLocaleString()}</TableCell>
-                  <TableCell>
+                <TableRow key={item.mensualidad_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer transition-colors`}>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.mensualidad_id}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.numero_estudiante}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.estudiante}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.grado}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.seccion}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_inicio}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_vencimiento}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.monto_total.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.beneficio_aplicado}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.porcentaje_descuento}%</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.saldo_pagado.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D] font-medium" style={{ fontFamily }}>
                     <strong>L. {item.saldo_pendiente.toLocaleString()}</strong>
                   </TableCell>
-                  <TableCell>L. {item.recargo.toLocaleString()}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.recargo.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     <Badge
                       variant="outline"
                       className={
-                        item.estado === "Pagado" ? "bg-[#538A3E] text-white" :
-                        item.estado === "Parcial" ? "bg-[#F38223] text-white" :
+                        item.estado === "Pagado" ? "bg-green-600 text-white" :
+                        item.estado === "Parcial" ? "bg-orange-500 text-white" :
                         "bg-red-500 text-white"
                       }
-                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
                     >
                       {item.estado}
                     </Badge>
                   </TableCell>
-
-                  <TableCell>
-                                    <Badge
-                                      variant="outline"
-                                      className={
-                                        item.comprobante === "Enviado"
-                                          ? "bg-[#538A3E] text-white hover:bg-[#538A3E] hover:text-white w-20 justify-center"
-                                          : "bg-[#F38223] text-white hover:bg-[#F38223] hover:text-white w-20 justify-center"
-                                      }
-                                      style={{ fontFamily, padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}
-                                    >
-                                      {item.comprobante}
-                                    </Badge>
-                                  </TableCell>
-
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        item.comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"
+                      }
+                    >
+                      {item.comprobante}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
-                      <button 
-                        onClick={() => handleEdit(item.mensualidad_id)} 
-                        className="text-[#538A3E] hover:text-[#3e682e]"
+                      <button
+                        onClick={() => handleEdit(item.mensualidad_id)}
+                        className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
+                        title="Editar"
+                        style={{
+                          transition: "all 0.2s ease, transform 0.2s ease",
+                        }}
                       >
                         <EditIcon fontSize="small" />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(item.mensualidad_id, item.estudiante)} 
-                        className="text-red-500 hover:text-red-700"
+                      <button
+                        onClick={() => handleDelete(item.mensualidad_id, item.estudiante)}
+                        className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
+                        title="Eliminar"
+                        style={{
+                          transition: "all 0.2s ease, transform 0.2s ease",
+                        }}
                       >
                         <DeleteIcon fontSize="small" />
                       </button>
@@ -256,49 +620,153 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
         </div>
       </div>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, p: 2, bgcolor: "white", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
-        <Typography variant="body2" sx={{ fontFamily }}>Mostrando {tableData.length} de {total} registros</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mt: 2,
+          p: 2,
+          bgcolor: "white",
+          borderRadius: "12px",
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+        }}
+      >
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ fontFamily, display: "flex", alignItems: "center" }}
+        >
+          Mostrando {tableData.length} de {total} registros
+        </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button 
-            variant="contained" 
-            size="small" 
-            onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page <= 1}
-            sx={{ bgcolor: "#F38223", "&:disabled": { bgcolor: "#F3822370" } }}
+            sx={{
+              ...paginationButtonStyle,
+              bgcolor: "#F38223",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#e67615",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
+              },
+              "&:active": {
+                backgroundColor: "#d56a10",
+                transform: "translateY(1px)",
+              },
+              "&.Mui-disabled": {
+                bgcolor: "rgba(243, 130, 35, 0.4)",
+                color: "white",
+              },
+            }}
           >
-            Anterior
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
           </Button>
           {[...Array(Math.min(5, pageCount))].map((_, i) => {
             const pageNum = page <= 3 ? i + 1 : page - 2 + i;
-            return pageNum <= pageCount ? (
-              <Button 
-                key={i}
-                variant={pageNum === page ? "contained" : "outlined"}
-                onClick={() => setPage(pageNum)}
-                sx={{ 
-                  bgcolor: pageNum === page ? "#538A3E" : "inherit",
-                  color: pageNum === page ? "white" : "inherit",
-                  "&:hover": { bgcolor: pageNum === page ? "#3e682e" : "#f5f5f5" }
-                }}
-              >
-                {pageNum}
-              </Button>
-            ) : null;
+            if (pageNum <= pageCount) {
+              return (
+                <Button
+                  key={i}
+                  variant={pageNum === page ? "contained" : "outlined"}
+                  size="small"
+                  onClick={() => setPage(pageNum)}
+                  sx={
+                    pageNum === page
+                      ? {
+                          ...paginationButtonStyle,
+                          bgcolor: "#538A3E",
+                          color: "white",
+                          "&:hover": {
+                            bgcolor: "#3e682e",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+                          },
+                        }
+                      : {
+                          ...paginationButtonStyle,
+                          bgcolor: "#f8f9fa",
+                          color: "#333",
+                          border: "1px solid #ddd",
+                          "&:hover": {
+                            bgcolor: "#e7f5e8",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.1)",
+                          },
+                        }
+                  }
+                >
+                  {pageNum}
+                </Button>
+              );
+            }
+            return null;
           })}
-          <Button 
-            variant="contained" 
-            size="small" 
-            onClick={() => setPage((p) => Math.min(p + 1, pageCount))} 
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setPage((p) => Math.min(p + 1, pageCount))}
             disabled={page >= pageCount}
-            sx={{ bgcolor: "#F38223", "&:disabled": { bgcolor: "#F3822370" } }}
+            sx={{
+              ...paginationButtonStyle,
+              bgcolor: "#F38223",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#e67615",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
+              },
+              "&:active": {
+                backgroundColor: "#d56a10",
+                transform: "translateY(1px)",
+              },
+              "&.Mui-disabled": {
+                bgcolor: "rgba(243, 130, 35, 0.4)",
+                color: "white",
+              },
+            }}
           >
-            Siguiente
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </Button>
         </Box>
       </Box>
 
       {!isLoading && !isFetching && tableData.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: "center", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)" }}>
+        <Paper
+          sx={{
+            p: 4,
+            textAlign: "center",
+            borderRadius: "12px",
+            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+          }}
+        >
           <Typography color="text.secondary" sx={{ fontFamily }}>
             No se encontraron mensualidades para los filtros actuales.
           </Typography>
