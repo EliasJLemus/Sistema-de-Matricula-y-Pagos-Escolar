@@ -140,9 +140,10 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (validateForm()) {
       setIsSubmitting(true);
+      
       setTimeout(() => {
         console.log("Datos guardados:", {
           ...formData,
@@ -169,38 +170,12 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   };
 
    // Estilo para botón primario verde
-   const primaryButtonStyle = {
-    bgcolor: "#538A3E",
-    fontFamily,
-    textTransform: "none",
-    borderRadius: "12px",
-    color: "white",
-    px: 4,
-    py: 1.2,
-    minWidth: "140px",
-    fontWeight: 600,
-    fontSize: "15px",
-    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
-    "&:hover": {
-      backgroundColor: "#3e682e",
-      transform: "translateY(-2px)",
-      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
-    },
-    "&:active": {
-      backgroundColor: "#2e5022",
-      transform: "translateY(1px)",
-    },
-    "&.Mui-disabled": {
-      bgcolor: "rgba(83, 138, 62, 0.7)",
-      color: "white",
-    },
-    transition: "all 0.2s ease-in-out",
-  };
+
 
 
   return (
     <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
-     <Snackbar
+    <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
@@ -228,16 +203,14 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
             No
           </Button>
           <Button
-            onClick={() => {
-              setOpenCancelDialog(false);
-              onClose?.();
-              navigate("/pagos/mensualidad");
-            }}
-            sx={{ fontFamily, color: '#1A1363' }}
-            autoFocus
+         onClick={() => {setOpenCancelDialog(false);  // Cerrar el diálogo
+          onClose?.();                 // Ejecutar cierre del formulario si es necesario
+       navigate("/pagos/mensualidad"); }}
+       sx={{ fontFamily, color: '#1A1363' }}
+       autoFocus
           >
-            Sí
-          </Button>
+              Sí
+            </Button>
         </DialogActions>
       </Dialog>
 
@@ -436,13 +409,26 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
               </Grid>
 
               <Grid item xs={12} sx={{ mt: 3, textAlign: 'center' }}>
-                <Button
-                  variant="outlined"
-                  onClick={onClose || (() => navigate('/mensualidades'))}
-                  sx={{ mr: 2 }}
-                >
-                  Cancelar
-                </Button>
+              <Button
+            variant="outlined"
+            onClick={() => setOpenCancelDialog(true)}  // Cambiado aquí
+            sx={{
+              fontFamily,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              borderColor: '#1A1363',
+              color: '#1A1363',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: '#1A136310',
+                borderColor: '#1A1363',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
                 <Button
                   variant="contained"
                   type="submit"

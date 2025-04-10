@@ -28,7 +28,13 @@ import {
   Alert,
   Snackbar,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
+
 import type { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import {EstudiantesTablaType} from "@shared/estudiantesType"
 import {useGetEstudianteByUuid, useRegistrarEstudiante, useUpdateEstudiante} from "@/lib/queries"
@@ -67,6 +73,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
   const [modalStatus, setModalStatus] = useState<FeedbackStatus>("loading");
   const [modalTitle, setModalTitle] = useState("");
   const [modalDescription, setModalDescription] = useState("");
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const formatearFechaParaInput = (fechaString: string | undefined): string => {
     if (!fechaString) return "";
@@ -827,6 +834,43 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           {alertMessage}
         </Alert>
       </Snackbar>
+
+    <Dialog
+      open={openCancelDialog}
+      onClose={() => setOpenCancelDialog(false)}
+    >
+      <DialogTitle sx={{ fontFamily, color: "#1A1363" }}>
+        Confirmar Cancelación
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ fontFamily }}>
+          ¿Seguro que quieres cancelar el proceso? Los cambios no guardados se perderán.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button 
+          onClick={() => setOpenCancelDialog(false)}
+          sx={{ fontFamily, color: "#1A1363" }}
+        >
+          No
+        </Button>
+        <Button
+          onClick={() => {
+            setOpenCancelDialog(false);
+            if (isModal && onClose) {
+              onClose();
+            } else {
+              navigate("/estudiantes");
+            }
+          }}
+          sx={{ fontFamily, color: "#1A1363" }}
+          autoFocus
+        >
+          Sí
+        </Button>
+      </DialogActions>
+    </Dialog>
+
 
       {/* No mostramos el encabezado aquí si estamos en un modal, ya que se muestra en el componente padre */}
       {!isModal && (
@@ -2154,61 +2198,48 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
               zIndex: 10,
             }}
           >
-            <Button
-              variant="contained"
-              onClick={() => {
-                setIsNavigating(true);
-                if (activeSection === "personal") {
-                  if (isModal && onClose) onClose();
-                  else navigate("/estudiantes");
-                } else if (activeSection === "academico") {
-                  setActiveSection("personal");
-                } else {
-                  setActiveSection("academico");
-                }
-                setTimeout(() => {
-                  setIsNavigating(false);
-                }, 100);
-
-                setEstudianteUUID(formData?.uuid ?? null);
-              }}
-              sx={secondaryButtonStyle}
-              startIcon={
-                activeSection === "personal" ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                  </svg>
-                )
-              }
-            >
-              {activeSection === "personal" ? "Cancelar" : "Anterior"}
-            </Button>
+             
+ {/* Botón Cancelar/Anterior Modificado */}
+ <Button
+    variant="contained"
+    onClick={() => setOpenCancelDialog(true)} // Cambio clave aquí
+    sx={secondaryButtonStyle}
+    startIcon={
+      activeSection === "personal" ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      )
+    }
+  >
+    {activeSection === "personal" ? "Cancelar" : "Anterior"}
+  </Button>
 
             <Button
               variant="contained"
