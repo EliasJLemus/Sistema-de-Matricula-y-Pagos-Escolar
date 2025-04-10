@@ -18,17 +18,22 @@ import {
   Card,
   CardContent,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 const fontFamily = "'Nunito', sans-serif";
 
 // Lista mock de estudiantes con datos realistas de nivelados
 const estudiantes = [
-  { numero: "EST001", nombre: "Abigail López", grado: "Kinder", seccion: "A" },
-  { numero: "EST002", nombre: "Anna Mejía", grado: "Primero", seccion: "A" },
-  { numero: "EST003", nombre: "Berenice Corrales", grado: "Tercero", seccion: "B" },
-  { numero: "EST004", nombre: "Carlos López", grado: "Cuarto", seccion: "A" },
-  { numero: "EST005", nombre: "Axel López", grado: "Sexto", seccion: "B" },
+  { numero: "EST001", nombre: "Abigail López" },
+  { numero: "EST002", nombre: "Anna Mejía" },
+  { numero: "EST003", nombre: "Berenice Corrales" },
+  { numero: "EST004", nombre: "Carlos López" },
+  { numero: "EST005", nombre: "Axel López" },
 ];
 
 interface FormularioNiveladoProps {
@@ -47,6 +52,8 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -60,6 +67,7 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
     porcentaje_descuento: "0%",
     recargo: 0,
     estado: "Pendiente",
+    comprobante: ""
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -80,7 +88,8 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
           beca_aplicada: "Ninguna",
           porcentaje_descuento: "0%",
           recargo: 0,
-          estado: "Pendiente"
+          estado: "Pendiente",
+          comprobante: "",
         });
         setIsLoading(false);
       }, 1000);
@@ -99,9 +108,7 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
       setFormData(prev => ({
         ...prev,
         numero_estudiante: value,
-        nombre_estudiante: estudianteSeleccionado?.nombre || "",
-        grado: estudianteSeleccionado?.grado || "",
-        seccion: estudianteSeleccionado?.seccion || ""
+        nombre_estudiante: estudianteSeleccionado?.nombre || ""
       }));
     } else {
       setFormData(prev => ({
@@ -119,6 +126,8 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
     const newErrors: Record<string, string> = {};
     
     if (!formData.numero_estudiante) newErrors.numero_estudiante = "Seleccione un estudiante";
+    if (!formData.grado) newErrors.grado = "Seleccione un grado";
+    if (!formData.seccion) newErrors.seccion = "Seleccione sección";
     if (!formData.fecha_pago) newErrors.fecha_pago = "Fecha de pago requerida";
     if (formData.monto_pagado <= 0) newErrors.monto_pagado = "Monto inválido";
     if (formData.saldo_restante < 0) newErrors.saldo_restante = "Valor inválido";
@@ -139,21 +148,98 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
           saldo_restante: calculateSaldoRestante()
         });
         setIsSubmitting(false);
-        onClose?.();
-        navigate("/nivelados");
+        setAlertMessage("Se guardó exitosamente el plan nivelado");
+        setAlertSeverity("success");
+        setAlertOpen(true);
       }, 1500);
     }
   };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/nivelados");
+    }
+  };
+
+ // Estilo para botón primario verde
+ const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
 
   return (
     <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
       <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
+        onClose={handleSnackbarClose}
       >
-        <Alert severity="error">{alertMessage}</Alert>
+     <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/nivelados");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
+
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Typography variant="h4" sx={{ 
@@ -178,7 +264,7 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               {/* Sección Información del Estudiante */}
-              <Grid item xs={12}>
+              <Grid item xs={12} md={8}>
                 <Card sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 3, color: '#1A1363', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -190,36 +276,136 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
 
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={6}>
-                        <FormControl fullWidth error={!!errors.numero_estudiante}>
-                          <InputLabel>Seleccionar Estudiante</InputLabel>
+      <FormControl fullWidth error={!!errors.numero_estudiante}>
+             <InputLabel>Seleccionar Estudiante</InputLabel>
+         <Select name="numero_estudiante" value={formData.numero_estudiante} onChange={handleChange}label="Seleccionar Estudiante" >
+     {estudiantes.map(estudiante => ( <MenuItem key={estudiante.numero} value={estudiante.numero} sx={{ fontFamily }} >
+    {estudiante.nombre} </MenuItem>))}</Select>
+{errors.numero_estudiante && (<Typography variant="caption" color="error"> {errors.numero_estudiante} </Typography>)}
+</FormControl>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Código de Estudiante"
+                          value={formData.numero_estudiante}
+                          InputProps={{ readOnly: true }}
+                          sx={{ 
+                            '& .MuiInputBase-input': { 
+                              fontWeight: 600,
+                              backgroundColor: '#f5f5f5'
+                            }
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth error={!!errors.grado}>
+                          <InputLabel>Grado</InputLabel>
                           <Select
-                            name="numero_estudiante"
-                            value={formData.numero_estudiante}
+                            name="grado"
+                            value={formData.grado}
                             onChange={handleChange}
-                            label="Seleccionar Estudiante"
+                            label="Grado"
                           >
-                            {estudiantes.map(estudiante => (
-                              <MenuItem key={estudiante.numero} value={estudiante.numero}>
-                                {estudiante.nombre} - {estudiante.grado} {estudiante.seccion}
+                            {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 
+                              'Quinto', 'Sexto', 'Séptimo', 'Octavo', 'Noveno'].map(grado => (
+                              <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
+                                {grado}
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
                       </Grid>
 
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Grado y Sección"
-                          value={`${formData.grado} ${formData.seccion}`}
-                          InputProps={{ readOnly: true }}
-                          sx={{ '& .MuiInputBase-input': { fontWeight: 600, backgroundColor: '#f5f5f5' }}}
-                        />
+                     <Grid item xs={12} md={6}>
+                        <FormControl fullWidth error={!!errors.seccion}>
+                          <InputLabel>Sección</InputLabel>
+                          <Select
+                            name="seccion"
+                            value={formData.seccion}
+                            onChange={handleChange}
+                            label="Sección"
+                          >
+                            {['A', 'B'].map(seccion => (
+                              <MenuItem key={seccion} value={seccion} sx={{ fontFamily }}>
+                                Sección {seccion}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Grid>
                     </Grid>
                   </CardContent>
                 </Card>
               </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: '1px solid #e0e0e0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 2, color: '#1A1363', fontFamily }}>
+                    Comprobante de Pago
+                  </Typography>
+
+                  {formData.comprobante ? (
+                    <Box
+                      component="img"
+                      src={formData.comprobante}
+                      alt="Comprobante de Pago"
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: 300,
+                        borderRadius: 2,
+                        border: '1px solid #e0e0e0',
+                      }}
+                    />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No se ha cargado ningún comprobante.
+                    </Typography>
+                  )}
+
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      mt: 2,
+                      fontFamily,
+                      bgcolor: '#1A1363',
+                      color: '#fff',
+                      '&:hover': { bgcolor: '#0f0c4f' },
+                    }}
+                  >
+                    Cargar Comprobante
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              comprobante: reader.result as string,
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </Button>
+                </Paper>
+              </Grid>
+
 
               {/* Sección Detalles del Nivelado */}
               <Grid item xs={12}>
@@ -292,15 +478,21 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
                       </Grid>
 
                       <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="% Descuento"
-                          name="porcentaje_descuento"
-                          value={formData.porcentaje_descuento}
-                          onChange={handleChange}
-                          InputProps={{ readOnly: true }}
-                          sx={{ bgcolor: '#f5f5f5' }}
-                        />
+                        <FormControl fullWidth>
+                          <InputLabel>Descuento</InputLabel>
+                          <Select
+                            name="descuento_aplicado"
+                            value={formData.porcentaje_descuento}
+                            onChange={handleChange}
+                            label="Descuento"
+                          >
+                            {[0, 10, 20, 25, 50, 75, 100].map(desc => (
+                              <MenuItem key={desc} value={`${desc}%`}>
+                                {desc}% Descuento
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Grid>
 
                       <Grid item xs={12} md={6}>
@@ -338,50 +530,113 @@ const FormularioNivelado: React.FC<FormularioNiveladoProps> = ({
               {/* Botones de Acción */}
               <Grid item xs={12} sx={{ mt: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="outlined"
-                    onClick={onClose || (() => navigate('/nivelados'))}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      borderColor: '#1A1363',
-                      color: '#1A1363',
-                      '&:hover': {
-                        bgcolor: '#1A136310',
-                        borderColor: '#1A1363'
-                      }
-                    }}
-                  >
-                    Cancelar
-                  </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setOpenCancelDialog(true)}
+                  sx={{
+                    fontFamily,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: '8px',
+                    borderColor: '#1A1363',
+                    color: '#1A1363',
+                    '&:hover': {
+                      bgcolor: '#1A136310',
+                      borderColor: '#1A1363'
+                    }
+                  }}
+                >
+                  Cancelar
+                </Button>
                   
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isSubmitting}
-                    sx={{
-                      fontFamily,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      bgcolor: '#538A3E',
-                      '&:hover': { bgcolor: '#3e682e' },
-                      '&.Mui-disabled': { bgcolor: '#538A3E80' }
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <CircularProgress size={24} sx={{ color: 'white' }} />
-                    ) : isEditing ? (
-                      'Actualizar Nivelado'
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={primaryButtonStyle}
+                  startIcon={
+                    isSubmitting ? (
+                      <CircularProgress size={20} sx={{ color: "white" }} />
                     ) : (
-                      'Registrar Pago'
-                    )}
-                  </Button>
-                </Box>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                      </svg>
+                    )
+                  }
+                >
+                  {isSubmitting
+                    ? isEditing
+                      ? "Actualizando..."
+                      : "Guardando..."
+                    : isEditing
+                    ? "Actualizar"
+                    : "Guardar"}
+                </Button>
+  {/* Botón Registrar y Generar Factura */}
+  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#F38223",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#d96d1c" },
+                      }}
+                      onClick={() => {
+                        console.log("Registrar y Generar Factura");
+                        // Aquí puedes agregar la lógica para registrar y generar factura
+                      }}
+                    >
+                      Registrar y Generar Factura
+                    </Button>
+                  )}
+
+                  
+                  {/* Botón Efectuar Pago */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#538A3E",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#3e682e" },
+                      }}
+                      onClick={() => {
+                        console.log("Efectuar Pago");
+                        // Aquí puedes agregar la lógica para efectuar el pago
+                      }}
+                    >
+                      Efectuar Pago
+                    </Button>
+                  )}
+                   </Box>
+                   </Grid>
+            
               </Grid>
-            </Grid>
+            
           </form>
         )}
       </Paper>

@@ -16,6 +16,12 @@ import {
   Alert,
   Snackbar,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+
 } from "@mui/material";
 
 const fontFamily = "'Nunito', sans-serif";
@@ -45,6 +51,8 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -55,7 +63,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     fecha_vencimiento: "",
     monto_total: 5000,
     beneficio_aplicado: "",
-    porcentaje_descuento: 0,
+    porcentaje_descuento: "0%",
     saldo_pagado: 0,
     recargo: 0,
     estado: "Pendiente",
@@ -76,7 +84,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
           fecha_vencimiento: "2025-03-01",
           monto_total: 5000,
           beneficio_aplicado: "Descuento Hermanos",
-          porcentaje_descuento: 25,
+          porcentaje_descuento: "25%",
           saldo_pagado: 3750,
           recargo: 0,
           estado: "Parcial",
@@ -87,7 +95,8 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   }, [isEditing, mensualidadId]);
 
   const calculateSaldoPendiente = () => {
-    const descuento = formData.monto_total * (formData.porcentaje_descuento / 100);
+    const porcentaje = parseInt(formData.porcentaje_descuento.replace('%', ''));
+    const descuento = formData.monto_total * (porcentaje / 100);
     const totalConDescuento = formData.monto_total - descuento;
     return totalConDescuento - formData.saldo_pagado + formData.recargo;
   };
@@ -105,8 +114,8 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: ["porcentaje_descuento", "saldo_pagado", "recargo"].includes(name)
-          ? Number(value)
+        [name]: name === "saldo_pagado" || name === "recargo" 
+          ? Number(value) 
           : value
       }));
     }
@@ -140,17 +149,97 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
           saldo_pendiente: calculateSaldoPendiente()
         });
         setIsSubmitting(false);
-        onClose?.();
-        navigate("/mensualidades");
+        setAlertMessage("Se guardó exitosamente la mensualidad");
+        setAlertSeverity("success");
+        setAlertOpen(true);
       }, 1500);
     }
   };
 
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/mensualidad");
+    }
+  };
+
+   // Estilo para botón primario verde
+   const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+
   return (
-    <Box sx={{ width: "100%", p: 2 }}>
-      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={() => setAlertOpen(false)}>
-        <Alert severity="error">{alertMessage}</Alert>
+    <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
+     <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/mensualidad");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Typography variant="h4" sx={{ mb: 4, fontFamily, color: '#1A1363', textAlign: "center" }}>

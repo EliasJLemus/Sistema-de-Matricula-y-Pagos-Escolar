@@ -15,6 +15,19 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+  Snackbar,
+  Card,
+  CardContent,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { useGetMatriculaPagos, useCrearMatricula, useGetMatriculaByUuid } from "@/lib/queries";
 import type { MatriculaType } from "@shared/pagos";
@@ -39,6 +52,8 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+    const [openCancelDialog, setOpenCancelDialog] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<FeedbackStatus>("loading");
@@ -112,6 +127,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
     }
   };
 
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -150,13 +166,107 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         },
       }
     );
+    
+    if (validateForm()) {
+      setIsSubmitting(true);
+      
+      setTimeout(() => {
+        console.log("Datos guardados:",formData);
+        setIsSubmitting(false);
+        setAlertMessage("Se guardó exitosamente la matricula");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+      }, 1500);
+    }
+  };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setAlertOpen(false);
+    if (alertSeverity === "success") {
+      onClose?.();
+      navigate("/pagos/matricula");
+    }
+  };
+
+
+  // Estilo para botón primario verde
+  const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
   };
 
   return (
     <Box sx={{ maxWidth: 1000, margin: "auto", px: 2, py: 4 }}>
       <Snackbar open={alertOpen} autoHideDuration={6000} onClose={() => setAlertOpen(false)}>
         <Alert severity="error">{alertMessage}</Alert>
+    <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
+     <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
+          Confirmar Cancelación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            ¿Seguro que quieres cancelar el proceso?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenCancelDialog(false)}
+            sx={{ fontFamily, color: '#1A1363' }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenCancelDialog(false);
+              onClose?.();
+              navigate("/pagos/matricula");
+            }}
+            sx={{ fontFamily, color: '#1A1363' }}
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Paper
         sx={{
@@ -256,6 +366,141 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                   InputLabelProps={{ shrink: true }}
                   sx={{ fontFamily }}
                 />
+              {/* Sección Detalles de Pago */}
+              <Grid item xs={12}>
+                <Card sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  border: '1px solid #e0e0e0',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ 
+                      mb: 3, 
+                      color: '#1A1363',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#1A1363">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                      </svg>
+                      Detalles de Pago
+                    </Typography>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Fecha Matrícula"
+                          name="fecha_matricula"
+                          type="date"
+                          value={formData.fecha_matricula}
+                          onChange={handleChange}
+                          InputLabelProps={{ shrink: true }}
+                          error={!!errors.fecha_matricula}
+                          helperText={errors.fecha_matricula}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Tarifa Base"
+                          name="tarifa_base"
+                          type="number"
+                          value={formData.tarifa_base}
+                          onChange={handleChange}
+                          error={!!errors.tarifa_base}
+                          helperText={errors.tarifa_base}
+                          InputProps={{ 
+                            startAdornment: 'L. ',
+                            inputProps: { min: 0 }
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Beneficio Aplicado</InputLabel>
+                          <Select
+                            name="beneficio_aplicado"
+                            value={formData.beneficio_aplicado}
+                            onChange={handleChange}
+                            label="Beneficio Aplicado"
+                          >
+                            <MenuItem value="">Ninguno</MenuItem>
+                            <MenuItem value="Beca Excelencia">Beca Excelencia</MenuItem>
+                            <MenuItem value="Descuento Hermanos">Descuento Hermanos</MenuItem>
+                            <MenuItem value="Beca Deportiva">Beca Deportiva</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Descuento</InputLabel>
+                          <Select
+                            name="descuento_aplicado"
+                            value={formData.descuento_aplicado}
+                            onChange={handleChange}
+                            label="Descuento"
+                          >
+                            {[0, 10, 20, 25, 50, 75, 100].map(desc => (
+                              <MenuItem key={desc} value={`${desc}%`}>
+                                {desc}% Descuento
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Total a Pagar"
+                          value={`L. ${formData.total_pagar.toFixed(2)}`}
+                          InputProps={{ readOnly: true }}
+                          sx={{ 
+                            bgcolor: '#f5f5f5',
+                            '& .MuiInputBase-input': { fontWeight: 600 }
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Estado</InputLabel>
+                          <Select
+                            name="estado"
+                            value={formData.estado}
+                            onChange={handleChange}
+                            label="Estado"
+                          >
+                            <MenuItem value="Pagado">Pagado</MenuItem>
+                            <MenuItem value="Pendiente">Pendiente</MenuItem>
+                            <MenuItem value="Moroso">Moroso</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Comprobante</InputLabel>
+                          <Select
+                            name="comprobante"
+                            value={formData.comprobante}
+                            onChange={handleChange}
+                            label="Comprobante"
+                          >
+                            <MenuItem value="Enviado">Enviado</MenuItem>
+                            <MenuItem value="Pendiente">Pendiente</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               </Grid>
 
               <Grid item xs={12}>
@@ -293,6 +538,110 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                   >
                     {isEditing ? "Actualizar Matrícula" : "Registrar Matrícula"}
                   </Button>
+            variant="outlined"
+            onClick={() => setOpenCancelDialog(true)}  // Cambiado aquí
+            sx={{
+              fontFamily,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              borderColor: '#1A1363',
+              color: '#1A1363',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: '#1A136310',
+                borderColor: '#1A1363',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+
+<Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={primaryButtonStyle}
+              startIcon={  // Cambiado de endIcon a startIcon
+                isSubmitting ? (
+                  <CircularProgress size={20} sx={{ color: "white" }} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                )
+              }
+              >
+              {isSubmitting
+                ? isEditing
+                  ? "Actualizando..."
+                  : "Guardando..."
+                : isEditing
+                ? "Actualizar"
+                : "Guardar"}
+            </Button>
+
+
+                  {/* Botón Registrar y Generar Factura */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#F38223",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#d96d1c" },
+                      }}
+                      onClick={() => {
+                        console.log("Registrar y Generar Factura");
+                        // Aquí puedes agregar la lógica para registrar y generar factura
+                      }}
+                    >
+                      Registrar y Generar Factura
+                    </Button>
+                  )}
+
+                  {/* Botón Efectuar Pago */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        fontFamily,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "12px",
+                        bgcolor: "#538A3E",
+                        color: "#fff",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#3e682e" },
+                      }}
+                      onClick={() => {
+                        console.log("Efectuar Pago");
+                        // Aquí puedes agregar la lógica para efectuar el pago
+                      }}
+                    >
+                      Efectuar Pago
+                    </Button>
+                  )}
                 </Box>
               </Grid>
             </Grid>
