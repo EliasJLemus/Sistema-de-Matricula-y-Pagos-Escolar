@@ -20,7 +20,7 @@ export const registrarApoderado = async(req: Request, res: Response): Promise<vo
             parsed.telefono,
             parsed.es_principal,
             parsed.parentesco,
-            parsed.uuid_estudiante
+            parsed.uuid
         );
 
         if(result.codigo_generado === null){

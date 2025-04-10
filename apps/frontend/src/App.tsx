@@ -24,19 +24,18 @@ import NuevoApoderado from "./pages/apoderados/nuevo/NuevoApoderado";
 import EditarApoderado from "./pages/apoderados/editar/EditarApoderado";
 import SubirComprobante from "./components/Comprobante/subirComprobante";
 import Pagos from "./pages/pagos/Pagos";
- import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
- import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
- import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
- 
- import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
- import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
- import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
-
- import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
- import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
- import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
-
+import MatriculaPage from "./pages/pagos/matricula/MatriculaPage";
+import NuevoMatricula from "./pages/pagos/matricula/nuevo/NuevoMatricula";
+import EditarMatricula from "./pages/pagos/matricula/editar/EditarMatricula";
+import MensualidadPage from "./pages/pagos/mensualidad/MensualidadPage";
+import NuevoMensualidad from "./pages/pagos/mensualidad/nuevo/NuevoMensualidad";
+import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualidad";
+import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
+import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
+import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
 import Login from "./pages/login/login";
+
+import { getUsuarioFromToken } from "./helpers/auth";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -60,7 +59,7 @@ function App() {
     navigate("/login");
   };
 
-  if (!authLoaded && !isComprobanteRoute) {
+  if (!authLoaded) {
     return (
       <Box
         sx={{
@@ -99,7 +98,9 @@ function App() {
 
           <Box
             flexGrow={1}
-            ml={!isComprobanteRoute && isLoggedIn && isSidebarVisible ? "300px" : "0px"}
+            ml={
+              !isComprobanteRoute && isLoggedIn && isSidebarVisible ? "300px" : "0px"
+            }
             sx={{ transition: "margin 0.3s ease" }}
           >
             {!isComprobanteRoute && isLoggedIn && (
@@ -141,10 +142,23 @@ function App() {
                   path="/home"
                   element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
                 />
+
+                {/* Validación: rol diferente a asistente */}
                 <Route
                   path="/reportes"
-                  element={isLoggedIn ? <DashboardPage /> : <Navigate to="/login" />}
+                  element={
+                    isLoggedIn ? (
+                      getUsuarioFromToken()?.rol === "asistente" ? (
+                        <Navigate to="/home" />
+                      ) : (
+                        <DashboardPage />
+                      )
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
                 />
+
                 <Route
                   path="/estudiantes"
                   element={isLoggedIn ? <EstudiantesPage /> : <Navigate to="/login" />}
@@ -157,6 +171,7 @@ function App() {
                   path="/estudiantes/editar/:id"
                   element={isLoggedIn ? <EditarEstudiantePage /> : <Navigate to="/login" />}
                 />
+
                 <Route
                   path="/apoderados"
                   element={isLoggedIn ? <ApoderadoPage /> : <Navigate to="/login" />}
@@ -167,54 +182,29 @@ function App() {
                 />
                 <Route
                   path="/apoderados/editar/:id"
-                  element={
-                    isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />
-                  }
-                />
-  <Route path="/pagos" element={<Pagos />} />
-
-{/* Rutas de matricula*/}
-<Route path="/pagos/matricula" element={<MatriculaPage />} />
-                 <Route
-                   path="/pagos/matricula/nuevo"
-                   element={<NuevoMatricula />}
-                 />
-                 <Route
-                   path="/pagos/matricula/editar/:id"
-                   element={<EditarMatricula />}
-                 />
- 
-  {/* Rutas de mensualidad*/}
-  <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
-                 <Route
-                   path="/pagos/mensualidad/nuevo"
-                   element={<NuevoMensualidad />}
-                 />
-                 <Route
-                   path="/pagos/mensualidad/editar/:id"
-                   element={<EditarMensualidad />}
-                 />
-
-                <Route
-                  path="/subir-comprobante"
-                  element={
-                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
-                  }
+                  element={isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />}
                 />
 
- {/* Rutas de nivelados*/}
+                {/* Pagos */}
+                <Route path="/pagos" element={<Pagos />} />
+
+                {/* Matricula */}
+                <Route path="/pagos/matricula" element={<MatriculaPage />} />
+                <Route path="/pagos/matricula/nuevo" element={<NuevoMatricula />} />
+                <Route path="/pagos/matricula/editar/:id" element={<EditarMatricula />} />
+
+                {/* Mensualidad */}
+                <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
+                <Route path="/pagos/mensualidad/nuevo" element={<NuevoMensualidad />} />
+                <Route path="/pagos/mensualidad/editar/:id" element={<EditarMensualidad />} />
+
+                {/* Nivelados */}
                 <Route path="/pagos/nivelados" element={<NiveladoPage />} />
-                
-                <Route path="/pagos/nivelados/nuevo"  element={<NuevoNivelado />} />
-                 <Route path="/pagos/nivelados/editar/:id" element={<EditarNivelado />}/>
-    
-                 <Route
-                  path="/subir-comprobante"
-                  element={
-                    isLoggedIn ? <SubirComprobante /> : <Navigate to="/login" />
-                  }
-                />
+                <Route path="/pagos/nivelados/nuevo" element={<NuevoNivelado />} />
+                <Route path="/pagos/nivelados/editar/:id" element={<EditarNivelado />} />
 
+                {/* Subir comprobante (ACCESO PÚBLICO) */}
+                <Route path="/subir-comprobante" element={<SubirComprobante />} />
               </Routes>
             </Box>
           </Box>

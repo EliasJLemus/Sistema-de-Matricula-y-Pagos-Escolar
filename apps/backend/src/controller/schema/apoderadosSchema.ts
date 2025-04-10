@@ -17,9 +17,8 @@ export const registrarEncargadoSchema = z.object({
   correo: z.string().email('Correo inválido'),
   telefono: z
     .string()
-    .min(8, 'Teléfono inválido')
-    .regex(/^\d+$/, 'Solo se permiten números'),
+    .min(8, 'Teléfono inválido'),
   es_principal: z.boolean(),
   parentesco: z.string().min(1, 'Parentesco requerido'),
-  uuid_estudiante: z.string().uuid('UUID inválido'),
+  uuid: z.string().uuid('UUID inválido'),
 });

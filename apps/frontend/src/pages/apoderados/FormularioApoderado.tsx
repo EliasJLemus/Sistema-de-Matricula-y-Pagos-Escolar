@@ -8,28 +8,21 @@ import {
   Select,
   MenuItem,
   Typography,
-  Card,
-  CardContent,
   Grid,
   CircularProgress,
   Snackbar,
   Alert,
-  Checkbox,
-  InputAdornment,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   useTheme,
-  IconButton,
-  Tooltip,
   Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useGetEstudiantes, useRegistrarApoderado } from "@/lib/queries";
 import { TelefonoInput } from "@/components/TelefonoInput";
-import { ApoderadoType } from "@/lib/queries/useGetApoderados";
 
 const fontFamily = "'Nunito', sans-serif";
 
@@ -43,14 +36,14 @@ const FormularioApoderado = () => {
     primer_apellido: "",
     segundo_apellido: "",
     identidad: "",
-    genero: "M",
+    genero: "",
     fecha_nacimiento: "",
     correo_electronico: "",
     telefono_personal: "",
     parentesco: "",
     es_encargado_principal: false,
     grado_estudiante: "",
-    uuid_estudiante: "",
+    uuid: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -87,13 +80,8 @@ const FormularioApoderado = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "grado_estudiante" ? { uuid_estudiante: "" } : {}),
+      ...(name === "grado_estudiante" ? { uuid: "" } : {}),
     }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleTelefonoChange = (value: string) => {
@@ -112,7 +100,9 @@ const FormularioApoderado = () => {
       newErrors.correo_electronico = "Correo inválido";
     }
     if (!formData.parentesco) newErrors.parentesco = "Requerido";
-    if (!formData.uuid_estudiante) newErrors.uuid_estudiante = "Seleccione un estudiante";
+    if (!formData.genero) newErrors.genero = "Requerido";
+    if (!formData.grado_estudiante) newErrors.grado_estudiante = "Requerido";
+    if (!formData.uuid) newErrors.uuid = "Seleccione un estudiante";
     if (!formData.fecha_nacimiento) newErrors.fecha_nacimiento = "Requerido";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -131,13 +121,13 @@ const FormularioApoderado = () => {
         primer_apellido: formData.primer_apellido,
         segundo_apellido: formData.segundo_apellido || "",
         identidad: formData.identidad,
-        genero: formData.genero === "F" ? "Femenino" : "Masculino",
+        genero: formData.genero,
         fecha_nacimiento: formData.fecha_nacimiento,
         correo: formData.correo_electronico,
         telefono: formData.telefono_personal,
         es_principal: formData.es_encargado_principal,
         parentesco: formData.parentesco,
-        uuid_estudiante: formData.uuid_estudiante,
+        uuid: formData.uuid,
       },
       {
         onSuccess: (res) => {
@@ -166,9 +156,6 @@ const FormularioApoderado = () => {
   const handleOpenCancelDialog = () => setOpenCancelDialog(true);
   const handleCloseCancelDialog = () => setOpenCancelDialog(false);
   const handleConfirmCancel = () => navigate("/apoderados");
-
-  const getGradoEstudiante = (uuid: string) =>
-    estudiantesData?.data?.find((e) => e.uuid === uuid)?.grado || "";
 
   return (
     <Box>
@@ -271,20 +258,61 @@ const FormularioApoderado = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={!!errors.uuid_estudiante}>
-                <InputLabel>Estudiante</InputLabel>
+              <FormControl fullWidth error={!!errors.genero}>
+                <InputLabel>Género</InputLabel>
                 <Select
-                  name="uuid_estudiante"
-                  value={formData.uuid_estudiante}
+                  name="genero"
+                  value={formData.genero}
                   onChange={handleSelectChange}
                 >
-                  {filteredEstudiantes.map((e: any) => {
-                    return (
-                      <MenuItem key={e.uuid_encargado} value={e.uuid_encargado}>
-                        {e.primer_nombre} - {e.grado_estudiante} 
-                      </MenuItem>
-                    );
-                  })}
+                  <MenuItem value="Masculino">Masculino</MenuItem>
+                  <MenuItem value="Femenino">Femenino</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Fecha de Nacimiento"
+                name="fecha_nacimiento"
+                value={formData.fecha_nacimiento}
+                onChange={handleChange}
+                InputLabelProps={{ shrink: true }}
+                error={!!errors.fecha_nacimiento}
+                helperText={errors.fecha_nacimiento}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.grado_estudiante}>
+                <InputLabel>Grado</InputLabel>
+                <Select
+                  name="grado_estudiante"
+                  value={formData.grado_estudiante}
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value="Primero">Primero</MenuItem>
+                  <MenuItem value="Segundo">Segundo</MenuItem>
+                  <MenuItem value="Tercero">Tercero</MenuItem>
+                  <MenuItem value="Cuarto">Cuarto</MenuItem>
+                  <MenuItem value="Quinto">Quinto</MenuItem>
+                  <MenuItem value="Sexto">Sexto</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.uuid}>
+                <InputLabel>Estudiante</InputLabel>
+                <Select
+                  name="uuid"
+                  value={formData.uuid}
+                  onChange={handleSelectChange}
+                >
+                  {filteredEstudiantes.map((e: any) => (
+                    <MenuItem key={e.uuid} value={e.uuid}>
+                      {e.primer_nombre} - {e.grado_estudiante}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

@@ -358,13 +358,13 @@ interface RegistrarApoderadoInput {
   primer_apellido: string;
   segundo_apellido?: string;
   identidad: string;
-  genero: "Masculino" | "Femenino" | "Otro";
+  genero: string;
   fecha_nacimiento: string;
   correo: string;
   telefono: string;
   es_principal: boolean;
   parentesco: string;
-  uuid_estudiante: string;
+  uuid: string;
 }
 
 interface RegistrarApoderadoResponse {
