@@ -33,7 +33,21 @@ export interface MatriculaPagoType {
     nombre_encargado_principal?: string;
     uuid_encargado_secundario?: string;
     codigo_encargado_secundario?: string;
-    nombre_encargado_secundario?: string
+    nombre_encargado_secundario?: string;
+    tipo_pago?: string;
+    descripcion?: string;
+    periodicidad?: string;
+    codigo_plan_detallado?: string;
+    codigo_plan_matricula?: string;
+    tarifa_plan_matricula?: number;
+    vencimiento?: string;
+    tipo_plan_matricula?: string;
+    nivel_plan_matricula?: string;
+    year_plan_matricula?: number;
+    nombre_beca?: string;
+    descuento?: number;
+    codigo_beca? : string;
+    total_matricula?: number;
   }
 
   export interface MatriculaTableType {

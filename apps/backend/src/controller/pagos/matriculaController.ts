@@ -3,6 +3,7 @@ import { getPaginationParams } from "@/controller/utils/pagination";
 import { PagosMatriculasDB } from "@/db/pagos/matricula";
 import {MatriculaType} from "@shared/pagos"
 import { enviarCorreoComprobante } from "@/utils/enviarCorreoComprobante";
+import { Database } from "@/db/service";
 
 
 const pagosMatriculasDB = new PagosMatriculasDB();
@@ -219,5 +220,50 @@ export const actualizarEstadoComprobanteController = async (req: Request, res: R
       message: "Error al actualizar estado del comprobante.",
     });
     return
+  }
+};
+
+
+export const getPlanPagoDetalladoByEstudiante = async (req: Request, res: Response): Promise<void> => {
+  const { uuid  } = req.params;
+
+  try {
+    if (!uuid ) {
+      res.status(400).json({ success: false, message: "UUID del estudiante requerido" });
+      return;
+    }
+
+    const db = new Database();
+
+    const result = await db.query(
+      `
+      SELECT * FROM "Pagos"."VistaDetalleMatriculaEstudiante"
+      WHERE uuid_estudiante = $1
+      ORDER BY fecha_modificacion DESC
+      LIMIT 1
+      `,
+      [uuid ]
+    );
+
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "No se encontró plan de pago detallado para el estudiante.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: result.rows[0],
+    });
+
+  } catch (error: any) {
+    console.error("Error al obtener el plan detallado:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error interno al obtener plan detallado.",
+      detail: error.message,
+    });
   }
 };

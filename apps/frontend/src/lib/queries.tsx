@@ -580,3 +580,44 @@ export const useActualizarEstadoComprobante = () => {
     },
   });
 };
+
+
+interface VistaDetalleMatricula {
+  uuid_plan_detallado: string;
+  uuid_estudiante: string;
+  tipo_pago: string;
+  descripcion: string;
+  periodicidad: string;
+  fecha_modificacion: string;
+  codigo_plan_detallado: string;
+  uuid_plan_matricula: string;
+  uuid_plan_mensualidad: string | null;
+  uuid_plan_nivelado: string | null;
+  uuid_beca: string | null;
+
+  codigo_plan_matricula: string;
+  tarifa_plan_matricula: string;
+  vencimiento: string;
+  tipo_plan_matricula: string;
+  nivel_plan_matricula: string;
+  year_plan_matricula: number;
+
+  nombre_beca: string | null;
+  descuento: number | null;
+  codigo_beca: string | null;
+  estado_beca: string | null;
+
+  total_matricula: string;
+}
+
+export const useGetVistaDetalleMatricula = (uuid_estudiante: string) => {
+  return useQuery({
+    queryKey: ["vistaDetalleMatricula", uuid_estudiante],
+    queryFn: async () => {
+      if (!uuid_estudiante) return null;
+      const response = await axios.get(`http://localhost:3000/pagos/plan-detallado/${uuid_estudiante}`);
+      return response.data;
+    },
+    enabled: !!uuid_estudiante,
+  });
+};

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Apoderados } from "@/db/estudiantes/apoderadosDB";
 import { registrarEncargadoSchema } from "@/controller/schema/apoderadosSchema"
+import { Database } from "@/db/service";
 
 const apoderadoDB = new Apoderados();
 
