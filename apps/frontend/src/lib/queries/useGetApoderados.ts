@@ -18,6 +18,9 @@ export interface ApoderadoType {
   estudiante_primer_nombre: string;
   estudiante_primer_apellido: string;
   grado_estudiante: string;
+  fecha_nacimiento?: string;
+  uuid_estudiante?: string;
+  uuid_encargado?: string;
 }
 
 // Función para obtener los apoderados de la API
