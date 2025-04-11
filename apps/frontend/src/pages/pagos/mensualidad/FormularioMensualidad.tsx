@@ -21,10 +21,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-
+  Card,
+  CardContent,
+  InputAdornment,
 } from "@mui/material";
 
-const fontFamily = "'Nunito', sans-serif";
+const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 const estudiantes = [
   { numero: "EST001", nombre: "Abigail López" },
@@ -38,7 +40,7 @@ interface FormularioMensualidadProps {
   mensualidadId?: string | number;
   isEditing?: boolean;
   onClose?: () => void;
-  comprobante?: string; // solo por compatibilidad
+  comprobante?: string;
 }
 
 const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
@@ -51,8 +53,9 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error" | "warning">("error");
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 
   const [formData, setFormData] = useState({
     numero_estudiante: "",
@@ -101,6 +104,11 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     return totalConDescuento - formData.saldo_pagado + formData.recargo;
   };
 
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+  };
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
 
@@ -114,7 +122,7 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: name === "saldo_pagado" || name === "recargo" 
+        [name]: name === "saldo_pagado" || name === "recargo" || name === "monto_total"
           ? Number(value) 
           : value
       }));
@@ -141,6 +149,18 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Marcar todos los campos como tocados antes de validar
+    const allFields = {
+      numero_estudiante: true,
+      grado: true,
+      seccion: true,
+      fecha_inicio: true,
+      fecha_vencimiento: true,
+      monto_total: true,
+      saldo_pagado: true,
+    };
+    setTouchedFields(allFields);
+
     if (validateForm()) {
       setIsSubmitting(true);
       
@@ -150,10 +170,19 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
           saldo_pendiente: calculateSaldoPendiente()
         });
         setIsSubmitting(false);
-        setAlertMessage("Se guardó exitosamente la mensualidad");
+        setAlertMessage("¡La mensualidad se guardó exitosamente!");
         setAlertSeverity("success");
         setAlertOpen(true);
+
+        // Navegar después de mostrar el mensaje
+        setTimeout(() => {
+          navigate("/pagos/mensualidad");
+        }, 2000);
       }, 1500);
+    } else {
+      setAlertSeverity("warning");
+      setAlertMessage("Por favor complete todos los campos requeridos correctamente");
+      setAlertOpen(true);
     }
   };
 
@@ -163,284 +192,707 @@ const FormularioMensualidad: React.FC<FormularioMensualidadProps> = ({
   ) => {
     if (reason === "clickaway") return;
     setAlertOpen(false);
-    if (alertSeverity === "success") {
-      onClose?.();
+  };
+
+  const handleOpenCancelDialog = () => {
+    setOpenCancelDialog(true);
+  };
+
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+  };
+
+  const handleConfirmCancel = () => {
+    setOpenCancelDialog(false);
+    if (onClose) {
+      onClose();
+    } else {
       navigate("/pagos/mensualidad");
     }
   };
 
-   // Estilo para botón primario verde
+  // Estilos comunes para TextField
+  const textFieldStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363 !important",
+      "&.Mui-focused": {
+        color: "#1A1363 !important",
+      },
+    },
+    "& .MuiInputLabel-shrink": {
+      color: "#1A1363 !important",
+    },
+    "& .MuiInputBase-root": {
+      fontFamily,
+      borderRadius: "12px",
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+        borderWidth: "2px",
+      },
+    },
+    "& .MuiFormHelperText-root": {
+      fontFamily,
+      color: "#f44336",
+    },
+  };
 
+  // Estilos comunes para FormControl
+  const formControlStyle = {
+    "& .MuiInputLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiFormLabel-root": {
+      fontFamily,
+      fontSize: "14px",
+      color: "#1A1363",
+    },
+    "& .MuiSelect-select": {
+      fontFamily,
+      backgroundColor: "#f8f9fa",
+    },
+    "& .MuiInputBase-root": {
+      borderRadius: "12px",
+      transition: "transform 0.2s, box-shadow 0.2s",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#538A3E",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#1A1363",
+        borderWidth: "2px",
+      },
+      "&.Mui-focused": {
+        transform: "translateY(-2px)",
+        boxShadow: "0 4px 10px rgba(26, 19, 99, 0.1)",
+      },
+      "&.Mui-error .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#f44336",
+      },
+      "&.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#f44336",
+      },
+    },
+    "& .MuiMenuItem-root:hover": {
+      backgroundColor: "#e7f5e8",
+    },
+    "& .MuiFormHelperText-root.Mui-error": {
+      color: "#f44336",
+    },
+    "& .MuiFormLabel-root.Mui-error": {
+      color: "#f44336",
+    },
+  };
 
+  // Estilo para botón primario verde
+  const primaryButtonStyle = {
+    bgcolor: "#538A3E",
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(83, 138, 62, 0.3)",
+    "&:hover": {
+      backgroundColor: "#3e682e",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(83, 138, 62, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#2e5022",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(83, 138, 62, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  // Estilo para botón secundario naranja
+  const secondaryButtonStyle = {
+    fontFamily,
+    textTransform: "none",
+    borderRadius: "12px",
+    bgcolor: "#F38223",
+    color: "white",
+    px: 4,
+    py: 1.2,
+    minWidth: "140px",
+    fontWeight: 600,
+    fontSize: "15px",
+    boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)",
+    "&:hover": {
+      backgroundColor: "#e67615",
+      transform: "translateY(-2px)",
+      boxShadow: "0px 6px 12px rgba(243, 130, 35, 0.4)",
+    },
+    "&:active": {
+      backgroundColor: "#d56a10",
+      transform: "translateY(1px)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(243, 130, 35, 0.7)",
+      color: "white",
+    },
+    transition: "all 0.2s ease-in-out",
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+        <CircularProgress sx={{ color: "#538A3E" }} />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: 'auto', p: 3 }}>
-    <Snackbar
+    <Box sx={{ height: "auto" }}>
+      <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={alertSeverity}>{alertMessage}</Alert>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={alertSeverity}
+          sx={{
+            width: "100%",
+            fontFamily,
+            "& .MuiAlert-icon": {
+              color: alertSeverity === "success" ? "#538A3E" : 
+                    alertSeverity === "warning" ? "#F38223" : "#f44336",
+            },
+          }}
+        >
+          {alertMessage}
+        </Alert>
       </Snackbar>
 
+      <Paper
+        elevation={0}
+        sx={{
+          p: 0,
+          mb: 3,
+          borderRadius: "16px",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+          maxWidth: "1200px",
+          mx: "auto",
+          bgcolor: "#ffffff",
+          height: "auto",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          border: "1px solid rgba(0,0,0,0.05)",
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          {/* Información de la mensualidad */}
+          <Box sx={{ p: 4 }}>
+            <Card
+              elevation={0}
+              sx={{
+                mb: 4,
+                borderRadius: "16px",
+                border: "1px solid rgba(0,0,0,0.05)",
+                overflow: "visible",
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{
+                    color: "#1A1363",
+                    fontFamily,
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "18px",
+                    mb: 3,
+                    "&::before": {
+                      content: '""',
+                      display: "inline-block",
+                      width: "5px",
+                      height: "24px",
+                      backgroundColor: "#538A3E",
+                      marginRight: "10px",
+                      borderRadius: "3px",
+                    },
+                  }}
+                >
+                  Información de la Mensualidad
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Primera fila */}
+                  <Grid item xs={12} md={6}>
+                    <FormControl
+                      fullWidth
+                      error={!!errors.numero_estudiante}
+                      required
+                      sx={formControlStyle}
+                    >
+                      <InputLabel id="estudiante-label">Estudiante Asociado</InputLabel>
+                      <Select
+                        labelId="estudiante-label"
+                        name="numero_estudiante"
+                        value={formData.numero_estudiante}
+                        label="Estudiante Asociado"
+                        onChange={handleChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                              borderRadius: "12px",
+                              mt: 1,
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                            },
+                          },
+                        }}
+                      >
+                        {estudiantes.map(est => (
+                          <MenuItem key={est.numero} value={est.numero} sx={{ fontFamily }}>
+                            {est.nombre}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.numero_estudiante && (
+                        <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
+                          {errors.numero_estudiante}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Código Estudiante"
+                      value={formData.numero_estudiante}
+                      InputProps={{ readOnly: true }}
+                      sx={{
+                        ...textFieldStyle,
+                        "& .MuiInputBase-input": {
+                          backgroundColor: "#f0f0f0",
+                        },
+                      }}
+                    />
+                  </Grid>
+
+                  {/* Segunda fila */}
+                  <Grid item xs={12} md={6}>
+                    <FormControl
+                      fullWidth
+                      error={!!errors.grado}
+                      required
+                      sx={formControlStyle}
+                    >
+                      <InputLabel id="grado-label">Grado</InputLabel>
+                      <Select
+                        labelId="grado-label"
+                        name="grado"
+                        value={formData.grado}
+                        label="Grado"
+                        onChange={handleChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                              borderRadius: "12px",
+                              mt: 1,
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                            },
+                          },
+                        }}
+                      >
+                        {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto'].map(grado => (
+                          <MenuItem key={grado} value={grado} sx={{ fontFamily }}>{grado}</MenuItem>
+                        ))}
+                      </Select>
+                      {errors.grado && (
+                        <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
+                          {errors.grado}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl
+                      fullWidth
+                      error={!!errors.seccion}
+                      required
+                      sx={formControlStyle}
+                    >
+                      <InputLabel id="seccion-label">Sección</InputLabel>
+                      <Select
+                        labelId="seccion-label"
+                        name="seccion"
+                        value={formData.seccion}
+                        label="Sección"
+                        onChange={handleChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                              borderRadius: "12px",
+                              mt: 1,
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                            },
+                          },
+                        }}
+                      >
+                        {['A', 'B'].map(seccion => (
+                          <MenuItem key={seccion} value={seccion} sx={{ fontFamily }}>
+                            {`Sección ${seccion}`}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.seccion && (
+                        <Typography variant="caption" color="error" sx={{ fontFamily, mt: 0.5, ml: 1.5 }}>
+                          {errors.seccion}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  </Grid>
+
+                  {/* Tercera fila */}
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Fecha Inicio"
+                      name="fecha_inicio"
+                      type="date"
+                      value={formData.fecha_inicio}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      InputLabelProps={{ shrink: true }}
+                      error={!!errors.fecha_inicio}
+                      helperText={errors.fecha_inicio}
+                      required
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Fecha Vencimiento"
+                      name="fecha_vencimiento"
+                      type="date"
+                      value={formData.fecha_vencimiento}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      InputLabelProps={{ shrink: true }}
+                      error={!!errors.fecha_vencimiento}
+                      helperText={errors.fecha_vencimiento}
+                      required
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  {/* Cuarta fila */}
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Monto Total (L.)"
+                      name="monto_total"
+                      type="number"
+                      value={formData.monto_total}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={!!errors.monto_total}
+                      helperText={errors.monto_total}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">L.</InputAdornment>
+                        ),
+                      }}
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth sx={formControlStyle}>
+                      <InputLabel id="beneficio-label">Beneficio Aplicado</InputLabel>
+                      <Select
+                        labelId="beneficio-label"
+                        name="beneficio_aplicado"
+                        value={formData.beneficio_aplicado}
+                        label="Beneficio Aplicado"
+                        onChange={handleChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                              borderRadius: "12px",
+                              mt: 1,
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                            },
+                          },
+                        }}
+                      >
+                        <MenuItem value="" sx={{ fontFamily }}><em>Ninguno</em></MenuItem>
+                        <MenuItem value="Beca Excelencia" sx={{ fontFamily }}>Beca Excelencia</MenuItem>
+                        <MenuItem value="Descuento Hermanos" sx={{ fontFamily }}>Descuento Hermanos</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Quinta fila */}
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="% Descuento"
+                      name="porcentaje_descuento"
+                      type="text"
+                      value={formData.porcentaje_descuento}
+                      onChange={handleChange}
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Saldo Pagado (L.)"
+                      name="saldo_pagado"
+                      type="number"
+                      value={formData.saldo_pagado}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={!!errors.saldo_pagado}
+                      helperText={errors.saldo_pagado}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">L.</InputAdornment>
+                        ),
+                        inputProps: { min: 0 }
+                      }}
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  {/* Sexta fila */}
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Recargo (L.)"
+                      name="recargo"
+                      type="number"
+                      value={formData.recargo}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">L.</InputAdornment>
+                        ),
+                        inputProps: { min: 0 }
+                      }}
+                      sx={textFieldStyle}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Saldo Pendiente (L.)"
+                      value={`${calculateSaldoPendiente().toFixed(2)}`}
+                      InputProps={{ 
+                        readOnly: true,
+                        startAdornment: (
+                          <InputAdornment position="start">L.</InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        ...textFieldStyle,
+                        "& .MuiInputBase-input": {
+                          backgroundColor: "#f0f0f0",
+                          fontWeight: 600,
+                        },
+                      }}
+                    />
+                  </Grid>
+
+                  {/* Séptima fila */}
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth sx={formControlStyle}>
+                      <InputLabel id="estado-label">Estado</InputLabel>
+                      <Select
+                        labelId="estado-label"
+                        name="estado"
+                        value={formData.estado}
+                        label="Estado"
+                        onChange={handleChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: "#e7f5e8",
+                              },
+                              borderRadius: "12px",
+                              mt: 1,
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                            },
+                          },
+                        }}
+                      >
+                        <MenuItem value="Pagado" sx={{ fontFamily }}>Pagado</MenuItem>
+                        <MenuItem value="Pendiente" sx={{ fontFamily }}>Pendiente</MenuItem>
+                        <MenuItem value="Parcial" sx={{ fontFamily }}>Parcial</MenuItem>
+                        <MenuItem value="Moroso" sx={{ fontFamily }}>Moroso</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Box>
+
+          {/* Botones de acción */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 3,
+              p: 3,
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              bgcolor: "#f8f9fa",
+              position: "sticky",
+              bottom: 0,
+              zIndex: 10,
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleOpenCancelDialog}
+              sx={secondaryButtonStyle}
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              }
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={primaryButtonStyle}
+              startIcon={
+                isSubmitting ? (
+                  <CircularProgress size={20} sx={{ color: "white" }} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                )
+              }
+            >
+              {isSubmitting
+                ? isEditing
+                  ? "Actualizando..."
+                  : "Guardando..."
+                : isEditing
+                ? "Actualizar"
+                : "Guardar"}
+            </Button>
+          </Box>
+        </form>
+      </Paper>
+
+      {/* Diálogo de confirmación para cancelar */}
       <Dialog
         open={openCancelDialog}
-        onClose={() => setOpenCancelDialog(false)}
+        onClose={handleCloseCancelDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        <DialogTitle sx={{ fontFamily, color: '#1A1363' }}>
-          Confirmar Cancelación
+        <DialogTitle id="alert-dialog-title" sx={{ fontFamily }}>
+          Confirmar cancelación
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ fontFamily }}>
+          <DialogContentText id="alert-dialog-description" sx={{ fontFamily }}>
             ¿Seguro que quieres cancelar el proceso?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button 
-            onClick={() => setOpenCancelDialog(false)}
-            sx={{ fontFamily, color: '#1A1363' }}
+            onClick={handleCloseCancelDialog} 
+            sx={{ 
+              fontFamily,
+              color: "#1A1363",
+              "&:hover": {
+                backgroundColor: "#f0f0f0"
+              }
+            }}
           >
             No
           </Button>
-          <Button
-         onClick={() => {setOpenCancelDialog(false);  // Cerrar el diálogo
-          onClose?.();                 // Ejecutar cierre del formulario si es necesario
-       navigate("/pagos/mensualidad"); }}
-       sx={{ fontFamily, color: '#1A1363' }}
-       autoFocus
-          >
-              Sí
-            </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-        <Typography variant="h4" sx={{ mb: 4, fontFamily, color: '#1A1363', textAlign: "center" }}>
-          {isEditing ? "Editar Mensualidad" : "Nueva Mensualidad"}
-        </Typography>
-
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress sx={{ color: '#538A3E' }} />
-          </Box>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3} sx={{ maxWidth: 900, mx: "auto" }}>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.numero_estudiante}>
-                  <InputLabel>Seleccionar Estudiante</InputLabel>
-                  <Select
-                    name="numero_estudiante"
-                    value={formData.numero_estudiante}
-                    onChange={handleChange}
-                    label="Seleccionar Estudiante"
-                  >
-                    {estudiantes.map(est => (
-                      <MenuItem key={est.numero} value={est.numero}>
-                        {est.nombre}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Código Estudiante"
-                  value={formData.numero_estudiante}
-                  InputProps={{ readOnly: true }}
-                  sx={{ bgcolor: '#f5f5f5' }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.grado}>
-                  <InputLabel>Grado</InputLabel>
-                  <Select
-                    name="grado"
-                    value={formData.grado}
-                    onChange={handleChange}
-                    label="Grado"
-                  >
-                    {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto'].map(grado => (
-                      <MenuItem key={grado} value={grado}>{grado}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.seccion}>
-                  <InputLabel>Sección</InputLabel>
-                  <Select
-                    name="seccion"
-                    value={formData.seccion}
-                    onChange={handleChange}
-                    label="Sección"
-                  >
-                    {['A', 'B'].map(seccion => (
-                      <MenuItem key={seccion} value={seccion}>{`Sección ${seccion}`}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Inicio"
-                  name="fecha_inicio"
-                  type="date"
-                  value={formData.fecha_inicio}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  error={!!errors.fecha_inicio}
-                  helperText={errors.fecha_inicio}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Vencimiento"
-                  name="fecha_vencimiento"
-                  type="date"
-                  value={formData.fecha_vencimiento}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  error={!!errors.fecha_vencimiento}
-                  helperText={errors.fecha_vencimiento}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Monto Total"
-                  name="monto_total"
-                  type="number"
-                  value={formData.monto_total}
-                  onChange={handleChange}
-                  error={!!errors.monto_total}
-                  helperText={errors.monto_total}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Beneficio Aplicado</InputLabel>
-                  <Select
-                    name="beneficio_aplicado"
-                    value={formData.beneficio_aplicado}
-                    onChange={handleChange}
-                    label="Beneficio Aplicado"
-                  >
-                    <MenuItem value="">Ninguno</MenuItem>
-                    <MenuItem value="Beca Excelencia">Beca Excelencia</MenuItem>
-                    <MenuItem value="Descuento Hermanos">Descuento Hermanos</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="% Descuento"
-                  name="porcentaje_descuento"
-                  type="number"
-                  value={formData.porcentaje_descuento}
-                  onChange={handleChange}
-                  InputProps={{ inputProps: { min: 0, max: 100 } }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Saldo Pagado"
-                  name="saldo_pagado"
-                  type="number"
-                  value={formData.saldo_pagado}
-                  onChange={handleChange}
-                  error={!!errors.saldo_pagado}
-                  helperText={errors.saldo_pagado}
-                  InputProps={{ inputProps: { min: 0 } }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Recargo"
-                  name="recargo"
-                  type="number"
-                  value={formData.recargo}
-                  onChange={handleChange}
-                  InputProps={{ inputProps: { min: 0 } }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Saldo Pendiente"
-                  value={`L. ${calculateSaldoPendiente().toFixed(2)}`}
-                  InputProps={{ readOnly: true }}
-                  sx={{ bgcolor: "#f5f5f5", fontWeight: 600 }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Estado</InputLabel>
-                  <Select
-                    name="estado"
-                    value={formData.estado}
-                    onChange={handleChange}
-                    label="Estado"
-                  >
-                    <MenuItem value="Pagado">Pagado</MenuItem>
-                    <MenuItem value="Pendiente">Pendiente</MenuItem>
-                    <MenuItem value="Parcial">Parcial</MenuItem>
-                    <MenuItem value="Moroso">Moroso</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} sx={{ mt: 3, textAlign: 'center' }}>
-              <Button
-            variant="outlined"
-            onClick={() => setOpenCancelDialog(true)}  // Cambiado aquí
-            sx={{
+          <Button 
+            onClick={handleConfirmCancel} 
+            autoFocus
+            sx={{ 
               fontFamily,
-              px: 4,
-              py: 1.5,
-              borderRadius: '12px',
-              borderColor: '#1A1363',
-              color: '#1A1363',
-              fontWeight: 600,
-              textTransform: 'none',
-              '&:hover': {
-                bgcolor: '#1A136310',
-                borderColor: '#1A1363',
-              },
+              color: "#F38223",
+              "&:hover": {
+                backgroundColor: "#f0f0f0"
+              }
             }}
           >
-            Cancelar
+            Sí
           </Button>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isEditing ? "Guardar Cambios" : "Registrar Mensualidad"}
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        )}
-      </Paper>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -1520,15 +1520,15 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                             control={
                               <Radio
                                 sx={{
-                                  color: "#2196F3", // Color azul para masculino
+                                  color: "#538A3E", // Color verde para ambos estados
                                   "&.Mui-checked": {
-                                    color: "#2196F3",
+                                    color: "#538A3E", // Color verde cuando está seleccionado
                                   },
                                 }}
                               />
                             }
                             label={
-                              <Typography sx={{ color: "#2196F3", fontFamily }}>
+                              <Typography sx={{ color: "#1A1363", fontFamily }}> {/* Color de texto oscuro */}
                                 Masculino
                               </Typography>
                             }
@@ -1547,15 +1547,15 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
                             control={
                               <Radio
                                 sx={{
-                                  color: "#E91E63", // Color rosa para femenino
+                                  color: "#538A3E", // Color verde para ambos estados
                                   "&.Mui-checked": {
-                                    color: "#E91E63",
+                                    color: "#538A3E", // Color verde cuando está seleccionado
                                   },
                                 }}
                               />
                             }
                             label={
-                              <Typography sx={{ color: "#E91E63", fontFamily }}>
+                              <Typography sx={{ color: "#1A1363", fontFamily }}> {/* Color de texto oscuro */}
                                 Femenino
                               </Typography>
                             }
