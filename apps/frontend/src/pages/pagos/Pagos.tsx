@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Pagos = () => {
   const navigate = useNavigate();
 
-  const handleNavigation = (route) => {
+  const handleNavigation = (route: any) => {
     navigate(route);
   };
 

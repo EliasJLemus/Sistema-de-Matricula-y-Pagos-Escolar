@@ -84,8 +84,8 @@ class ReporteSintetizadoDB {
           tasa_retiro
         FROM "Estudiantes".reporte_retiro_estudiantes(
           2025,                    -- p_anio (año lectivo)
-          '2025-01-01',            -- p_fecha_inicio
-          '2025-12-31'             -- p_fecha_fin
+          '2020-01-01',            -- p_fecha_inicio
+          '2030-12-31'             -- p_fecha_fin
         )
       `;
 

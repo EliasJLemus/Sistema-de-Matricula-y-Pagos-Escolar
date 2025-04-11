@@ -7,7 +7,13 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import { Navigate, Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 // Layout
 import Topbar from "./pages/global/Topbar";
@@ -34,8 +40,7 @@ import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
 import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
 import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
 import Login from "./pages/login/login";
-
-import { getUsuarioFromToken } from "./helpers/auth";
+import UsuariosPage from "./pages/usuarios/UsuariosPage"; // 👈🏼 Nuevo import
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -59,7 +64,7 @@ function App() {
     navigate("/login");
   };
 
-  if (!authLoaded) {
+  if (!authLoaded && !isComprobanteRoute) {
     return (
       <Box
         sx={{
@@ -87,7 +92,7 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box display="flex">
+        <Box sx={{ display: "flex", height: "100vh" }}>
           {!isComprobanteRoute && isLoggedIn && (
             <Sidebar
               isSidebarVisible={isSidebarVisible}
@@ -98,13 +103,23 @@ function App() {
 
           <Box
             flexGrow={1}
-            ml={
-              !isComprobanteRoute && isLoggedIn && isSidebarVisible ? "300px" : "0px"
-            }
-            sx={{ transition: "margin 0.3s ease" }}
+            sx={{
+              marginLeft:
+                !isComprobanteRoute && isLoggedIn && isSidebarVisible
+                  ? "240px"
+                  : !isComprobanteRoute && isLoggedIn
+                  ? "70px"
+                  : "0px",
+              transition: "margin 0.3s ease",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
           >
             {!isComprobanteRoute && isLoggedIn && (
-              <Topbar onMenuClick={() => setIsSidebarVisible(!isSidebarVisible)} />
+              <Topbar
+                onMenuClick={() => setIsSidebarVisible(!isSidebarVisible)}
+              />
             )}
 
             <Box
@@ -112,6 +127,7 @@ function App() {
                 padding: isComprobanteRoute ? "0" : "20px",
                 marginTop: isComprobanteRoute ? "0" : "10px",
                 overflow: "auto",
+                flex: 1,
               }}
             >
               <Routes>
@@ -136,75 +152,134 @@ function App() {
                     )
                   }
                 />
+                <Route
+                  path="/subir-comprobante"
+                  element={<SubirComprobante />}
+                />
 
                 {/* Rutas protegidas */}
                 <Route
                   path="/home"
                   element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
                 />
-
-                {/* Validación: rol diferente a asistente */}
                 <Route
                   path="/reportes"
                   element={
+                    isLoggedIn ? <DashboardPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/estudiantes"
+                  element={
+                    isLoggedIn ? <EstudiantesPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/estudiantes/nuevo"
+                  element={
                     isLoggedIn ? (
-                      getUsuarioFromToken()?.rol === "asistente" ? (
-                        <Navigate to="/home" />
-                      ) : (
-                        <DashboardPage />
-                      )
+                      <NuevoEstudiantePage />
                     ) : (
                       <Navigate to="/login" />
                     )
                   }
                 />
-
-                <Route
-                  path="/estudiantes"
-                  element={isLoggedIn ? <EstudiantesPage /> : <Navigate to="/login" />}
-                />
-                <Route
-                  path="/estudiantes/nuevo"
-                  element={isLoggedIn ? <NuevoEstudiantePage /> : <Navigate to="/login" />}
-                />
                 <Route
                   path="/estudiantes/editar/:id"
-                  element={isLoggedIn ? <EditarEstudiantePage /> : <Navigate to="/login" />}
+                  element={
+                    isLoggedIn ? (
+                      <EditarEstudiantePage />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
                 />
-
                 <Route
                   path="/apoderados"
-                  element={isLoggedIn ? <ApoderadoPage /> : <Navigate to="/login" />}
+                  element={
+                    isLoggedIn ? <ApoderadoPage /> : <Navigate to="/login" />
+                  }
                 />
                 <Route
                   path="/apoderados/nuevo"
-                  element={isLoggedIn ? <NuevoApoderado /> : <Navigate to="/login" />}
+                  element={
+                    isLoggedIn ? <NuevoApoderado /> : <Navigate to="/login" />
+                  }
                 />
                 <Route
                   path="/apoderados/editar/:id"
-                  element={isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />}
+                  element={
+                    isLoggedIn ? <EditarApoderado /> : <Navigate to="/login" />
+                  }
                 />
-
-                {/* Pagos */}
-                <Route path="/pagos" element={<Pagos />} />
-
-                {/* Matricula */}
-                <Route path="/pagos/matricula" element={<MatriculaPage />} />
-                <Route path="/pagos/matricula/nuevo" element={<NuevoMatricula />} />
-                <Route path="/pagos/matricula/editar/:id" element={<EditarMatricula />} />
-
-                {/* Mensualidad */}
-                <Route path="/pagos/mensualidad" element={<MensualidadPage />} />
-                <Route path="/pagos/mensualidad/nuevo" element={<NuevoMensualidad />} />
-                <Route path="/pagos/mensualidad/editar/:id" element={<EditarMensualidad />} />
-
-                {/* Nivelados */}
-                <Route path="/pagos/nivelados" element={<NiveladoPage />} />
-                <Route path="/pagos/nivelados/nuevo" element={<NuevoNivelado />} />
-                <Route path="/pagos/nivelados/editar/:id" element={<EditarNivelado />} />
-
-                {/* Subir comprobante (ACCESO PÚBLICO) */}
-                <Route path="/subir-comprobante" element={<SubirComprobante />} />
+                <Route
+                  path="/usuarios"
+                  element={
+                    isLoggedIn ? <UsuariosPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos"
+                  element={isLoggedIn ? <Pagos /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/pagos/matricula"
+                  element={
+                    isLoggedIn ? <MatriculaPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/matricula/nuevo"
+                  element={
+                    isLoggedIn ? <NuevoMatricula /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/matricula/editar/:id"
+                  element={
+                    isLoggedIn ? <EditarMatricula /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/mensualidad"
+                  element={
+                    isLoggedIn ? <MensualidadPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/mensualidad/nuevo"
+                  element={
+                    isLoggedIn ? <NuevoMensualidad /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/mensualidad/editar/:id"
+                  element={
+                    isLoggedIn ? (
+                      <EditarMensualidad />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
+                />
+                <Route
+                  path="/pagos/nivelados"
+                  element={
+                    isLoggedIn ? <NiveladoPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/nivelados/nuevo"
+                  element={
+                    isLoggedIn ? <NuevoNivelado /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/pagos/nivelados/editar/:id"
+                  element={
+                    isLoggedIn ? <EditarNivelado /> : <Navigate to="/login" />
+                  }
+                />
               </Routes>
             </Box>
           </Box>
