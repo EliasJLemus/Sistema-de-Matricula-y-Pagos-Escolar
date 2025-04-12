@@ -42,7 +42,7 @@ const EditarMatricula: React.FC = () => {
   return (
     <SidebarLayout>
       <Box sx={{ p: 4 }}>
-        <FormularioMatricula estudianteId={id} isEditing={true} />
+        <FormularioMatricula matriculaId={id} isEditing={true} onClose={() => navigate("/pagos/matricula")} />
       </Box>
     </SidebarLayout>
   );

@@ -397,7 +397,7 @@ export const useRegistrarApoderado = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getEstudiantes"] }); // Por si querés refrescar lista
+      queryClient.invalidateQueries({ queryKey: ["getEstudiantes"] }); 
     },
   });
 };

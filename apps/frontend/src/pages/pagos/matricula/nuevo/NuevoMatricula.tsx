@@ -7,7 +7,9 @@ const NuevoMatricula: React.FC = () => {
   return (
     <SidebarLayout>
       <Box sx={{ p: 4 }}>
-        <FormularioMatricula />
+        <FormularioMatricula onClose={function (): void {
+          throw new Error('Function not implemented.');
+        } } />
       </Box>
     </SidebarLayout>
   );

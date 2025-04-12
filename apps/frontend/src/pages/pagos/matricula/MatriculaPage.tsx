@@ -52,8 +52,9 @@ const MatriculaPage: React.FC = () => {
 
       <TablaMatricula
         onNewMatricula={handleOpenCreateModal}
-        onEditMatricula={handleOpenEditModal}
-      />
+        onEditMatricula={handleOpenEditModal} onDeleteMatricula={function (codigo_matricula: string, nombre: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
 
       <MatriculaModal
         open={createModalOpen}

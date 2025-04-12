@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
@@ -35,6 +35,9 @@ import {
 } from "@mui/material";
 import type { ApoderadoType } from "@/lib/queries/useGetApoderados";
 import { TelefonoInput } from "@/components/TelefonoInput";
+import { useGetEstudiantes } from "@/lib/queries";
+import { EstudianteType } from "@/lib/queries/useGetEstudiantes";
+import { EstudiantesTablaType } from "@shared/estudiantesType";
 
 const fontFamily =
   "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -63,15 +66,19 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [filterEstudiante, setFilterEstudiante] = useState("");
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [getGrado, setFilterGrado] = useState("")
   const theme = useTheme();
+  const {data: estudianteFiltered} = useGetEstudiantes(
+    1, 10000, {
+      estado: "",
+      grado: getGrado,
+      nombre: ""
+    }
+  )
 
-  // Lista de estudiantes con sus datos
-  const estudiantes = [
-    { numero: 1001, nombre: "Abigail Fajardo", grado: "Sexto" },
-    { numero: 1002, nombre: "Allan Fernández", grado: "Primero" },
-    { numero: 1003, nombre: "Ángel Velásquez", grado: "Noveno" },
-    { numero: 1004, nombre: "María Rodríguez", grado: "Segundo" },
-    { numero: 1005, nombre: "Carlos Mendoza", grado: "Tercero" },
+  const grados = [
+    "Prekínder", "Kínder", "Primero", "Segundo", "Tercero",
+    "Cuarto", "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno"
   ];
 
   // Estado para los datos del formulario
@@ -87,22 +94,17 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     parentesco: "",
     es_encargado_principal: false,
     numero_estudiante: 0,
+    grado_estudiante: "",
   });
 
   // Estado para controlar errores de validación
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Función para filtrar estudiantes
-  const filteredEstudiantes = estudiantes.filter(est =>
-    est.nombre.toLowerCase().includes(filterEstudiante.toLowerCase())
+  const filteredEstudiantes = (estudianteFiltered?.data ?? []).filter(est =>
+    `${est.primer_nombre} ${est.primer_apellido}`.toLowerCase().includes(filterEstudiante.toLowerCase())
   );
-
-  // Función para obtener el grado del estudiante basado en el número de estudiante
-  const getGradoEstudiante = (numeroEstudiante?: number) => {
-    if (!numeroEstudiante) return "";
-    const estudiante = estudiantes.find(e => e.numero === numeroEstudiante);
-    return estudiante ? estudiante.grado : "";
-  };
+  
 
   // Efecto para cargar datos si estamos en modo edición
   useEffect(() => {
@@ -231,12 +233,22 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
   // Manejar cambios en selects y radio buttons
   const handleSelectChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Limpiar errores al modificar un campo
+  
+    if (name === "numero_estudiante") {
+      const estudianteSeleccionado = estudianteFiltered?.data.find(est => est.uuid === value);
+      setFormData((prev) => ({
+        ...prev,
+        uuid_estudiante: value,
+        grado_estudiante: estudianteSeleccionado?.grado || "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  
+    // Limpiar errores
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -245,7 +257,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       });
     }
   };
-
+  
   // Manejar checkbox de encargado principal
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -1087,6 +1099,28 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                 </Typography>
 
                 <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <FormControl
+                    fullWidth
+                    required
+                    sx={formControlStyle}
+                  >
+                    <InputLabel id="grado-label">Grado del Estudiante</InputLabel>
+                    <Select
+                      labelId="grado-label"
+                      name="grado_estudiante"
+                      value={getGrado}
+                      label="Grado del Estudiante"
+                      onChange={(e) => setFilterGrado(e.target.value)}
+                    >
+                      {grados.map((grado) => (
+                        <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
+                          {grado}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
                   <Grid item xs={12} md={6}>
                     <FormControl
                       fullWidth
@@ -1098,7 +1132,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                       <Select
                         labelId="estudiante-label"
                         name="numero_estudiante"
-                        value={formData.numero_estudiante || ""}
+                        value={formData.uuid_estudiante || ""}
                         label="Estudiante Asociado"
                         onChange={handleSelectChange}
                         MenuProps={{
@@ -1118,34 +1152,19 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                         <MenuItem value="" sx={{ fontFamily, color: "#999" }}>
                           <em>Ninguno</em>
                         </MenuItem>
-
-                        {/* Campo de búsqueda */}
-                        <Box sx={{ p: 1, borderBottom: '1px solid #eee' }}>
-                          <TextField
-                            fullWidth
-                            variant="outlined"
-                            size="small"
-                            placeholder="Buscar estudiante..."
-                            value={filterEstudiante}
-                            onChange={(e) => setFilterEstudiante(e.target.value)}
-                            sx={{
-                              "& .MuiInputBase-root": {
-                                borderRadius: "8px",
-                              },
-                            }}
-                          />
-                        </Box>
+          
 
                         {/* Lista filtrada de estudiantes */}
-                        {filteredEstudiantes.length > 0 ? (
-                          filteredEstudiantes.map((est) => (
+                        {(estudianteFiltered?.data ?? []).length > 0 ? (
+                          filteredEstudiantes.map((est: EstudiantesTablaType) => (
                             <MenuItem 
-                              key={est.numero} 
-                              value={est.numero}
-                              sx={{ fontFamily }}
-                            >
-                              {est.numero} - {est.nombre}
-                            </MenuItem>
+                            key={est.uuid} 
+                            value={est.uuid}
+                            sx={{ fontFamily }}
+                          >
+                            {est.codigo_estudiante} - {est.primer_nombre} {est.primer_apellido}
+                          </MenuItem>
+                          
                           ))
                         ) : (
                           <MenuItem disabled sx={{ fontFamily }}>
@@ -1161,22 +1180,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
                     </FormControl>
                   </Grid>
 
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Grado del Estudiante"
-                      value={getGradoEstudiante(formData.numero_estudiante)}
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                      sx={{
-                        ...textFieldStyle,
-                        "& .MuiInputBase-input": {
-                          backgroundColor: "#f0f0f0",
-                        },
-                      }}
-                    />
-                  </Grid>
+                 
                 </Grid>
               </CardContent>
             </Card>
