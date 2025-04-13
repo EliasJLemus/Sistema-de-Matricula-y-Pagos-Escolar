@@ -81,13 +81,42 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   );
 
   useEffect(() => {
-    if (isEditing && dataMatricula?.data) {
+    
+    setGradoSeleccionado(dataMatricula?.data.grado || "");
+    setUuidEstudianteSeleccionado(dataMatricula?.data.uuid_estudiante || "");
+    if (
+      isEditing &&
+      dataMatricula?.data &&
+      vistaDetalleMatricula?.data
+    ) {
       const matricula = dataMatricula.data;
-      setGradoSeleccionado(matricula.grado || "");
-      setUuidEstudianteSeleccionado(matricula.uuid_estudiante || "");
-      setFormData(matricula);
+      const detalle = vistaDetalleMatricula.data;
+  
+      setFormData({
+        tipo_pago: detalle.tipo_pago,
+        grado: matricula.grado,
+        fecha_matricula: matricula.fecha_matricula?.substring(0, 10),
+        descripcion: matricula.descripcion,
+        periodicidad: matricula.periodicidad,
+        codigo_encargado_principal: matricula.codigo_encargado_principal || "",
+        nombre_estudiante: matricula.nombre_estudiante || "",
+        tarifa_base: matricula.tarifa_base,
+        codigo_plan_detallado: detalle.codigo_plan_detallado,
+        codigo_plan_matricula: detalle.codigo_plan_matricula,
+        tarifa_plan_matricula: detalle.tarifa_plan_matricula,
+        vencimiento: detalle.vencimiento,
+        tipo_plan_matricula: detalle.tipo_plan_matricula,
+        nivel_plan_matricula: detalle.nivel_plan_matricula,
+        year_plan_matricula: detalle.year_plan_matricula,
+        nombre_beca: detalle.nombre_beca,
+        descuento: detalle.descuento,
+        codigo_beca: detalle.codigo_beca,
+        total_matricula: detalle.total_matricula,
+      });
     }
-  }, [isEditing, dataMatricula]);
+  }, [isEditing, dataMatricula?.data, vistaDetalleMatricula?.data]);
+  
+  
 
   useEffect(() => {
     if (!isEditing && uuidEstudianteSeleccionado && vistaDetalleMatricula?.data) {

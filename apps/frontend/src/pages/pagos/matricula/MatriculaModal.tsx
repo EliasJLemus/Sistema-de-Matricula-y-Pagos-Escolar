@@ -43,7 +43,8 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
 
   useEffect(() => {
     if (data?.data?.url_imagen) {
-      setComprobanteUrl(data.data.url_imagen);
+  
+      setComprobanteUrl(`http://localhost:3000${data.data.url_imagen}`);
     }
   }, [data]);
 

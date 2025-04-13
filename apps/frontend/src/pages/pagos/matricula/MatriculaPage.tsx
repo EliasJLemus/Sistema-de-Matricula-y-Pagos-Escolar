@@ -14,6 +14,7 @@ const MatriculaPage: React.FC = () => {
   const handleCloseCreateModal = () => setCreateModalOpen(false);
 
   const handleOpenEditModal = (codigo: string) => {
+    console.log(codigo)
     setSelectedMatriculaId(codigo);
     setEditModalOpen(true);
   };
