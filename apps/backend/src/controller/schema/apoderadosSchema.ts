@@ -13,7 +13,7 @@ export const registrarEncargadoSchema = z.object({
   genero: z.enum(['Masculino', 'Femenino', 'Otro']),
   fecha_nacimiento: z
     .string()
-    .refine((val) => !isNaN(Date.parse(val)), { message: 'Fecha inválida' }),
+    .refine((val) => !isNaN(Date.parse(val)), { message: 'Fecha inválida' }).optional().or(z.literal('')),
   correo: z.string().email('Correo inválido'),
   telefono: z
     .string()

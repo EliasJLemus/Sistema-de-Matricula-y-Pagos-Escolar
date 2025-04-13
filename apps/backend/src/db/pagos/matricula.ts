@@ -209,7 +209,7 @@ export class PagosMatriculasDB {
       LEFT JOIN "Pagos"."PlanPagoDetallado" pd ON pd.uuid_estudiante = e.uuid AND pd.uuid_plan_matricula = ppm.uuid
       LEFT JOIN "Pagos"."Becas" b ON b.uuid = m.uuid_beca
       LEFT JOIN "Pagos"."ComprobantePago" cp ON cp.uuid = m.uuid_comprobante
-      ORDER BY m.fecha_matricula ASC
+      ORDER BY m.fecha_matricula DESC
               LIMIT $1 OFFSET $2;
       `;
 
@@ -281,6 +281,7 @@ export class PagosMatriculasDB {
         [uuid_matricula]
       );
   
+      console.log("Resultado: ", result.rows[0])
       return result.rows[0];
     } catch (error) {
       console.error("Error en getMatriculaPorUuid:", error);

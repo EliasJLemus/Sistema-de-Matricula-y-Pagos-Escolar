@@ -379,6 +379,7 @@ export const useRegistrarApoderado = () => {
   return useMutation({
     mutationKey: ["registrarApoderado"],
     mutationFn: async (data: RegistrarApoderadoInput): Promise<RegistrarApoderadoResponse> => {
+      console.log("datos apoderado", data)
       try {
         const response = await axios.post<RegistrarApoderadoResponse>(
           "http://localhost:3000/estudiantes/registro-apoderado",

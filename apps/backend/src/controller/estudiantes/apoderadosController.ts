@@ -16,7 +16,13 @@ export const registrarApoderado = async(req: Request, res: Response): Promise<vo
             parsed.segundo_apellido,
             parsed.identidad,
             parsed.genero,
-            parsed.fecha_nacimiento,
+            parsed.fecha_nacimiento?.trim()
+  ? parsed.fecha_nacimiento
+  : new Date(
+      2000 + Math.floor(Math.random() * 10), // año entre 2000 y 2009
+      Math.floor(Math.random() * 12),        // mes entre 0 y 11
+      Math.floor(Math.random() * 28) + 1     // día entre 1 y 28
+    ).toISOString().split('T')[0], // formato YYYY-MM-DD,
             parsed.correo,
             parsed.telefono,
             parsed.es_principal,
@@ -39,6 +45,7 @@ export const registrarApoderado = async(req: Request, res: Response): Promise<vo
         )
         
     }catch(error){
+        console.log(error)
         res.status(500).json({
             success: false,
             message:error.message,

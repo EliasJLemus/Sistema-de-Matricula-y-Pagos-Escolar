@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 import type { ApoderadoType } from "@/lib/queries/useGetApoderados";
 import { TelefonoInput } from "@/components/TelefonoInput";
-import { useGetEstudiantes } from "@/lib/queries";
+import { useGetEstudiantes, useRegistrarApoderado } from "@/lib/queries";
 import { EstudianteType } from "@/lib/queries/useGetEstudiantes";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
 
@@ -75,6 +75,7 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       nombre: ""
     }
   )
+  const {mutate: reistroApoderado} = useRegistrarApoderado()
 
   const grados = [
     "Prekínder", "Kínder", "Primero", "Segundo", "Tercero",
@@ -315,8 +316,8 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
       newErrors.parentesco = "El parentesco es requerido";
     }
 
-    if (!formData.numero_estudiante) {
-      newErrors.numero_estudiante = "Debes seleccionar un estudiante";
+    if (!formData.uuid_estudiante) {
+      newErrors.uuid_estudiante = "Debes seleccionar un estudiante";
     }
 
     setErrors(newErrors);
@@ -345,28 +346,32 @@ const FormularioApoderado: React.FC<FormularioApoderadoProps> = ({
     if (validateForm()) {
       setIsSubmitting(true);
 
-      // Simular envío a la API
-      setTimeout(() => {
-        console.log("Datos a enviar:", formData);
-        setIsSubmitting(false);
+      const payload = {
+        primer_nombre: formData.primer_nombre || "",
+        segundo_nombre: formData.segundo_apellido,
+        primer_apellido: formData.primer_apellido || "",
+        segundo_apellido: formData.segundo_apellido,
+        identidad: formData.identidad || "",
+        genero: formData.genero === 'M' ? "Masculino": "Femenino",
+        fecha_nacimiento: formData.fecha_nacimiento || "",
+        correo: formData.correo_electronico || "",
+        telefono: formData.telefono_personal || "",
+        es_principal: formData.es_encargado_principal || false,
+        parentesco: formData.parentesco || "",
+        uuid: formData.uuid_estudiante || ""
+      }
 
-        // Mostrar mensaje de éxito
-        setAlertSeverity("success");
-        setAlertMessage("¡El apoderado se guardó exitosamente!");
-        setAlertOpen(true);
-
-        // Si estamos en un modal, cerrarlo después de un tiempo
-        if (isModal && onClose) {
-          setTimeout(() => {
-            onClose();
-          }, 2000);
-        } else {
-          // Navegar después de mostrar el mensaje
-          setTimeout(() => {
-            navigate("/apoderados");
-          }, 2000);
-        }
-      }, 1500);
+      if(!isEditing){
+        reistroApoderado(payload, {
+          onSuccess: (response)=> {
+            alert("Exito")
+          },
+          onError: (response)=> {
+            alert("malito")
+          }
+        })
+      }
+      
     } else {
       setAlertSeverity("warning");
       setAlertMessage("Por favor complete todos los campos requeridos correctamente");
