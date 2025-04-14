@@ -13,7 +13,8 @@ import {
 } from "@shared/reportsType";
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
-import {MatriculaTableType, MatriculaType} from "@shared/pagos"
+import {MatriculaTableType, MatriculaType, MensualidadTableType} from "@shared/pagos"
+import { number } from "yup";
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -622,3 +623,39 @@ export const useGetVistaDetalleMatricula = (uuid_estudiante: string) => {
     enabled: !!uuid_estudiante,
   });
 };
+
+type FiltrosMensualidadTable = {
+  nombre?: string,
+  grado?: string,
+  estado?: string,
+  fecha_vencimiento?: string | Date
+}
+
+// ======================
+// Hook para obtener Mensualidades
+// ======================
+export const useGetMensualidadesAll = (
+  page: number,
+  limit: number,
+  filters: FiltrosMensualidadTable
+): UseQueryResult<StructureAndData<MensualidadTableType>, Error> => {
+  return useQuery({
+    queryKey: ["getMensualidades", page, limit, JSON.stringify(filters)],
+    queryFn: async() => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+      if(filters.nombre) params.append("nombre", filters.nombre);
+      if(filters.grado) params.append("grado", filters.grado);
+      if(filters.estado) params.append("estado", filters.estado);
+      if(filters.fecha_vencimiento) params.append("fecha_vencimiento", filters.fecha_vencimiento.toString());
+
+      const response = await axios.get<StructureAndData<MensualidadTableType>>(`
+        http://localhost:3000/pagos/obtener-mensualidades?${params.toString()}
+      `)
+
+      return response.data;
+    },
+    staleTime: 1000*60*5
+  })
+}

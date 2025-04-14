@@ -8,6 +8,10 @@ import {getMatriculasController,
     getPlanPagoDetalladoByEstudiante
 } from "@/controller/pagos/matriculaController"
 
+import {
+ getAllMensualidades
+} from "@/controller/pagos/mensualidadController"
+
 const pagosRoute = Router();
 
 
@@ -25,6 +29,8 @@ pagosRoute.patch("/comprobante/:uuid", actualizarEstadoComprobanteController);
 
 pagosRoute.get("/plan-detallado/:uuid", getPlanPagoDetalladoByEstudiante);
 
+//Mensualidades
 
+pagosRoute.get("/obtener-mensualidades", getAllMensualidades)
 
 export default pagosRoute

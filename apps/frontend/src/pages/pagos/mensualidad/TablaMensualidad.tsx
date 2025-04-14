@@ -26,13 +26,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 import useGetMensualidades, { MensualidadType } from "@/lib/queries/useGetMensualidades";
+import { useGetMensualidadesAll } from "@/lib/queries";
 
 const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaMensualidadProps {
   onNewMensualidad: () => void;
-  onEditMensualidad: (id: number) => void;
-  onDeleteMensualidad: (id: number, nombre: string) => void;
+  onEditMensualidad: (id: string) => void;
+  onDeleteMensualidad: (id: string, nombre: string) => void;
 }
 
 export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
@@ -53,6 +54,10 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
   });
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const debouncedFilters = useDebounce(filters, 400);
+
+  const {data: getMensualidades, isLoading, isFetching, error} = useGetMensualidadesAll(
+    page, limit, filters
+  )
 
   useEffect(() => {
     const currentContainer = document.getElementById("tabla-mensualidades-container");
@@ -243,14 +248,12 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
     transition: "all 0.2s ease-in-out",
   };
 
-  const { data, isLoading, isFetching, error } = useGetMensualidades(page, limit, debouncedFilters);
-
-  const tableData = data?.data ?? [];
-  const total = data?.pagination?.total ?? 0;
+  const tableData = getMensualidades?.data ?? [];
+  const total = getMensualidades?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleEdit = (id: number) => onEditMensualidad(id);
-  const handleDelete = (id: number, nombre: string) => {
+  const handleEdit = (id: string) => onEditMensualidad(id);
+  const handleDelete = (id: string, nombre: string) => {
     if (window.confirm(`¿Está seguro que desea eliminar la mensualidad de ${nombre}?`)) {
       onDeleteMensualidad(id, nombre);
       handleFreshReload();
@@ -551,22 +554,22 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
-                <TableRow key={item.mensualidad_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer transition-colors`}>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.mensualidad_id}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.numero_estudiante}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.estudiante}</TableCell>
+                <TableRow key={item.codigo_mensualidad} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer transition-colors`}>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.codigo_mensualidad}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.codigo_estudiante}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.nombre_estudiante}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.grado}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.seccion}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_inicio}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_vencimiento}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.monto_total.toLocaleString()}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.beneficio_aplicado}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.porcentaje_descuento}%</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.saldo_pagado.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_inicio ? new Date(item.fecha_inicio).toLocaleDateString() : ''}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_vencimiento ? new Date(item.fecha_vencimiento).toLocaleDateString() : ''}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.monto_total}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.beneficio}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.descuento}%</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.saldo_pagado}</TableCell>
                   <TableCell className="text-[#4D4D4D] font-medium" style={{ fontFamily }}>
-                    <strong>L. {item.saldo_pendiente.toLocaleString()}</strong>
+                    <strong>L. {item.saldo_pendiente}</strong>
                   </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.recargo.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.recargo || "0"}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     <Badge
                       variant="outline"
@@ -583,16 +586,16 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
                     <Badge
                       variant="outline"
                       className={
-                        item.comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"
+                        item.estado_comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"
                       }
                     >
-                      {item.comprobante}
+                      {item.estado_comprobante}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => handleEdit(item.mensualidad_id)}
+                        onClick={() => handleEdit(item?.uuid_mensualidad || "")}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -602,7 +605,7 @@ export const TablaMensualidad: React.FC<TablaMensualidadProps> = ({
                         <EditIcon fontSize="small" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.mensualidad_id, item.estudiante)}
+                        onClick={() => handleDelete(item?.uuid_mensualidad || "", item?.nombre_estudiante || "")}
                         className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
                         title="Eliminar"
                         style={{

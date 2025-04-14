@@ -65,4 +65,29 @@ export interface MatriculaPagoType {
     estado_comprobante: string;
     fecha_matricula: string;
   }
+
+  //**
+  //MENSUALIDADES 
+  //  */
+  export type MensualidadTableType = {
+    codigo_mensualidad? : string,
+    codigo_estudiante?: string,
+    nombre_estudiante?: string,
+    grado? : string,
+    seccion?: string,
+    fecha_inicio?: Date | string,
+    fecha_vencimiento?: Date | string,
+    monto_total?: number,
+    beneficio?: string,
+    descuento?: number,
+    saldo_pagado?: number,
+    saldo_pendiente? : number,
+    recargo?: number
+    estado?: string,
+    estado_comprobante?: string,
+    uuid_mensualidad? : string,
+    uuid_estudiante?: string,
+    uuid_comprobante?: string,
+    uuid_matricula?: string
+  }
   
