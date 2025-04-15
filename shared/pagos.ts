@@ -91,3 +91,26 @@ export interface MatriculaPagoType {
     uuid_matricula?: string
   }
   
+
+  //**
+  //  NIVELDO
+  //  */
+  export type NiveladoTableType = {
+    codigo_nivelado?: string,
+    codigo_estudiante?: string,
+    nombre_estudiante?: string,
+    grado?: string,
+    seccion?: string,
+    fecha_inicio?: Date | string,
+    feca_fin?: Date | string,
+    monto_pagado?: number,
+    saldo_restante?: number,
+    nombre_beca?: string,
+    descuento?: number,
+    recargo?: number,
+    estado?: string,
+    estado_comprobante?: string,
+    uuid_nivelado?: string,
+    uuid_estudiante?: string,
+    uuid_comprobante?: string
+  }
