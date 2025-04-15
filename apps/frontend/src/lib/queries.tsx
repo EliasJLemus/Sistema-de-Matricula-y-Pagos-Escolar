@@ -14,7 +14,6 @@ import {
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
 import {MatriculaTableType, MatriculaType, MensualidadTableType, NiveladoTableType} from "@shared/pagos"
-import { number } from "yup";
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -672,11 +671,11 @@ type FiltrosNiveladoTable = {
   estado?: string,
   fecha_pago?: string | Date
 }
-export const useGetNivelados = (
+export const useGetNiveladosAll = (
   page: number,
   limit: number,
   filter: FiltrosNiveladoTable
-): UseQueryResult<StructureAndData<NiveladoTableType> | Error> => {
+): UseQueryResult<StructureAndData<NiveladoTableType>> => {
   return useQuery({
     queryKey: ["getNivelados", page, limit, JSON.stringify(filter)],
     queryFn: async() => {
