@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -31,7 +33,7 @@ import {
 } from "@/lib/queries";
 import type { MatriculaType } from "@shared/pagos";
 import FeedbackModal, {
-  FeedbackStatus,
+  type FeedbackStatus,
 } from "@/components/FeedbackModal/FeedbackModal";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -65,7 +67,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<
-    "success" | "error" | "warning"
+    "success" | "error" | "warning" | "info"
   >("error");
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,7 +79,10 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   const [isNavigating, setIsNavigating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filteredEstudiantes, setFilteredEstudiantes] = useState<any[]>([]);
-  const [mostrarAlertaSeleccion, setMostrarAlertaSeleccion] = useState(true);
+  const [mostrarAlertaGrado, setMostrarAlertaGrado] = useState(true);
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
+    any | null
+  >(null);
 
   const { data: dataMatricula, isLoading: isLoadingMatricula } =
     useGetMatriculaByUuid(typeof matriculaId === "string" ? matriculaId : "");
@@ -105,6 +110,16 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         e.grado === gradoSeleccionado
     ) || [];
 
+  // Función para formatear fecha de YYYY-MM-DD a DD/MM/YYYY
+  const formatearFecha = (fechaString: string | undefined): string => {
+    if (!fechaString) return "";
+
+    const partes = fechaString.split("-");
+    if (partes.length !== 3) return fechaString;
+
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  };
+
   // Efecto para actualizar estudiantes filtrados cuando cambia el grado
   useEffect(() => {
     if (data?.data && gradoSeleccionado) {
@@ -115,22 +130,54 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
           e.grado === gradoSeleccionado
       );
       setFilteredEstudiantes(filtrados);
+      setMostrarAlertaGrado(false);
+
+      // Si no hay estudiantes disponibles para este grado
+      if (filtrados.length === 0) {
+        setAlertMessage("No hay estudiantes disponibles para este grado.");
+        setAlertSeverity("info");
+        setAlertOpen(true);
+      }
     }
   }, [data?.data, gradoSeleccionado]);
 
+  // Modificar el useEffect para cargar correctamente el estudiante cuando ya está seleccionado
   useEffect(() => {
     setIsLoading(true);
 
-    setGradoSeleccionado(dataMatricula?.data?.grado || "");
-    setUuidEstudianteSeleccionado(dataMatricula?.data?.uuid_estudiante || "");
+    if (dataMatricula?.data) {
+      setGradoSeleccionado(dataMatricula.data.grado || "");
+      setUuidEstudianteSeleccionado(dataMatricula.data.uuid_estudiante || "");
+
+      // Si hay un estudiante en los datos, establecerlo como seleccionado
+      if (dataMatricula.data.nombre_estudiante) {
+        setEstudianteInputValue(dataMatricula.data.nombre_estudiante);
+
+        // Crear un objeto estudiante para el Autocomplete
+        const estudianteObj = {
+          uuid_estudiante: dataMatricula.data.uuid_estudiante,
+          nombre_estudiante: dataMatricula.data.nombre_estudiante,
+          grado: dataMatricula.data.grado,
+        };
+
+        setEstudianteSeleccionado(estudianteObj);
+
+        // Asegurarse de que formData tenga los datos del estudiante
+        setFormData((prev) => ({
+          ...prev,
+          uuid_estudiante: dataMatricula.data.uuid_estudiante,
+          nombre_estudiante: dataMatricula.data.nombre_estudiante,
+          grado: dataMatricula.data.grado,
+        }));
+
+        // Desactivar alertas cuando ya hay estudiante seleccionado
+        setMostrarAlertaGrado(false);
+      }
+    }
 
     if (isEditing && dataMatricula?.data && vistaDetalleMatricula?.data) {
       const matricula = dataMatricula.data;
       const detalle = vistaDetalleMatricula.data;
-
-      if (matricula.nombre_estudiante) {
-        setEstudianteInputValue(matricula.nombre_estudiante);
-      }
 
       setFormData({
         tipo_pago: detalle.tipo_pago,
@@ -156,8 +203,6 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
       });
 
       setActiveSection("revision");
-      // Ocultar alerta cuando ya hay estudiante seleccionado
-      setMostrarAlertaSeleccion(false);
     }
 
     setTimeout(() => {
@@ -197,9 +242,6 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
           codigo_beca: vistaDetalleMatricula.data.codigo_beca,
           total_matricula: vistaDetalleMatricula.data.total_matricula,
         }));
-
-        // Ocultar alerta cuando ya hay estudiante seleccionado
-        setMostrarAlertaSeleccion(false);
       }
     }
   }, [
@@ -224,13 +266,12 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
       if (value !== formData.grado) {
         setUuidEstudianteSeleccionado("");
         setEstudianteInputValue("");
+        setEstudianteSeleccionado(null);
         setFormData((prev) => ({
           ...prev,
           nombre_estudiante: "",
           uuid_estudiante: "",
         }));
-        // Mostrar alerta cuando no hay estudiante seleccionado
-        setMostrarAlertaSeleccion(true);
       }
     } else if (name === "uuid_estudiante") {
       setUuidEstudianteSeleccionado(value);
@@ -245,6 +286,8 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
   };
 
   const handleEstudianteChange = (event: any, newValue: any) => {
+    setEstudianteSeleccionado(newValue);
+
     if (newValue) {
       setUuidEstudianteSeleccionado(newValue.uuid_estudiante);
       setFormData((prev) => ({
@@ -255,8 +298,6 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         grado: prev.grado || gradoSeleccionado,
       }));
       setErrors((prev) => ({ ...prev, uuid_estudiante: "" }));
-      // Ocultar alerta cuando ya hay estudiante seleccionado
-      setMostrarAlertaSeleccion(false);
     } else {
       setUuidEstudianteSeleccionado("");
       setFormData((prev) => ({
@@ -266,14 +307,17 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         // Mantener el grado seleccionado
         grado: prev.grado || gradoSeleccionado,
       }));
-      // Mostrar alerta cuando no hay estudiante seleccionado
-      setMostrarAlertaSeleccion(true);
     }
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     let sectionWithErrors = "";
+
+    if (!gradoSeleccionado) {
+      newErrors.grado = "Seleccione un grado.";
+      sectionWithErrors = sectionWithErrors || "seleccion";
+    }
 
     if (!formData.uuid_estudiante) {
       newErrors.uuid_estudiante = "Seleccione un estudiante.";
@@ -378,7 +422,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
 
   const hasErrorsInSection = (section: string) => {
     if (section === "seleccion") {
-      return !!errors.uuid_estudiante;
+      return !!errors.uuid_estudiante || !!errors.grado;
     } else if (section === "detalles") {
       return !!errors.fecha_matricula;
     }
@@ -546,8 +590,19 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
     );
   }
 
+  // Modificar la estructura del componente principal para eliminar contenedores anidados
   return (
-    <>
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        margin: 0,
+        padding: 0,
+      }}
+    >
       <Snackbar
         open={alertOpen}
         autoHideDuration={6000}
@@ -566,6 +621,8 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
                   ? "#538A3E"
                   : alertSeverity === "warning"
                   ? "#F38223"
+                  : alertSeverity === "info"
+                  ? "#1A1363"
                   : "#f44336",
             },
           }}
@@ -1036,744 +1093,687 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         </Button>
       </Box>
 
+      {/* Contenido principal - Eliminar contenedores anidados innecesarios */}
       <form
         onSubmit={handleSubmit}
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
+          overflow: "auto",
+          width: "100%",
+          margin: 0,
+          padding: 0,
         }}
       >
-        <Box
-          sx={{
-            flex: 1,
-            p: 4,
-            height: "auto",
-          }}
-        >
-          {/* Sección Selección de Estudiante */}
-          <Box
-            sx={{
-              display: activeSection === "seleccion" ? "block" : "none",
-            }}
-          >
-            <Box
+        {/* Sección Selección de Estudiante */}
+        {activeSection === "seleccion" && (
+          <Box sx={{ p: 3, bgcolor: "#ffffff", width: "100%" }}>
+            <Typography
+              variant="h6"
+              gutterBottom
               sx={{
-                p: 3,
-                bgcolor: "#f9f9f9",
-                borderRadius: "16px",
-                mb: 4,
+                color: "#1A1363",
+                fontFamily,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                fontSize: "18px",
+                mb: 3,
+                "&::before": {
+                  content: '""',
+                  display: "inline-block",
+                  width: "5px",
+                  height: "24px",
+                  backgroundColor: "#538A3E",
+                  marginRight: "10px",
+                  borderRadius: "3px",
+                },
               }}
             >
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{
-                  color: "#1A1363",
-                  fontFamily,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "18px",
-                  mb: 3,
-                  "&::before": {
-                    content: '""',
-                    display: "inline-block",
-                    width: "5px",
-                    height: "24px",
-                    backgroundColor: "#538A3E",
-                    marginRight: "10px",
-                    borderRadius: "3px",
-                  },
-                }}
-              >
-                Selección de Estudiante
-              </Typography>
+              Selección de Estudiante
+            </Typography>
 
-              <Grid container spacing={3}>
-                {/* Grado */}
-                <Grid item xs={12} md={6}>
-                  <FormControl
-                    fullWidth
+            <Grid container spacing={3}>
+              {/* Grado */}
+              <Grid item xs={12} md={6}>
+                <FormControl
+                  fullWidth
+                  error={!!errors.grado}
+                  sx={formControlStyle}
+                >
+                  <InputLabel>Grado</InputLabel>
+                  <Select
+                    name="grado"
+                    value={gradoSeleccionado}
+                    onChange={handleChange}
+                    label="Grado"
+                    disabled={isEditing}
                     error={!!errors.grado}
-                    sx={formControlStyle}
                   >
-                    <InputLabel>Grado</InputLabel>
-                    <Select
-                      name="grado"
-                      value={gradoSeleccionado}
-                      onChange={handleChange}
-                      label="Grado"
-                      disabled={isEditing}
+                    {[
+                      "Kinder",
+                      "Primero",
+                      "Segundo",
+                      "Tercero",
+                      "Cuarto",
+                      "Quinto",
+                      "Sexto",
+                      "Séptimo",
+                      "Octavo",
+                      "Noveno",
+                    ].map((grado) => (
+                      <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
+                        {grado}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.grado && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ fontFamily, mt: 0.5, ml: 1.5 }}
                     >
-                      {[
-                        "Kinder",
-                        "Primero",
-                        "Segundo",
-                        "Tercero",
-                        "Cuarto",
-                        "Quinto",
-                        "Sexto",
-                        "Séptimo",
-                        "Octavo",
-                        "Noveno",
-                      ].map((grado) => (
-                        <MenuItem key={grado} value={grado} sx={{ fontFamily }}>
-                          {grado}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                      {errors.grado}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
 
-                {/* Estudiante - Autocomplete */}
-                <Grid item xs={12} md={6}>
-                  <Autocomplete
-                    id="estudiante-autocomplete"
-                    options={filteredEstudiantes}
-                    getOptionLabel={(option) => option.nombre_estudiante || ""}
-                    value={
-                      filteredEstudiantes.find(
-                        (est) =>
-                          est.uuid_estudiante === uuidEstudianteSeleccionado
-                      ) || null
-                    }
-                    onChange={handleEstudianteChange}
-                    inputValue={estudianteInputValue}
-                    onInputChange={(event, newInputValue) => {
-                      setEstudianteInputValue(newInputValue);
-                    }}
-                    disabled={isEditing || !gradoSeleccionado}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Estudiante"
-                        error={!!errors.uuid_estudiante}
-                        helperText={errors.uuid_estudiante}
-                        sx={textFieldStyle}
+              {/* Estudiante - Autocomplete */}
+              <Grid item xs={12} md={6}>
+                <Autocomplete
+                  id="estudiante-autocomplete"
+                  options={filteredEstudiantes}
+                  getOptionLabel={(option) => option.nombre_estudiante || ""}
+                  value={estudianteSeleccionado}
+                  onChange={handleEstudianteChange}
+                  inputValue={estudianteInputValue}
+                  onInputChange={(event, newInputValue) => {
+                    setEstudianteInputValue(newInputValue);
+                  }}
+                  disabled={isEditing || !gradoSeleccionado}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Estudiante"
+                      error={!!errors.uuid_estudiante}
+                      helperText={errors.uuid_estudiante}
+                      sx={textFieldStyle}
+                    />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props}>
+                      <ListItemText
+                        primary={option.nombre_estudiante}
+                        sx={{ fontFamily }}
                       />
-                    )}
-                    renderOption={(props, option) => (
-                      <li {...props}>
-                        <ListItemText
-                          primary={option.nombre_estudiante}
-                          sx={{ fontFamily }}
-                        />
-                      </li>
-                    )}
-                    noOptionsText="No hay estudiantes disponibles"
-                    loadingText="Cargando estudiantes..."
-                    fullWidth
-                  />
-                </Grid>
+                    </li>
+                  )}
+                  noOptionsText="No hay estudiantes disponibles"
+                  loadingText="Cargando estudiantes..."
+                  fullWidth
+                />
+              </Grid>
 
-                {/* Mensaje de alerta solo cuando no hay grado seleccionado */}
-                {gradoSeleccionado &&
-                  !formData.nombre_estudiante &&
-                  mostrarAlertaSeleccion && (
-                    <Grid item xs={12}>
-                      <Alert
-                        severity="info"
+              {/* Información del estudiante seleccionado */}
+              {formData.nombre_estudiante && (
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: "#f8f9fa",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(26, 19, 99, 0.1)",
+                      mt: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: "#538A3E",
+                        width: 46,
+                        height: 46,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {formData.nombre_estudiante
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .substring(0, 2)
+                        .toUpperCase()}
+                    </Avatar>
+                    <Box>
+                      <Typography
+                        variant="subtitle1"
                         sx={{
                           fontFamily,
-                          mt: 1,
-                          "& .MuiAlert-icon": {
-                            color: "#1A1363",
-                          },
-                        }}
-                      >
-                        Seleccione un estudiante para continuar.
-                      </Alert>
-                    </Grid>
-                  )}
-
-                {!gradoSeleccionado && mostrarAlertaSeleccion && (
-                  <Grid item xs={12}>
-                    <Alert
-                      severity="info"
-                      sx={{
-                        fontFamily,
-                        mt: 1,
-                        "& .MuiAlert-icon": {
+                          fontWeight: 600,
                           color: "#1A1363",
-                        },
-                      }}
-                    >
-                      Seleccione un grado para ver los estudiantes disponibles.
-                    </Alert>
-                  </Grid>
-                )}
-
-                {/* Información del estudiante seleccionado */}
-                {formData.nombre_estudiante && (
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        bgcolor: "#f5f9ff",
-                        borderRadius: "10px",
-                        border: "1px solid rgba(26, 19, 99, 0.1)",
-                        mt: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                      }}
-                    >
-                      <Avatar
-                        sx={{
-                          bgcolor: "#538A3E",
-                          width: 46,
-                          height: 46,
-                          fontWeight: "bold",
                         }}
                       >
-                        {formData.nombre_estudiante
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .substring(0, 2)
-                          .toUpperCase()}
-                      </Avatar>
-                      <Box>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#1A1363",
-                          }}
-                        >
-                          {formData.nombre_estudiante}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontFamily, color: "#666" }}
-                        >
-                          Grado: {formData.grado || gradoSeleccionado}
-                        </Typography>
-                      </Box>
+                        {formData.nombre_estudiante}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily, color: "#666" }}
+                      >
+                        Grado: {formData.grado || gradoSeleccionado}
+                      </Typography>
                     </Box>
+                  </Box>
+                </Grid>
+              )}
+            </Grid>
+          </Box>
+        )}
+
+        {/* Sección Detalles de Matrícula */}
+        {activeSection === "detalles" && (
+          <Box sx={{ p: 3, bgcolor: "#ffffff", width: "100%" }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                color: "#1A1363",
+                fontFamily,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                fontSize: "18px",
+                mb: 3,
+                "&::before": {
+                  content: '""',
+                  display: "inline-block",
+                  width: "5px",
+                  height: "24px",
+                  backgroundColor: "#538A3E",
+                  marginRight: "10px",
+                  borderRadius: "3px",
+                },
+              }}
+            >
+              Detalles de Matrícula
+            </Typography>
+
+            <Grid container spacing={3}>
+              {/* Fecha matrícula */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Fecha Matrícula"
+                  name="fecha_matricula"
+                  type="date"
+                  value={formData.fecha_matricula || ""}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.fecha_matricula}
+                  helperText={errors.fecha_matricula}
+                  sx={textFieldStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Tipo de Pago"
+                  value={formData.tipo_pago || "Normal"}
+                  InputProps={{ readOnly: true }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Descripción"
+                  value={
+                    formData.descripcion ||
+                    "Plan de pago asignado automáticamente al registrar estudiante."
+                  }
+                  InputProps={{ readOnly: true }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Periodicidad"
+                  value={formData.periodicidad || "Mensual"}
+                  InputProps={{ readOnly: true }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Código Plan Detallado"
+                  value={
+                    formData.codigo_plan_detallado ||
+                    "DET-NOR-2025-EST-2025-0020"
+                  }
+                  InputProps={{ readOnly: true }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        )}
+
+        {/* Sección de revisión */}
+        {activeSection === "revision" && (
+          <Box sx={{ p: 3, bgcolor: "#ffffff", width: "100%" }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                color: "#1A1363",
+                fontFamily,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                fontSize: "18px",
+                mb: 3,
+                "&::before": {
+                  content: '""',
+                  display: "inline-block",
+                  width: "5px",
+                  height: "24px",
+                  backgroundColor: "#538A3E",
+                  marginRight: "10px",
+                  borderRadius: "3px",
+                },
+              }}
+            >
+              Información de Matrícula
+            </Typography>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    border: "1px solid rgba(0,0,0,0.05)",
+                    borderRadius: "12px",
+                    bgcolor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontFamily,
+                      fontWeight: 600,
+                      color: "#1A1363",
+                      mb: 2,
+                      borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+                      pb: 1,
+                    }}
+                  >
+                    Información de Matrícula
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Estudiante:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.nombre_estudiante || "No seleccionado"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Grado:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.grado ||
+                          gradoSeleccionado ||
+                          "No seleccionado"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Fecha de Matrícula:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.fecha_matricula
+                          ? formatearFecha(formData.fecha_matricula)
+                          : "No definida"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Encargado Principal:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.codigo_encargado_principal || "No definido"}
+                      </Typography>
+                    </Grid>
                   </Grid>
-                )}
+                </Box>
               </Grid>
-            </Box>
-          </Box>
 
-          {/* Sección Detalles de Matrícula */}
-          <Box
-            sx={{
-              display: activeSection === "detalles" ? "block" : "none",
-            }}
-          >
-            <Box
-              sx={{
-                p: 3,
-                bgcolor: "#f9f9f9",
-                borderRadius: "16px",
-                mb: 4,
-              }}
-            >
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{
-                  color: "#1A1363",
-                  fontFamily,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "18px",
-                  mb: 3,
-                  "&::before": {
-                    content: '""',
-                    display: "inline-block",
-                    width: "5px",
-                    height: "24px",
-                    backgroundColor: "#538A3E",
-                    marginRight: "10px",
-                    borderRadius: "3px",
-                  },
-                }}
-              >
-                Detalles de Matrícula
-              </Typography>
-
-              <Grid container spacing={3}>
-                {/* Fecha matrícula */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Fecha Matrícula"
-                    name="fecha_matricula"
-                    type="date"
-                    value={formData.fecha_matricula || ""}
-                    onChange={handleChange}
-                    InputLabelProps={{ shrink: true }}
-                    error={!!errors.fecha_matricula}
-                    helperText={errors.fecha_matricula}
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Tipo de Pago"
-                    value={formData.tipo_pago || "Normal"}
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Descripción"
-                    value={
-                      formData.descripcion ||
-                      "Plan de pago asignado automáticamente al registrar estudiante."
-                    }
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Periodicidad"
-                    value={formData.periodicidad || "Mensual"}
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Código Plan Detallado"
-                    value={
-                      formData.codigo_plan_detallado ||
-                      "DET-NOR-2025-EST-2025-0020"
-                    }
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-
-          {/* Sección de revisión */}
-          <Box
-            sx={{
-              display: activeSection === "revision" ? "block" : "none",
-            }}
-          >
-            <Box
-              sx={{
-                p: 3,
-                bgcolor: "#f9f9f9",
-                borderRadius: "16px",
-                mb: 4,
-              }}
-            >
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{
-                  color: "#1A1363",
-                  fontFamily,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "18px",
-                  mb: 3,
-                  "&::before": {
-                    content: '""',
-                    display: "inline-block",
-                    width: "5px",
-                    height: "24px",
-                    backgroundColor: "#538A3E",
-                    marginRight: "10px",
-                    borderRadius: "3px",
-                  },
-                }}
-              >
-                Información de Matrícula
-              </Typography>
-
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    border: "1px solid rgba(0,0,0,0.05)",
+                    borderRadius: "12px",
+                    bgcolor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
                     sx={{
-                      p: 2,
+                      fontFamily,
+                      fontWeight: 600,
+                      color: "#1A1363",
                       mb: 2,
-                      border: "1px solid rgba(0,0,0,0.05)",
-                      borderRadius: "12px",
-                      bgcolor: "#fff",
+                      borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+                      pb: 1,
                     }}
                   >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily,
-                        fontWeight: 600,
-                        color: "#1A1363",
-                        mb: 2,
-                      }}
-                    >
-                      Datos del Estudiante
-                    </Typography>
+                    Datos del Plan
+                  </Typography>
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Estudiante:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.nombre_estudiante || "No seleccionado"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Grado:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.grado ||
-                            gradoSeleccionado ||
-                            "No seleccionado"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Fecha de Matrícula:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.fecha_matricula || "No definida"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Encargado Principal:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.codigo_encargado_principal || "No definido"}
-                        </Typography>
-                      </Grid>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Tipo Plan:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.tipo_plan_matricula || "Pago Único"}
+                      </Typography>
                     </Grid>
-                  </Box>
-                </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      border: "1px solid rgba(0,0,0,0.05)",
-                      borderRadius: "12px",
-                      bgcolor: "#fff",
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily,
-                        fontWeight: 600,
-                        color: "#1A1363",
-                        mb: 2,
-                      }}
-                    >
-                      Datos del Plan
-                    </Typography>
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Tipo Plan:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.tipo_plan_matricula || "Pago Único"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Nivel:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.nivel_plan_matricula || "Básica"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Año Académico:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.year_plan_matricula || 2025}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Vencimiento:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          {formData.vencimiento?.substring(0, 10) ||
-                            "2025-02-15"}
-                        </Typography>
-                      </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Nivel:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.nivel_plan_matricula || "Básica"}
+                      </Typography>
                     </Grid>
-                  </Box>
-                </Grid>
 
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      border: "1px solid rgba(0,0,0,0.05)",
-                      borderRadius: "12px",
-                      bgcolor: "#f8f9fa", // Fondo gris claro
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily,
-                        fontWeight: 600,
-                        color: "#1A1363",
-                        mb: 2,
-                      }}
-                    >
-                      Información de Pago
-                    </Typography>
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={3}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Tarifa Base:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          L. {formData.tarifa_base || "0.00"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={3}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Tarifa Plan:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: "#333",
-                          }}
-                        >
-                          L. {formData.tarifa_plan_matricula || "1200.00"}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={3}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Beca Aplicada:
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 600,
-                            color: formData.nombre_beca ? "#538A3E" : "#666",
-                          }}
-                        >
-                          {formData.nombre_beca || "Sin beca"}{" "}
-                          {formData.descuento ? `(${formData.descuento}%)` : ""}
-                        </Typography>
-                      </Grid>
-
-                      <Grid item xs={12} md={3}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily,
-                            color: "#666",
-                            mb: 0.5,
-                          }}
-                        >
-                          Total a Pagar:
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily,
-                            fontWeight: 700,
-                            color: "#538A3E",
-                          }}
-                        >
-                          L.{" "}
-                          {formData.total_matricula ||
-                            formData.tarifa_plan_matricula ||
-                            "1200.00"}
-                        </Typography>
-                      </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Año Académico:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.year_plan_matricula || 2025}
+                      </Typography>
                     </Grid>
-                  </Box>
-                </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Vencimiento:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {formData.vencimiento
+                          ? formatearFecha(
+                              formData.vencimiento.substring(0, 10)
+                            )
+                          : "15/02/2025"}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
               </Grid>
-            </Box>
-          </Box>
-        </Box>
 
-        {/* Botones de acción */}
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    border: "1px solid rgba(0,0,0,0.05)",
+                    borderRadius: "12px",
+                    bgcolor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontFamily,
+                      fontWeight: 600,
+                      color: "#1A1363",
+                      mb: 2,
+                      borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+                      pb: 1,
+                    }}
+                  >
+                    Información de Pago
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={3}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Tarifa Base:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        L. {formData.tarifa_base || "0.00"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Tarifa Plan:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        L. {formData.tarifa_plan_matricula || "1200.00"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Beca Aplicada:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 600,
+                          color: formData.nombre_beca ? "#538A3E" : "#666",
+                        }}
+                      >
+                        {formData.nombre_beca || "Sin beca"}{" "}
+                        {formData.descuento ? `(${formData.descuento}%)` : ""}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily,
+                          color: "#666",
+                          mb: 0.5,
+                        }}
+                      >
+                        Total a Pagar:
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontFamily,
+                          fontWeight: 700,
+                          color: "#538A3E",
+                        }}
+                      >
+                        L.{" "}
+                        {formData.total_matricula ||
+                          formData.tarifa_plan_matricula ||
+                          "1200.00"}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
+
+        {/* Botones de acción - Fijos en la parte inferior */}
         <Box
           sx={{
             display: "flex",
@@ -1784,7 +1784,11 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
             bgcolor: "#f8f9fa",
             position: "sticky",
             bottom: 0,
+            left: 0,
+            right: 0,
+            width: "100%",
             zIndex: 10,
+            boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
           }}
         >
           {/* Botón Cancelar/Anterior */}
@@ -1844,7 +1848,25 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
               e.preventDefault();
               setIsNavigating(true);
               if (activeSection === "seleccion") {
-                // Validar selección de estudiante
+                // Si ya hay un estudiante seleccionado, permitir avanzar sin validación adicional
+                if (formData.nombre_estudiante) {
+                  setActiveSection("detalles");
+                  setIsNavigating(false);
+                  return;
+                }
+
+                // Validar selección de grado y estudiante
+                if (!gradoSeleccionado) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    grado: "Seleccione un grado.",
+                  }));
+                  setAlertMessage("Debe seleccionar un grado para continuar.");
+                  setAlertSeverity("error");
+                  setAlertOpen(true);
+                  setIsNavigating(false);
+                  return;
+                }
                 if (!formData.uuid_estudiante) {
                   setErrors((prev) => ({
                     ...prev,
@@ -1944,7 +1966,7 @@ const FormularioMatricula: React.FC<FormularioMatriculaProps> = ({
         description={modalDescription}
         onClose={handleCloseModal}
       />
-    </>
+    </Box>
   );
 };
 
