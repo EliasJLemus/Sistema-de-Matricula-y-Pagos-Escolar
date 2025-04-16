@@ -7,6 +7,7 @@ import {login} from "@/controller/autController"
 import pagosRoute from "@/routes/pagos"
 import comprobanteRoute from "@/routes/comprobantes"
 import path from "path";
+import routerUsers from "@/routes/users"
 // import "../src/db/estudiantes/apoderadosDB"
 // import "./envio"
 
@@ -33,7 +34,9 @@ app.use("/pagos", pagosRoute)
 
 app.use("/login", login)
 
-app.use("/comprobante", comprobanteRoute)
+app.use("/comprobante", comprobanteRoute);
+
+app.use("/usuarios", routerUsers)
 
 app.listen(Keys.Port, ()=> {
     console.log(`Server running on port ${Keys.Port}`);
