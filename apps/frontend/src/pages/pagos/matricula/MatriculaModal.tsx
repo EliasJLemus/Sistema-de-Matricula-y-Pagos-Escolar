@@ -15,8 +15,13 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import FormularioMatricula from "./FormularioMatricula";
 import { useEffect, useState } from "react";
-import { useGetMatriculaByUuid, useActualizarEstadoComprobante } from "@/lib/queries";
-import FeedbackModal, { FeedbackStatus } from "@/components/FeedbackModal/FeedbackModal";
+import {
+  useGetMatriculaByUuid,
+  useActualizarEstadoComprobante,
+} from "@/lib/queries";
+import FeedbackModal, {
+  FeedbackStatus,
+} from "@/components/FeedbackModal/FeedbackModal";
 
 const fontFamily = "'Nunito', sans-serif";
 
@@ -43,7 +48,6 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
 
   useEffect(() => {
     if (data?.data?.url_imagen) {
-  
       setComprobanteUrl(`http://localhost:3000${data.data.url_imagen}`);
     }
   }, [data]);
@@ -127,7 +131,10 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="h6" sx={{ fontFamily, fontWeight: 700, color: "#FFFFFF" }}>
+            <Typography
+              variant="h6"
+              sx={{ fontFamily, fontWeight: 700, color: "#FFFFFF" }}
+            >
               {isEditing ? "Editar Matrícula" : "Registrar Matrícula"}
             </Typography>
           </Box>
@@ -157,10 +164,11 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
               alignItems: "flex-start",
             }}
           >
-            <Box sx={{ flex: 1, maxWidth: "850px", minWidth: { lg: "600px" } }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <FormularioMatricula
                 matriculaId={matriculaId}
                 isEditing={isEditing}
+                isModal={true}
                 onClose={onClose}
               />
             </Box>
@@ -169,8 +177,8 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
               <Paper
                 elevation={3}
                 sx={{
-                  width: "100%",
-                  maxWidth: 420,
+                  width: { xs: "100%", lg: "380px" },
+                  flexShrink: 0,
                   p: 3,
                   borderRadius: "16px",
                   display: "flex",
@@ -178,7 +186,6 @@ const MatriculaModal: React.FC<MatriculaModalProps> = ({
                   alignItems: "center",
                   bgcolor: "#fff",
                   boxShadow: "0 4px 16px rgba(0, 0, 0, 0.06)",
-                  flexShrink: 0,
                 }}
               >
                 <Typography
