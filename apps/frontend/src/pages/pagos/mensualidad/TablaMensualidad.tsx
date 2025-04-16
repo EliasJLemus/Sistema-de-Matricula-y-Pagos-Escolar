@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import useGetMensualidades, { MensualidadType } from "@/lib/queries/useGetMensualidades";
 import { useGetMensualidadesAll } from "@/lib/queries";
 
 const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";

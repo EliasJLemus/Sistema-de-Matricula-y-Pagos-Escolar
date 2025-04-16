@@ -13,8 +13,7 @@ import {
 } from "@shared/reportsType";
 import axios from "axios";
 import { EstudiantesTablaType } from "@shared/estudiantesType";
-import {MatriculaTableType, MatriculaType, MensualidadTableType} from "@shared/pagos"
-import { number } from "yup";
+import {MatriculaTableType, MatriculaType, MensualidadTableType, NiveladoTableType} from "@shared/pagos"
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
   nombre?: string;
@@ -631,6 +630,7 @@ type FiltrosMensualidadTable = {
   fecha_vencimiento?: string | Date
 }
 
+
 // ======================
 // Hook para obtener Mensualidades
 // ======================
@@ -652,6 +652,43 @@ export const useGetMensualidadesAll = (
 
       const response = await axios.get<StructureAndData<MensualidadTableType>>(`
         http://localhost:3000/pagos/obtener-mensualidades?${params.toString()}
+      `)
+
+      return response.data;
+    },
+    staleTime: 1000*60*5
+  })
+}
+
+
+// ======================
+// Hook para obtener Nivelados
+// ======================
+
+type FiltrosNiveladoTable = {
+  nombre?: string,
+  grado?: string,
+  estado?: string,
+  fecha_pago?: string | Date
+}
+export const useGetNiveladosAll = (
+  page: number,
+  limit: number,
+  filter: FiltrosNiveladoTable
+): UseQueryResult<StructureAndData<NiveladoTableType>> => {
+  return useQuery({
+    queryKey: ["getNivelados", page, limit, JSON.stringify(filter)],
+    queryFn: async() => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+      if(filter.nombre) params.append("nombre", filter.nombre);
+      if(filter.grado) params.append("grado", filter.grado);
+      if(filter.estado) params.append("estado", filter.estado);
+      if(filter.fecha_pago) params.append("fecha_pago", filter.fecha_pago.toString());
+
+      const response = await axios.get<StructureAndData<NiveladoTableType>>(`
+         http://localhost:3000/pagos/obtener-nivelados?${params.toString()}
       `)
 
       return response.data;

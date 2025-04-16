@@ -26,13 +26,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 import useGetNivelados, { NiveladoType } from "@/lib/queries/useGetNivelados";
+import {useGetNiveladosAll} from "@/lib/queries"
 
 const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaNiveladoProps {
   onNewNivelado: () => void;
-  onEditNivelado: (id: number) => void;
-  onDeleteNivelado: (id: number, nombre: string) => void;
+  onEditNivelado: (id: string) => void;
+  onDeleteNivelado: (id: string, nombre: string) => void;
 }
 
 export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
@@ -53,6 +54,8 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
   });
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const debouncedFilters = useDebounce(filters, 400);
+
+  const {data: getNivelados} = useGetNiveladosAll(page, limit, filters);
 
   useEffect(() => {
     const currentContainer = document.getElementById("tabla-nivelados-container");
@@ -245,12 +248,12 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
 
   const { data, isLoading, isFetching, error } = useGetNivelados(page, limit, debouncedFilters);
 
-  const tableData = data?.data ?? [];
-  const total = data?.pagination?.total ?? 0;
+  const tableData = getNivelados?.data ?? [];
+  const total = getNivelados?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const handleEdit = (id: number) => onEditNivelado(id);
-  const handleDelete = (id: number, nombre: string) => {
+  const handleEdit = (id: string) => onEditNivelado(id);
+  const handleDelete = (id: string, nombre: string) => {
     if (window.confirm(`¿Está seguro que desea eliminar el pago nivelado de ${nombre}?`)) {
       onDeleteNivelado(id, nombre);
       handleFreshReload();
@@ -551,20 +554,20 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
             </TableHeader>
             <TableBody>
               {tableData.map((item, index) => (
-                <TableRow key={item.nivelado_id} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer transition-colors`}>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.nivelado_id}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.numero_estudiante}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.estudiante}</TableCell>
+                <TableRow key={item.uuid_nivelado} className={`${index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"} hover:bg-[#e7f5e8] cursor-pointer transition-colors`}>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.codigo_nivelado}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.codigo_estudiante}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.nombre_estudiante}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.grado}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.seccion}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_pago}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.monto_pagado.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.fecha_inicio ? new Date(item.fecha_inicio).toLocaleDateString() : ''}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.monto_pagado}</TableCell>
                   <TableCell className="text-[#4D4D4D] font-medium" style={{ fontFamily }}>
-                    <strong>L. {item.saldo_restante.toLocaleString()}</strong>
+                    <strong>L. {item.saldo_restante}</strong>
                   </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.beca_aplicada}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.porcentaje_descuento}</TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.recargo.toLocaleString()}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.nombre_beca}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>{item.descuento}</TableCell>
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>L. {item.recargo}</TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     <Badge
                       variant="outline"
@@ -581,16 +584,16 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
                     <Badge
                       variant="outline"
                       className={
-                        item.comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"
+                        item.estado_comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"
                       }
                     >
-                      {item.comprobante}
+                      {item.estado_comprobante}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => handleEdit(item.nivelado_id)}
+                        onClick={() => handleEdit(item.uuid_nivelado || "")}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -600,7 +603,7 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
                         <EditIcon fontSize="small" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.nivelado_id, item.estudiante)}
+                        onClick={() => handleDelete(item.uuid_nivelado || "", item.nombre_estudiante || "")}
                         className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
                         title="Eliminar"
                         style={{

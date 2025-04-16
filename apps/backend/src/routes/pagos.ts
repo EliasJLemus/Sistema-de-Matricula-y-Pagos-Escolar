@@ -12,6 +12,8 @@ import {
  getAllMensualidades
 } from "@/controller/pagos/mensualidadController"
 
+import {getAllNivelado} from "@/controller/pagos/niveladoController"
+
 const pagosRoute = Router();
 
 
@@ -32,5 +34,9 @@ pagosRoute.get("/plan-detallado/:uuid", getPlanPagoDetalladoByEstudiante);
 //Mensualidades
 
 pagosRoute.get("/obtener-mensualidades", getAllMensualidades)
+
+//Nivelado
+
+pagosRoute.get("/obtener-nivelados", getAllNivelado)
 
 export default pagosRoute
