@@ -328,215 +328,209 @@ export const TablaNivelado: React.FC<TablaNiveladoProps> = ({
       </Box>
 
       <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          borderRadius: "12px",
-          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+  sx={{
+    p: 3,
+    mb: 3,
+    borderRadius: "12px",
+    boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+  }}
+>
+  <Box
+    sx={{
+      display: "flex",
+      flexWrap: "nowrap",
+      gap: 2,
+      alignItems: "center",
+      fontSize: "0.875rem",
+    }}
+  >
+    <TextField
+      label="Nombre del estudiante"
+      variant="outlined"
+      size="small"
+      sx={{
+        minWidth: 200,
+        height: "40px",
+        ...textFieldStyle,
+      }}
+      value={filters.estudiante}
+      onChange={(e) => handleInputChange("estudiante", e.target.value)}
+    />
+
+    <FormControl
+      sx={{
+        minWidth: 120,
+        height: "40px",
+        ...formControlStyle,
+      }}
+      size="small"
+    >
+      <InputLabel id="grado-label">Grado</InputLabel>
+      <Select
+        labelId="grado-label"
+        value={filters.grado || "todos"}
+        label="Grado"
+        onChange={(e) => handleInputChange("grado", e.target.value)}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              "& .MuiMenuItem-root:hover": {
+                backgroundColor: "#e7f5e8",
+              },
+            },
+          },
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
-            alignItems: "center",
-          }}
+        <MenuItem value="todos" sx={{ fontFamily }}>
+          Todos
+        </MenuItem>
+        {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 
+          'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'].map((grado) => (
+          <MenuItem key={grado} value={grado} sx={{ fontFamily }}>{grado}</MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    <FormControl
+      sx={{
+        minWidth: 120,
+        height: "40px",
+        ...formControlStyle,
+      }}
+      size="small"
+    >
+      <InputLabel id="estado-label">Estado</InputLabel>
+      <Select
+        labelId="estado-label"
+        value={filters.estado || "todos"}
+        label="Estado"
+        onChange={(e) => handleInputChange("estado", e.target.value)}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              "& .MuiMenuItem-root:hover": {
+                backgroundColor: "#e7f5e8",
+              },
+            },
+          },
+        }}
+      >
+        <MenuItem value="todos" sx={{ fontFamily }}>
+          Todos
+        </MenuItem>
+        <MenuItem value="Pendiente" sx={{ fontFamily }}>
+          Pendiente
+        </MenuItem>
+        <MenuItem value="Pagado" sx={{ fontFamily }}>
+          Pagado
+        </MenuItem>
+        <MenuItem value="Atrasado" sx={{ fontFamily }}>
+          Atrasado
+        </MenuItem>
+      </Select>
+    </FormControl>
+
+    <TextField
+      label="Fecha de Pago"
+      variant="outlined"
+      size="small"
+      sx={{
+        minWidth: 180,
+        height: "40px",
+        ...textFieldStyle,
+      }}
+      value={filters.fecha_pago}
+      onChange={(e) => handleInputChange("fecha_pago", e.target.value)}
+    />
+
+    <Button
+      variant="contained"
+      onClick={clearFilters}
+      sx={secondaryButtonStyle}
+      startIcon={
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <TextField
-            label="Nombre del estudiante"
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 250,
-              height: "40px",
-              ...textFieldStyle,
-            }}
-            value={filters.estudiante}
-            onChange={(e) => handleInputChange("estudiante", e.target.value)}
-          />
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      }
+    >
+      Quitar filtros
+    </Button>
 
-          <FormControl
-            sx={{
-              minWidth: 150,
-              height: "40px",
-              ...formControlStyle,
-            }}
-            size="small"
-          >
-            <InputLabel id="grado-label">Grado</InputLabel>
-            <Select
-              labelId="grado-label"
-              value={filters.grado || "todos"}
-              label="Grado"
-              onChange={(e) => handleInputChange("grado", e.target.value)}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    "& .MuiMenuItem-root:hover": {
-                      backgroundColor: "#e7f5e8",
-                    },
-                  },
-                },
-              }}
-            >
-              <MenuItem value="todos" sx={{ fontFamily }}>
-                Todos
-              </MenuItem>
-              {['Kinder', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 
-                'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'].map((grado) => (
-                <MenuItem key={grado} value={grado} sx={{ fontFamily }}>{grado}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+    <Box sx={{ flexGrow: 1 }} />
 
-          <FormControl
-            sx={{
-              minWidth: 150,
-              height: "40px",
-              ...formControlStyle,
-            }}
-            size="small"
-          >
-            <InputLabel id="estado-label">Estado</InputLabel>
-            <Select
-              labelId="estado-label"
-              value={filters.estado || "todos"}
-              label="Estado"
-              onChange={(e) => handleInputChange("estado", e.target.value)}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    "& .MuiMenuItem-root:hover": {
-                      backgroundColor: "#e7f5e8",
-                    },
-                  },
-                },
-              }}
-            >
-              <MenuItem value="todos" sx={{ fontFamily }}>
-                Todos
-              </MenuItem>
-              <MenuItem value="Pendiente" sx={{ fontFamily }}>
-                Pendiente
-              </MenuItem>
-              <MenuItem value="Pagado" sx={{ fontFamily }}>
-                Pagado
-              </MenuItem>
-              <MenuItem value="Atrasado" sx={{ fontFamily }}>
-                Atrasado
-              </MenuItem>
-            </Select>
-          </FormControl>
+    <Button
+      variant="contained"
+      onClick={() => setIsZoomed(!isZoomed)}
+      sx={zoomButtonStyle}
+      startIcon={
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {isZoomed ? (
+            <>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+            </>
+          ) : (
+            <>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </>
+          )}
+        </svg>
+      }
+    >
+      {isZoomed ? "Normal" : "Ver Tabla Completa"}
+    </Button>
 
-          <TextField
-            label="Fecha de Pago (DD/MM/YYYY)"
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 250,
-              height: "40px",
-              ...textFieldStyle,
-            }}
-            value={filters.fecha_pago}
-            onChange={(e) => handleInputChange("fecha_pago", e.target.value)}
-          />
-
-          <Button
-            variant="contained"
-            onClick={clearFilters}
-            sx={secondaryButtonStyle}
-            startIcon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            }
-          >
-            Quitar filtros
-          </Button>
-
-          <Box
-            sx={{
-              display: "flex",
-              ml: "auto",
-              gap: 2,
-              flexWrap: "nowrap",
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={() => setIsZoomed(!isZoomed)}
-              sx={zoomButtonStyle}
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {isZoomed ? (
-                    <>
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      <line x1="8" y1="11" x2="14" y2="11"></line>
-                      <line x1="11" y1="8" x2="11" y2="14"></line>
-                    </>
-                  ) : (
-                    <>
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      <line x1="8" y1="11" x2="14" y2="11"></line>
-                    </>
-                  )}
-                </svg>
-              }
-            >
-              {isZoomed ? "Vista Normal" : "Ver Tabla Completa"}
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={onNewNivelado}
-              sx={primaryButtonStyle}
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
-                  <line x1="12" y1="8" x2="12" y2="16"></line>
-                  <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-              }
-            >
-              Nuevo Nivelado
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
+    <Button
+      variant="contained"
+      onClick={onNewNivelado}
+      sx={primaryButtonStyle}
+      startIcon={
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      }
+    >
+      Nuevo Nivelado
+    </Button>
+  </Box>
+</Paper>
 
       <div className="border border-[#edad4c] rounded-lg overflow-hidden">
         <div style={{ overflowX: "auto", width: "100%" }}>

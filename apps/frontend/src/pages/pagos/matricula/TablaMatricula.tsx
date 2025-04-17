@@ -621,16 +621,6 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
                       >
                         <EditIcon fontSize="small" />
                       </button>
-                      <button
-                        onClick={() => onDeleteMatricula(item.uuid_matricula ?? "", item.nombre_estudiante)}
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
-                        title="Eliminar"
-                        style={{
-                          transition: "all 0.2s ease, transform 0.2s ease",
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </button>
                     </div>
                   </TableCell>
                 </TableRow>
