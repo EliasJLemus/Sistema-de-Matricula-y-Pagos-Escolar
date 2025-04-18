@@ -18,7 +18,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Table,
   TableBody,
@@ -29,7 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-// import useGetEstudiantes from "@/lib/queries/useGetEstudiantes";
+// import useGetEstudiantes from "@/lib/queries/useGetEstudiantes"
 import { useGetEstudiantes } from "@/lib/queries";
 
 const fontFamily =
@@ -583,7 +582,6 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
           <Table className="bg-[#fff9db]">
             <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
-               
                 <TableHead
                   className="text-white font-bold"
                   style={{ fontFamily }}
@@ -935,6 +933,7 @@ export const TablaEstudiantes: React.FC<TablaEstudiantesProps> = ({
         <Paper
           sx={{
             p: 4,
+            mt: 4,
             textAlign: "center",
             borderRadius: "12px",
             boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",

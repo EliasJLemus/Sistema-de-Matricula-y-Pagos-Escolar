@@ -1,3 +1,7 @@
+"use client";
+
+import type React from "react";
+
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -11,16 +15,23 @@ import {
   Paper,
   CircularProgress,
 } from "@mui/material";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetMatriculas } from "@/lib/queries";
-import { MatriculaTableType } from "@shared/pagos";
-import DeleteIcon from "@mui/icons-material/Delete";
+import type { MatriculaTableType } from "@shared/pagos";
 import EditIcon from "@mui/icons-material/Edit";
 
-const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const fontFamily =
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaMatriculaProps {
   onNewMatricula: () => void;
@@ -28,10 +39,10 @@ interface TablaMatriculaProps {
   onDeleteMatricula: (codigo_matricula: string, nombre: string) => void;
 }
 
-const TablaMatricula: React.FC<TablaMatriculaProps> = ({ 
-  onNewMatricula, 
+const TablaMatricula: React.FC<TablaMatriculaProps> = ({
+  onNewMatricula,
   onEditMatricula,
-  onDeleteMatricula 
+  onDeleteMatricula,
 }) => {
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -41,7 +52,9 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const currentContainer = document.getElementById("tabla-matriculas-container");
+    const currentContainer = document.getElementById(
+      "tabla-matriculas-container"
+    );
     if (currentContainer) {
       if (isZoomed) {
         currentContainer.style.zoom = "60%";
@@ -56,14 +69,26 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
     };
   }, [isZoomed]);
 
+  // Esta función es importante para aplicar los filtros correctamente
   const handleFreshReload = () => {
     queryClient.invalidateQueries({
-      queryKey: ["getMatriculas", page, limit, JSON.stringify(filters)],
+      queryKey: [
+        "getMatriculas",
+        page,
+        limit,
+        JSON.stringify(debouncedFilters),
+      ],
     });
   };
 
+  // Asegurarse de que los filtros se apliquen correctamente
+  useEffect(() => {
+    handleFreshReload();
+  }, [debouncedFilters, page, limit]);
+
   const handleInputChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value === "Todos" ? "" : value }));
+    // Corregir el manejo de "todos" para que sea consistente
+    setFilters((prev) => ({ ...prev, [key]: value === "todos" ? "" : value }));
     setPage(1);
   };
 
@@ -72,18 +97,40 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
     setPage(1);
   };
 
-  const { data, isLoading, isFetching, error } = useGetMatriculas(
-    page,
-    limit,
-    {
-      nombre: debouncedFilters.nombre,
-      grado: debouncedFilters.grado,
-      estado: debouncedFilters.estado,
-      year: new Date().getFullYear(),
-    }
-  );
+  // Implementar filtrado local como respaldo si la API no filtra correctamente
+  const { data, isLoading, isFetching, error } = useGetMatriculas(page, limit, {
+    nombre: debouncedFilters.nombre,
+    grado: debouncedFilters.grado,
+    estado: debouncedFilters.estado,
+    year: new Date().getFullYear(),
+  });
 
-  const tableData: MatriculaTableType[] = data?.data ?? [];
+  // Filtrado local como respaldo
+  const applyLocalFilters = (data: MatriculaTableType[]) => {
+    return data.filter((item) => {
+      const matchesNombre =
+        !debouncedFilters.nombre ||
+        item.nombre_estudiante
+          .toLowerCase()
+          .includes(debouncedFilters.nombre.toLowerCase());
+
+      const matchesGrado =
+        !debouncedFilters.grado || item.nombre_grado === debouncedFilters.grado;
+
+      const matchesEstado =
+        !debouncedFilters.estado || item.estado === debouncedFilters.estado;
+
+      return matchesNombre && matchesGrado && matchesEstado;
+    });
+  };
+
+  const rawData = data?.data ?? [];
+  // Aplicar filtrado local si hay datos y filtros activos
+  const tableData: MatriculaTableType[] =
+    debouncedFilters.nombre || debouncedFilters.grado || debouncedFilters.estado
+      ? applyLocalFilters(rawData)
+      : rawData;
+
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
@@ -368,7 +415,18 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
               <MenuItem value="todos" sx={{ fontFamily }}>
                 Todos
               </MenuItem>
-              {["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto", "Séptimo", "Octavo", "Noveno", "Décimo"].map((g) => (
+              {[
+                "Primero",
+                "Segundo",
+                "Tercero",
+                "Cuarto",
+                "Quinto",
+                "Sexto",
+                "Séptimo",
+                "Octavo",
+                "Noveno",
+                "Décimo",
+              ].map((g) => (
                 <MenuItem key={g} value={g} sx={{ fontFamily }}>
                   {g}
                 </MenuItem>
@@ -510,124 +568,174 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
       </Paper>
 
       <div className="border border-[#edad4c] rounded-lg overflow-hidden">
-        <div style={{ overflowX: "auto", width: "100%" }}>
-          <Table className="bg-[#fff9db]">
-            <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
-              <TableRow>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Código Matrícula
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Código Estudiante
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Estudiante
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Grado
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Sección
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Tarifa
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Beneficio
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Descuento
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Total
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Estado
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Comprobante
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Fecha
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Acciones
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tableData.map((item, index) => (
-                <TableRow
-                  key={item.codigo_matricula}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
-                  } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
+        <Table className="bg-[#fff9db]">
+          <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
+            <TableRow>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Código Matrícula
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Código Estudiante
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Estudiante
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Grado
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Sección
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Tarifa
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Beneficio
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Descuento
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Total
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Estado
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Comprobante
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Fecha
+              </TableHead>
+              <TableHead
+                className="text-white font-bold"
+                style={{ fontFamily }}
+              >
+                Editar
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tableData.map((item, index) => (
+              <TableRow
+                key={item.codigo_matricula}
+                className={`${
+                  index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
+                } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
+              >
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.codigo_matricula}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.codigo_estudiante}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.nombre_estudiante}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.nombre_grado}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.seccion}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  L. {Number.parseFloat(item.tarifa).toLocaleString()}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.beneficio}
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {item.descuento}
+                </TableCell>
+                <TableCell
+                  className="text-[#4D4D4D] font-medium"
+                  style={{ fontFamily }}
                 >
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.codigo_matricula}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.codigo_estudiante}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.nombre_estudiante}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.nombre_grado}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.seccion}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    L. {parseFloat(item.tarifa).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.beneficio}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.descuento}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D] font-medium" style={{ fontFamily }}>
-                    <strong>L. {parseFloat(item.total).toLocaleString()}</strong>
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    <Badge
-                      variant="outline"
-                      className={item.estado === "Pagado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"}
+                  <strong>
+                    L. {Number.parseFloat(item.total).toLocaleString()}
+                  </strong>
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  <Badge
+                    variant="outline"
+                    className={
+                      item.estado === "Pagado"
+                        ? "bg-[#538A3E] text-white"
+                        : "bg-orange-500 text-white"
+                    }
+                  >
+                    {item.estado}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  <Badge
+                    variant="outline"
+                    className={
+                      item.estado_comprobante === "Enviado"
+                        ? "bg-[#538A3E] text-white"
+                        : "bg-orange-500 text-white"
+                    }
+                  >
+                    {item.estado_comprobante}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                  {new Date(item.fecha_matricula).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={() => onEditMatricula(item.uuid_matricula ?? "")}
+                      className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
+                      title="Editar"
+                      style={{
+                        transition: "all 0.2s ease, transform 0.2s ease",
+                      }}
                     >
-                      {item.estado}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    <Badge
-                      variant="outline"
-                      className={item.estado_comprobante === "Enviado" ? "bg-green-600 text-white" : "bg-orange-500 text-white"}
-                    >
-                      {item.estado_comprobante}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {new Date(item.fecha_matricula).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => onEditMatricula(item.uuid_matricula ?? "")}
-                        className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
-                        title="Editar"
-                        style={{
-                          transition: "all 0.2s ease, transform 0.2s ease",
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                      <EditIcon fontSize="small" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
       <Box
@@ -772,6 +880,7 @@ const TablaMatricula: React.FC<TablaMatriculaProps> = ({
         <Paper
           sx={{
             p: 4,
+            mt: 4,
             textAlign: "center",
             borderRadius: "12px",
             boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
