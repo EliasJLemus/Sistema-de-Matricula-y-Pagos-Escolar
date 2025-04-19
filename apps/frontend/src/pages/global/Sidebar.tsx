@@ -1,9 +1,4 @@
-import {
-  Box,
-  ListItemButton,
-  Typography,
-  Avatar,
-} from "@mui/material";
+import { Box, ListItemButton, Typography, Avatar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
@@ -12,7 +7,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 interface SidebarProps {
   isSidebarVisible: boolean;
@@ -38,13 +33,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [rol, setRol] = useState<string>("");
 
   useEffect(() => {
-    const pathIndex = navigationItems.findIndex(
-      (item) => item.path === location.pathname
-    );
-    if (pathIndex !== -1) {
-      setActiveIndex(pathIndex);
-    }
-
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -55,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         console.error("Error al decodificar el token", error);
       }
     }
-  }, [location.pathname]);
+  }, []);
 
   const puedeVerReportes =
     rol === "admin" || rol === "administracion" || rol === "directivo";
@@ -69,6 +57,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       ? [{ icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" }]
       : []),
   ];
+
+  useEffect(() => {
+    const pathIndex = navigationItems.findIndex(
+      (item) => item.path === location.pathname
+    );
+    if (pathIndex !== -1) {
+      setActiveIndex(pathIndex);
+    }
+  }, [location.pathname, navigationItems]);
 
   const handleClick = (index: number) => {
     setActiveIndex(index);
@@ -100,6 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           justifyContent: "center",
           alignItems: "center",
           mb: isSidebarVisible ? 3 : 4,
+          transition: "filter 0.2s ease",
         }}
       >
         <Avatar
@@ -108,7 +106,13 @@ const Sidebar: React.FC<SidebarProps> = ({
             width: isSidebarVisible ? 80 : 40,
             height: isSidebarVisible ? 80 : 40,
             border: "3px solid #FFFFFF",
-            fontSize: isSidebarVisible ? 32 : 18,
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+            fontSize: isSidebarVisible ? 32 : 20,
+            fontWeight: 500,
+            transition: "width 0.3s ease, height 0.3s ease",
+            bgcolor: "#81BE83",
+            color: "#FFFFFF",
+            fontFamily: "'Nunito Sans', sans-serif",
           }}
         >
           {usuario ? usuario.charAt(0).toUpperCase() : "U"}
@@ -122,7 +126,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             color: "#FFFFFF",
             fontWeight: 600,
             textAlign: "center",
-            fontFamily,
+            fontFamily: fontFamily,
+            fontSize: "17px",
             mb: 3,
           }}
         >
@@ -130,64 +135,194 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Typography>
       )}
 
-      <Box sx={{ flex: 1, px: isSidebarVisible ? 2 : 0 }}>
+      {isSidebarVisible && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            color: "rgba(255, 255, 255, 0.7)",
+            fontWeight: 600,
+            width: "100%",
+            pl: 4,
+            mb: 1.5,
+            textTransform: "uppercase",
+            letterSpacing: "0.3px",
+            fontFamily: fontFamily,
+            fontSize: "12px",
+          }}
+        >
+          Navegación
+        </Typography>
+      )}
+
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          px: isSidebarVisible ? 2 : 0,
+        }}
+      >
         {navigationItems.map((item, index) => {
           const isActive = activeIndex === index;
+
           return (
-            <ListItemButton
+            <Box
               key={index}
-              component={Link}
-              to={item.path}
-              onClick={() => handleClick(index)}
               sx={{
+                width: isSidebarVisible ? "100%" : "auto",
                 my: 0.5,
-                borderRadius: "8px",
-                color: "#FFFFFF",
-                justifyContent: isSidebarVisible ? "flex-start" : "center",
-                backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                display: "flex",
+                justifyContent: "center",
+                position: "relative",
+                zIndex: hoveredIndex === index || isActive ? 2 : 1,
               }}
             >
-              <Box
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                onClick={() => handleClick(index)}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
                 sx={{
+                  width: isSidebarVisible ? "100%" : `${BUTTON_SIZE}px`,
+                  height: `${BUTTON_SIZE}px`,
+                  borderRadius: "8px",
                   display: "flex",
+                  justifyContent: isSidebarVisible ? "flex-start" : "center",
                   alignItems: "center",
-                  justifyContent: "center",
-                  minWidth: isSidebarVisible ? "26px" : "auto",
-                  mr: isSidebarVisible ? 2 : 0,
+                  color: "#FFFFFF",
+                  transition:
+                    "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    transform: "scale(1.05) translateZ(10px)",
+                    boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
+                    filter: "brightness(1.2)",
+                  },
+                  "&:active": {
+                    transform: "scale(0.98) translateZ(5px)",
+                  },
+                  backgroundColor: isActive
+                    ? "rgba(255, 255, 255, 0.15)"
+                    : "transparent",
+                  fontWeight: isActive ? 700 : 500,
+                  padding: isSidebarVisible ? "8px 16px" : 0,
+                  transformStyle: "preserve-3d",
+                  perspective: "1000px",
                 }}
               >
-                {item.icon}
-              </Box>
-              {isSidebarVisible && (
-                <Typography
+                <Box
                   sx={{
-                    fontSize: "16px",
-                    fontFamily,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: isSidebarVisible ? "26px" : "auto",
+                    marginRight: isSidebarVisible ? 2 : 0,
+                    width: isSidebarVisible ? "auto" : "100%",
+                    height: isSidebarVisible ? "auto" : "100%",
                   }}
                 >
-                  {item.text}
-                </Typography>
-              )}
-            </ListItemButton>
+                  {item.icon}
+                </Box>
+
+                {isSidebarVisible && (
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: "inherit",
+                      fontFamily: fontFamily,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    {item.text}
+                  </Typography>
+                )}
+              </ListItemButton>
+            </Box>
           );
         })}
       </Box>
 
-      <Box sx={{ mt: 2, px: isSidebarVisible ? 2 : 0 }}>
-        <ListItemButton
-          onClick={onLogout}
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          px: isSidebarVisible ? 2 : 0,
+          mt: 2,
+          position: "relative",
+          zIndex: hoveredIndex === 999 ? 2 : 1,
+        }}
+      >
+        <Box
           sx={{
-            backgroundColor: "#F38223",
-            color: "#FFFFFF",
-            borderRadius: "8px",
-            justifyContent: isSidebarVisible ? "flex-start" : "center",
+            width: isSidebarVisible ? "100%" : "auto",
+            display: "flex",
+            justifyContent: "center",
           }}
         >
-          <ExitToAppIcon sx={{ mr: isSidebarVisible ? 2 : 0 }} />
-          {isSidebarVisible && (
-            <Typography sx={{ fontFamily, fontWeight: 600 }}>Salir</Typography>
-          )}
-        </ListItemButton>
+          <ListItemButton
+            onClick={onLogout}
+            onMouseEnter={() => setHoveredIndex(999)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            sx={{
+              width: isSidebarVisible ? "100%" : `${BUTTON_SIZE}px`,
+              height: `${BUTTON_SIZE}px`,
+              backgroundColor: "#F38223",
+              color: "#FFFFFF",
+              borderRadius: "8px",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              transition:
+                "all 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+              "&:hover": {
+                backgroundColor: "#e67615",
+                transform: "scale(1.05) translateZ(10px)",
+                boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.3)",
+                filter: "brightness(1.2)",
+              },
+              "&:active": {
+                backgroundColor: "#d56a10",
+                transform: "scale(0.98) translateZ(5px)",
+              },
+              display: "flex",
+              justifyContent: isSidebarVisible ? "flex-start" : "center",
+              alignItems: "center",
+              padding: isSidebarVisible ? "8px 16px" : 0,
+              transformStyle: "preserve-3d",
+              perspective: "1000px",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: isSidebarVisible ? "26px" : "auto",
+                marginRight: isSidebarVisible ? 2 : 0,
+                width: isSidebarVisible ? "auto" : "100%",
+                height: isSidebarVisible ? "auto" : "100%",
+              }}
+            >
+              <ExitToAppIcon sx={{ color: "#FFFFFF" }} />
+            </Box>
+
+            {isSidebarVisible && (
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  fontFamily: fontFamily,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                Salir
+              </Typography>
+            )}
+          </ListItemButton>
+        </Box>
       </Box>
     </Box>
   );
