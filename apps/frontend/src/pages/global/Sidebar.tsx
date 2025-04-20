@@ -7,7 +7,12 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useState, useEffect } from "react";
+
 import { jwtDecode } from "jwt-decode";
+
+
+import { StarIcon } from "lucide-react";
+
 
 interface SidebarProps {
   isSidebarVisible: boolean;
@@ -53,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { icon: <SchoolIcon />, text: "Estudiantes", path: "/estudiantes" },
     { icon: <PeopleIcon />, text: "Apoderados", path: "/apoderados" },
     { icon: <PaymentIcon />, text: "Pagos", path: "/pagos" },
+    { icon: <StarIcon />, text: "Becas", path: "/becas" },
     ...(puedeVerReportes
       ? [{ icon: <DescriptionIcon />, text: "Reportes", path: "/reportes" }]
       : []),

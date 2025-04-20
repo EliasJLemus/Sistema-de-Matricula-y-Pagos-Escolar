@@ -39,6 +39,12 @@ import EditarMensualidad from "./pages/pagos/mensualidad/editar/EditarMensualida
 import NiveladoPage from "./pages/pagos/nivelados/NiveladoPage";
 import NuevoNivelado from "./pages/pagos/nivelados/nuevo/NuevoNivelado";
 import EditarNivelado from "./pages/pagos/nivelados/editar/EditarNivelado";
+
+import BecasPage from "./pages/becas/BecasPage";
+import NuevoBecas from "./pages/becas/nuevo/NuevoBecas";
+import EditarBecas from "./pages/becas/editar/EditarBecas";
+
+
 import Login from "./pages/login/login";
 import UsuariosPage from "./pages/usuarios/UsuariosPage"; // 👈🏼 Nuevo import
 
@@ -280,6 +286,26 @@ function App() {
                     isLoggedIn ? <EditarNivelado /> : <Navigate to="/login" />
                   }
                 />
+             <Route
+                  path="/becas"
+                  element={
+                    isLoggedIn ? <BecasPage /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/becas/nuevo"
+                  element={
+                    isLoggedIn ? <NuevoBecas /> : <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/becas/editar/:id"
+                  element={
+                    isLoggedIn ? <EditarBecas /> : <Navigate to="/login" />
+                  }
+                />
+
+
               </Routes>
             </Box>
           </Box>
