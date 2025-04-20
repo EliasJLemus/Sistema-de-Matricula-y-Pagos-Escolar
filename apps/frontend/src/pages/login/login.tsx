@@ -11,9 +11,7 @@ interface LoginProps {
   onLogin: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({
-  onLogin
-}) => {
+const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const {
     register,
     handleSubmit,
@@ -21,73 +19,119 @@ const Login: React.FC<LoginProps> = ({
   } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
-      try{
-        const response = await fetch("http://localhost:3000/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: data.username,
-            password: data.password
-          }),
-        });
+    try {
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.username,  
+          password: data.password
+        }),
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if(!response.ok){
-          throw new Error(result.message || "Error en la autenticación");
-        }
-        localStorage.setItem("token", result.token);
-        onLogin()
-      }catch(error){
-        console.error("Login fallido:", error);
-        alert("Error en la autenticación. Por favor, verifica tus credenciales.");
+      if (!response.ok) {
+        throw new Error(result.message || "Error en la autenticación");
       }
+      
+      localStorage.setItem("token", result.token);
+      onLogin();
+
+    } catch (error) {
+      console.error("Login fallido:", error);
+      alert("Error en la autenticación. Verifica tus credenciales.");
+    }
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/2 bg-gradient-to-b from-blue-900 via-blue-700 to-[#50853C] flex flex-col justify-center items-center text-white p-6  rounded-r-[45px] relative">
-      <div 
-        className="absolute inset-0 opacity-35 z-10 rounded-r-[45px]"
-        style={{  backgroundImage: "url('/bluebg.png')", backgroundSize: "cover", backgroundRepeat: "repeat" }}
-      ></div>
-        <div className="text-center">
-        <img src="/suny.png" alt="Logo" className="w-96 mx-auto mb-10" />
+    <div className="flex h-screen bg-[#F5F5F5]">
+   
+      <div className="w-1/2 relative bg-[#1B1263]">
+      
+        <div 
+          className="absolute right-0 top-0 w-64 h-64 bg-[#50853C] clip-path-triangle"
+        />
         
-          
-          <p className="text-base font-bold mt-4">Responsabilidad • Respeto • Colaboración</p>
+       
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-[#FFFDF1] w-96 h-96 rounded-2xl shadow-2xl transform rotate-3" />
+        </div>
+
+     
+        <div className="relative z-10 h-full flex flex-col items-center justify-center">
+          <img 
+            src="/suny.png" 
+            alt="Logo" 
+            className="w-72 mb-8 drop-shadow-lg" 
+          />
         </div>
       </div>
 
-      <div className="w-1/2   flex flex-col justify-center items-center">
-        <h2 className="text-4xl font-bold mb-4 relative -top-20 text-[#1B1263]">Bienvenido a</h2>
-        <h2 className="text-4xl font-bold mb-4 relative -top-20 text-[#1B1263]">Sunny Path Bilingual School</h2>
-        <div className="bg-[#FFFDF1] p-8 rounded-lg shadow-lg w-96">
-          <h3 className="font-bold text-xl mb-4">Accede a tu cuenta</h3>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium">Usuario</label>
+   
+      <div className="w-1/2 flex items-center justify-center">
+        <div className="bg-white p-12 rounded-3xl shadow-2xl w-[480px] relative">
+         
+          <div 
+            className="absolute -top-8 -right-8 w-32 h-32 bg-[#50853C] clip-path-triangle opacity-80"
+          />
+
+       
+          <h1 className="text-4xl font-bold text-[#1B1263] mb-2">Mi Cuenta</h1>
+          <p className="text-lg text-gray-600 mb-8">Ingresa tus credenciales</p>
+
+          <form onSubmit={handleSubmit(onSubmit)}> 
+            <div className="mb-6">
+              <label className="block text-[#1B1263] font-semibold mb-3">
+                Usuario
+              </label>
               <input
                 type="text"
-                {...register("username", { required: "El usuario es requerido" })}
-                className="w-full p-2 border rounded mt-1"
+                {...register("username", { 
+                  required: "Campo obligatorio" 
+                })}
+                className="w-full p-4 border-2 border-[#50853C]/20 rounded-xl focus:border-[#50853C]"
               />
-              {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+              {errors.username && (
+                <p className="text-red-500 text-sm mt-2">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium">Contraseña</label>
+            <div className="mb-8">
+              <label className="block text-[#1B1263] font-semibold mb-3">
+                Contraseña
+              </label>
               <input
                 type="password"
-                {...register("password", { required: "La contraseña es requerida" })}
-                className="w-full p-2 border rounded mt-1"
+                {...register("password", { 
+                  required: "Campo obligatorio" 
+                })}
+                className="w-full p-4 border-2 border-[#50853C]/20 rounded-xl focus:border-[#50853C]"
               />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-2">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
-            <Button type="submit" className="w-full bg-[#50853C] hover:bg-[#65C73F] text-white py-2 rounded">
+            <div className="mb-8 text-right">
+              <a 
+                href="#" 
+                className="text-[#50853C] hover:text-[#1B1263] font-medium"
+              >
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-[#50853C] hover:bg-[#1B1263] py-6 text-lg rounded-xl"
+            >
               Ingresar
             </Button>
           </form>
