@@ -45,7 +45,14 @@ const structureColumns: StructureColumn<ReporteBecaType>[] = [
     type: "date",
     render: (valor) => formatoFecha(valor),
   },
-  { name: "estado", label: "Estado" },
+  {
+    name: "estado",
+    label: "Estado",
+    render: (valor) => {
+      // Convertir a formato título (primera letra mayúscula, resto minúscula)
+      return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
+    },
+  },
 ];
 
 export const BecaTable: React.FC = () => {
@@ -137,6 +144,8 @@ export const BecaTable: React.FC = () => {
                 <SelectItem value="Séptimo">Séptimo</SelectItem>
                 <SelectItem value="Octavo">Octavo</SelectItem>
                 <SelectItem value="Noveno">Noveno</SelectItem>
+                <SelectItem value="Décimo">Décimo</SelectItem>
+                <SelectItem value="Undécimo">Undécimo</SelectItem>
               </SelectContent>
             </Select>
             <Input
@@ -147,13 +156,13 @@ export const BecaTable: React.FC = () => {
                 handleInputChange("tipo_beneficio", e.target.value)
               }
             />
-            <Button 
+            <Button
               variant="default"
               onClick={clearFilters}
               className="bg-[#F38223] hover:bg-[#e67615] text-white font-medium rounded-lg px-4 py-2 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg active:bg-[#d56a10] active:shadow-inner flex items-center gap-2 hover:-translate-y-1 hover:scale-[1.02] transform-gpu"
               style={{
-                boxShadow: '0px 4px 10px rgba(243, 130, 35, 0.3)',
-                willChange: 'transform' // Optimización para animaciones
+                boxShadow: "0px 4px 10px rgba(243, 130, 35, 0.3)",
+                willChange: "transform", // Optimización para animaciones
               }}
             >
               <svg
@@ -171,7 +180,9 @@ export const BecaTable: React.FC = () => {
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
-              <span className="transition-all duration-200">Quitar filtros</span>
+              <span className="transition-all duration-200">
+                Quitar filtros
+              </span>
             </Button>
           </div>
         }
@@ -185,10 +196,14 @@ export const BecaTable: React.FC = () => {
       />
 
       {!isLoading && !isFetching && tableData.length === 0 && (
-        <div className="text-sm text-muted-foreground px-2 py-4">
-          No se encontraron resultados para los filtros actuales.
+        <div className="text-center p-4">
+          <div className="text-sm text-muted-foreground">
+            No se encontraron becas para los filtros actuales.
+          </div>
         </div>
       )}
     </div>
   );
 };
+
+export default BecaTable;
