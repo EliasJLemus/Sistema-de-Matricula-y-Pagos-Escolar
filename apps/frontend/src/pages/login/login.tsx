@@ -90,7 +90,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <input
                 type="text"
                 {...register("username", { 
-                  required: "Campo obligatorio" 
+                  required: "El usuario es requerido" 
                 })}
                 className="w-full p-4 border-2 border-[#50853C]/20 rounded-xl focus:border-[#50853C]"
               />
@@ -108,7 +108,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <input
                 type="password"
                 {...register("password", { 
-                  required: "Campo obligatorio" 
+                  required: "La contraseña es requerida" 
                 })}
                 className="w-full p-4 border-2 border-[#50853C]/20 rounded-xl focus:border-[#50853C]"
               />
@@ -118,16 +118,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </p>
               )}
             </div>
-
             <div className="mb-8 text-right">
               <a 
                 href="#" 
                 className="text-[#50853C] hover:text-[#1B1263] font-medium"
               >
-                ¿Olvidaste tu contraseña?
+                Bienvenido a Sunny Path
               </a>
             </div>
-
             <Button
               type="submit"
               className="w-full bg-[#50853C] hover:bg-[#1B1263] py-6 text-lg rounded-xl"
