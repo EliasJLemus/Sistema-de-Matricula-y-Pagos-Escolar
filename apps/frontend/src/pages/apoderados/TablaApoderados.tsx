@@ -25,13 +25,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import useGetApoderados, { ApoderadoType } from "@/lib/queries/useGetApoderados";
+import  {useGetApoderados} from "@/lib/queries"
+import { ApoderadoConEstudianteType } from "@shared/estudiantesType";
+
+
 
 const fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface TablaApoderadosProps {
   onNewApoderado: () => void;
-  onEditApoderado: (id: number) => void;
+  onEditApoderado: (id: string) => void;
 }
 
 export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
@@ -88,35 +91,20 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
   };
 
   const { data, isLoading, isFetching, error } = useGetApoderados(
-    page,
-    limit,
-    debouncedFilters
+    {
+      page,
+      limit
+    }
   );
 
   const tableData = data?.data ?? [];
   const total = data?.pagination?.total ?? 0;
   const pageCount = Math.ceil(total / limit);
 
-  const getNombreCompleto = (a: ApoderadoType) => {
-    const primerNombre = a.primer_nombre || "";
-    const segundoNombre = a.segundo_nombre || "";
-    const primerApellido = a.primer_apellido || "";
-    const segundoApellido = a.segundo_apellido || "";
+ 
 
-    return `${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}`
-      .trim()
-      .replace(/\s+/g, " ");
-  };
-
-  const getNombreEstudiante = (a: ApoderadoType) => {
-    const primerNombre = a.estudiante_primer_nombre || "";
-    const primerApellido = a.estudiante_primer_apellido || "";
-
-    return `${primerNombre} ${primerApellido}`.trim();
-  };
-
-  const handleEdit = (id: number) => onEditApoderado(id);
-  const handleDelete = (id: number, nombre: string) => {
+  const handleEdit = (id: string) => onEditApoderado(id);
+  const handleDelete = (id: string, nombre: string) => {
     if (window.confirm(`¿Está seguro que desea eliminar al apoderado ${nombre}?`)) {
       console.log("Eliminar apoderado:", id);
       handleFreshReload();
@@ -543,10 +531,10 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
             <TableHeader className="bg-[#edad4c] sticky top-0 z-10">
               <TableRow>
                 <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  ID
+                  Codigo Encargado
                 </TableHead>
                 <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Código Apoderado
+                  Código Estudiante
                 </TableHead>
                 <TableHead className="text-white font-bold" style={{ fontFamily }}>
                   Nombre Completo
@@ -570,9 +558,6 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
                   Principal
                 </TableHead>
                 <TableHead className="text-white font-bold" style={{ fontFamily }}>
-                  Código Estudiante
-                </TableHead>
-                <TableHead className="text-white font-bold" style={{ fontFamily }}>
                   Estudiante
                 </TableHead>
                 <TableHead className="text-white font-bold" style={{ fontFamily }}>
@@ -586,22 +571,22 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
             <TableBody>
               {tableData.map((item, index) => (
                 <TableRow
-                  key={item.encargado_id}
+                  key={item.uuid_encargado}
                   className={`${
                     index % 2 === 0 ? "bg-white" : "bg-[#fff9db]"
                   } hover:bg-[#e7f5e8] cursor-pointer transition-colors`}
                 >
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.encargado_id}
+                    {item.codigo_encargado}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.numero_encargado}
+                    {item.codigo_estudiante}
                   </TableCell>
                   <TableCell
                     className="text-[#4D4D4D] font-medium"
                     style={{ fontFamily }}
                   >
-                    {getNombreCompleto(item)}
+                    {item.nombre_encargado}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.identidad}
@@ -610,7 +595,7 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
                     {item.genero}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.telefono_personal}
+                    {item.telefono}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
                     {item.correo_electronico}
@@ -619,21 +604,19 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
                     {item.parentesco}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.es_encargado_principal ? "Sí" : "No"}
+                    {item.es_princpal ? "Sí" : "No"}
+                  </TableCell>
+                  
+                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
+                    {item.nombre_estudiante}
                   </TableCell>
                   <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.numero_estudiante}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {getNombreEstudiante(item)}
-                  </TableCell>
-                  <TableCell className="text-[#4D4D4D]" style={{ fontFamily }}>
-                    {item.grado_estudiante}
+                    {item.grado}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <button
-                        onClick={() => handleEdit(item.encargado_id)}
+                        onClick={() => handleEdit(item.uuid_encargado ?? "")}
                         className="p-1 text-[#538A3E] hover:text-[#3e682e] transition-colors hover:scale-125"
                         title="Editar"
                         style={{
@@ -643,7 +626,7 @@ export const TablaApoderados: React.FC<TablaApoderadosProps> = ({
                         <EditIcon fontSize="small" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.encargado_id, getNombreCompleto(item))}
+                        onClick={() => handleDelete(item.uuid_encargado ?? "", item.nombre_encargado)}
                         className="p-1 text-red-500 hover:text-red-700 transition-colors hover:scale-125"
                         title="Eliminar"
                         style={{

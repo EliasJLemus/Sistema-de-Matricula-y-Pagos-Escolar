@@ -12,7 +12,7 @@ import {
   StructureAndData,
 } from "@shared/reportsType";
 import axios from "axios";
-import { EstudiantesTablaType } from "@shared/estudiantesType";
+import { EstudiantesTablaType,ApoderadoConEstudianteType } from "@shared/estudiantesType";
 import {MatriculaTableType, MatriculaType, MensualidadTableType, NiveladoTableType} from "@shared/pagos"
 // Hook para matrícula con filtros
 type FiltrosMatricula = {
@@ -696,3 +696,40 @@ export const useGetNiveladosAll = (
     staleTime: 1000*60*5
   })
 }
+
+export type UseGetApoderadosParams = {
+  page: number;
+  limit: number;
+};
+
+export type ApoderadosResponse = {
+  success: boolean;
+  data: ApoderadoConEstudianteType[];
+  pagination: {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
+  };
+};
+
+export const useGetApoderados = ({
+  page,
+  limit,
+}: UseGetApoderadosParams): UseQueryResult<ApoderadosResponse, Error> => {
+  return useQuery({
+    queryKey: ["getApoderados", page, limit],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      const response = await axios.get<ApoderadosResponse>(
+        `http://localhost:3000/estudiantes/obtener-apoderados?${params.toString()}`
+      );
+
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+};

@@ -27,3 +27,21 @@ export type EstudiantesTablaType = {
     plan_pago?: "Normal" | "Nivelado" | string;
   };
   
+
+  //**Encargados */
+  export type ApoderadoConEstudianteType = {
+    uuid_encargado?: string;
+    uuid_estudiante?: string;
+    codigo_encargado: string;
+    nombre_encargado: string;
+    identidad: string;
+    genero: "Masculino" | "Femenino";
+    telefono: string;
+    correo_electronico: string;
+    parentesco: string;
+    principal: boolean;
+    codigo_estudiante: string;
+    nombre_estudiante: string;
+    grado: string;
+  };
+  
