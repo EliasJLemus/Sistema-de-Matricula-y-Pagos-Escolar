@@ -42,7 +42,7 @@ export const actualizarEstudianteSchema = z.object({
   primer_apellido: z.string().min(1, "El primer apellido es requerido."),
   segundo_apellido: z.string().optional().nullable(),
 
-  identidad: z.string().min(13, "Debe tener al menos 13 caracteres.").max(20),
+  identidad: z.string().min(1, "Debe tener al menos 13 caracteres.").max(20),
   nacionalidad: z.string().min(3),
 
   genero: z.enum(["Masculino", "Femenino"]),
