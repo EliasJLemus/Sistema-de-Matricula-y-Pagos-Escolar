@@ -147,6 +147,7 @@ const FormularioEstudiante: React.FC<FormularioEstudianteProps> = ({
           seccion: datos?.seccion,
           dif_educacion_fisica: datos?.dif_educacion === "Sí",
           reaccion_alergica: datos?.alergia === "Sí",
+          es_zurdo: datos?.es_zurdo === "Sí",
           descripcion_alergica: datos?.desc_alergia,
           desc_alergia: datos?.desc_alergia,
           fecha_admision: formatearFechaParaInput(datos?.fecha_admision),
