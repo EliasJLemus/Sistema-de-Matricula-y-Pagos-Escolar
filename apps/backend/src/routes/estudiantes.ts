@@ -6,7 +6,7 @@ import {registroEstudiante,
 
 } from "@/controller/estudiantes/estudiantesController"
 
-import {registrarApoderado,} from "@/controller/estudiantes/apoderadosController"
+import {getAllEncargados, registrarApoderado,} from "@/controller/estudiantes/apoderadosController"
 
 const studentRoute = Router();
 
@@ -21,6 +21,8 @@ studentRoute.put("/actualizar-estudiante/:uuid", actualizarEstudiante);
 //**Apoderados */
 
 studentRoute.post("/registro-apoderado", registrarApoderado)
+
+studentRoute.get("/obtener-apoderados", getAllEncargados)
 
 
 export default studentRoute

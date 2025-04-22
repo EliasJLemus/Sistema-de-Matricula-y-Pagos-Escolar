@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Apoderados } from "@/db/estudiantes/apoderadosDB";
 import { registrarEncargadoSchema } from "@/controller/schema/apoderadosSchema"
 import { Database } from "@/db/service";
+import { getPaginationParams } from "@/controller/utils/pagination";
+
 
 const apoderadoDB = new Apoderados();
 
@@ -51,5 +53,32 @@ export const registrarApoderado = async(req: Request, res: Response): Promise<vo
             message:error.message,
             detail: error.message,
         });
+    }
+}
+
+export const getAllEncargados = async(req: Request, res: Response): Promise<void>=>{    
+    try{
+        const {limit, offset} = getPaginationParams(req);
+
+        const {data, total} = await apoderadoDB.getApoderados(limit, offset);
+    
+        res.status(200).json({
+            success: true,
+            data,
+            pagination: {
+              limit,
+              offset,
+              count: data.length,
+              total,
+            },
+          });
+    
+    }catch(error){
+        console.error("Error al obtener los encargados:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener los encargados",
+        });
+
     }
 }
