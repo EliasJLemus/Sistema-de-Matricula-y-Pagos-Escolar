@@ -1,14 +1,14 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { TablaEstudiantes } from "./TablaEstudiantes";
 import EstudianteModal from "./EstudianteModal";
 
 // Font family constant to match sidebar and topbar
-const fontFamily = "'Nunito', sans-serif";
+const fontFamily =
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 const EstudiantesPage: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);

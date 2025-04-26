@@ -24,7 +24,8 @@ const Pagos = () => {
           }`}
         />
       ),
-      color: "[#50853C]",
+      color: "#50853C",
+      hoverBg: "#62A14A", // Color más fuerte
       bgHover: "[#e0ebd9]",
       bgActive: "[#d4e5cb]",
     },
@@ -40,7 +41,8 @@ const Pagos = () => {
           }`}
         />
       ),
-      color: "[#F38223]",
+      color: "#F38223",
+      hoverBg: "#F46A00", // Color más fuerte
       bgHover: "[#fde8d3]",
       bgActive: "[#fcdec0]",
     },
@@ -64,7 +66,8 @@ const Pagos = () => {
           <path d="M12 2v20M2 12h20M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
         </svg>
       ),
-      color: "[#1B1263]",
+      color: "#1B1263",
+      hoverBg: "#2D2377", // Color más fuerte
       bgHover: "[#dbd9ea]",
       bgActive: "[#cecce4]",
     },
@@ -91,29 +94,37 @@ const Pagos = () => {
               onMouseLeave={() => setHoveredCard(null)}
               className={`relative rounded-xl shadow-md border border-gray-100 
                          cursor-pointer transition-all duration-300 overflow-hidden
-                         hover:shadow-xl hover:-translate-y-1 flex flex-col bg-white
-                         ${
-                           isHovered
-                             ? `bg-${card.bgHover} hover:bg-${card.bgActive}`
-                             : ""
-                         }`}
+                         hover:shadow-xl hover:-translate-y-1 flex flex-col bg-white`}
               style={{ minHeight: "380px" }}
             >
               {/* Decoración de fondo */}
               <div
-                className={`absolute top-0 right-0 w-40 h-40 -mr-20 -mt-20 bg-${card.color}/10 rounded-full`}
+                className={`absolute top-0 right-0 w-40 h-40 -mr-20 -mt-20 rounded-full transition-colors duration-300`}
+                style={{
+                  backgroundColor: isHovered
+                    ? "rgba(255, 255, 255, 0.15)"
+                    : `${card.color}10`,
+                }}
               ></div>
               <div
-                className={`absolute bottom-0 left-0 w-32 h-32 -ml-16 -mb-16 bg-${card.color}/10 rounded-full`}
+                className={`absolute bottom-0 left-0 w-32 h-32 -ml-16 -mb-16 rounded-full transition-colors duration-300`}
+                style={{
+                  backgroundColor: isHovered
+                    ? "rgba(255, 255, 255, 0.15)"
+                    : `${card.color}10`,
+                }}
               ></div>
               <div
                 className={`absolute ${
                   card.id === "mensualidad"
                     ? "top-1/2 left-0 -translate-x-8"
                     : "top-1/2 right-0 translate-x-8"
-                } w-16 h-16 transform -translate-y-8 bg-${
-                  card.color
-                }/10 rounded-full`}
+                } w-16 h-16 transform -translate-y-8 rounded-full transition-colors duration-300`}
+                style={{
+                  backgroundColor: isHovered
+                    ? "rgba(255, 255, 255, 0.15)"
+                    : `${card.color}10`,
+                }}
               ></div>
 
               <div className="p-5 flex flex-col h-full relative z-10">
@@ -125,19 +136,28 @@ const Pagos = () => {
                   <div
                     className={`w-28 h-28 rounded-xl flex items-center justify-center transform transition-all duration-300 
                       ${
-                        isHovered
-                          ? `bg-${card.color} rotate-6 scale-105`
-                          : "bg-white shadow-lg"
+                        isHovered ? "rotate-6 scale-105" : "bg-white shadow-lg"
                       }`}
+                    style={{
+                      backgroundColor: isHovered ? card.hoverBg : "white",
+                    }}
                   >
                     {card.icon(isHovered)}
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-800 mb-2 text-center">
+                <h3
+                  className={`text-xl font-bold mb-2 text-center transition-colors duration-300 ${
+                    isHovered ? "text-white" : "text-gray-800"
+                  }`}
+                >
                   {card.title}
                 </h3>
-                <p className="text-gray-600 mb-3 text-center text-sm">
+                <p
+                  className={`mb-3 text-center text-sm transition-colors duration-300 ${
+                    isHovered ? "text-white" : "text-gray-600"
+                  }`}
+                >
                   {card.description}
                 </p>
 
@@ -147,19 +167,31 @@ const Pagos = () => {
                       isHovered ? "translate-x-2" : ""
                     }`}
                   >
-                    <span className={`text-${card.color} font-medium mr-2`}>
+                    <span
+                      className={`font-medium mr-2 transition-colors duration-300 ${
+                        isHovered ? "text-white" : ""
+                      }`}
+                      style={{ color: isHovered ? "white" : card.color }}
+                    >
                       Acceder
                     </span>
                     <ArrowRight
-                      className={`h-5 w-5 text-${
-                        card.color
-                      } transition-all duration-300 ${
-                        isHovered ? "translate-x-2" : ""
+                      className={`h-5 w-5 transition-all duration-300 ${
+                        isHovered ? "translate-x-2 text-white" : ""
                       }`}
+                      style={{ color: isHovered ? "white" : card.color }}
                     />
                   </div>
                 </div>
               </div>
+
+              {/* Overlay de color para el efecto de hover */}
+              <div
+                className={`absolute inset-0 transition-opacity duration-300 ${
+                  isHovered ? "opacity-85" : "opacity-0"
+                }`}
+                style={{ backgroundColor: card.hoverBg, zIndex: 5 }}
+              ></div>
             </div>
           );
         })}

@@ -1,25 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Dialog, DialogContent, IconButton, Box, useTheme, useMediaQuery, Typography } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
-import FormularioEstudiante from "./FormularioEstudiante"
+import type React from "react";
+import {
+  Dialog,
+  DialogContent,
+  IconButton,
+  Box,
+  useTheme,
+  useMediaQuery,
+  Typography,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import FormularioEstudiante from "./FormularioEstudiante";
 
 const fontFamily =
-  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+  "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 interface EstudianteModalProps {
-  open: boolean
-  onClose: () => void
-  estudianteId?: string | number
-  isEditing?: boolean
+  open: boolean;
+  onClose: () => void;
+  estudianteId?: string | number;
+  isEditing?: boolean;
 }
 
-const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudianteId, isEditing = false }) => {
-
-  const theme = useTheme()
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"))
-
+const EstudianteModal: React.FC<EstudianteModalProps> = ({
+  open,
+  onClose,
+  estudianteId,
+  isEditing = false,
+}) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
     <Dialog
@@ -30,7 +41,7 @@ const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudi
       maxWidth="lg"
       PaperProps={{
         sx: {
-          borderRadius: "16px",
+          borderRadius: "24px",
           bgcolor: "rgba(249, 249, 249, 0.98)",
           boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.12)",
           overflow: "hidden",
@@ -50,11 +61,11 @@ const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudi
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          borderTopLeftRadius: "16px",
-          borderTopRightRadius: "16px",
-          borderBottomLeftRadius: "0px",
-          borderBottomRightRadius: "0px",
-          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)",
+          borderTopLeftRadius: "24px",
+          borderTopRightRadius: "24px",
+          borderBottomLeftRadius: "70px",
+          borderBottomRightRadius: "70px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.59)",
           position: "relative",
         }}
       >
@@ -113,10 +124,15 @@ const EstudianteModal: React.FC<EstudianteModalProps> = ({ open, onClose, estudi
       </Box>
 
       <DialogContent sx={{ p: 0 }}>
-        <FormularioEstudiante estudianteId={estudianteId} isEditing={isEditing} isModal={true} onClose={onClose} />
+        <FormularioEstudiante
+          estudianteId={estudianteId}
+          isEditing={isEditing}
+          isModal={true}
+          onClose={onClose}
+        />
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default EstudianteModal
+export default EstudianteModal;

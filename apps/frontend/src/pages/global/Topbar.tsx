@@ -23,14 +23,13 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
         position: "sticky",
         top: 0,
         zIndex: 900,
-        boxShadow:
-          "0 6px 25px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.08)",
-        borderBottom: "none",
-        borderBottomLeftRadius: "16px",
-        borderBottomRightRadius: "16px",
-        margin: 0,
+        boxShadow: "0 6px 25px rgba(0, 0, 0, 0.21)",
+        borderBottomLeftRadius: "30px",
+        borderBottomRightRadius: "30px",
         width: "100%",
         transition: "all 0.3s ease",
+        overflow: "visible",
+        marginBottom: "-15px",
       }}
     >
       <IconButton
